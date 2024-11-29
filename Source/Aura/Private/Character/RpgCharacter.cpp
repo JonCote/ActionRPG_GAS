@@ -5,7 +5,6 @@
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/RpgPlayerState.h"
-#include "AbilitySystem/RpgAbilitySystemComponent.h"
 #include "AbilitySystem/RpgAttributeSet.h"
 
 

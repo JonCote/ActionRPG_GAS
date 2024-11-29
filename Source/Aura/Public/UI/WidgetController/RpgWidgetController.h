@@ -3,33 +3,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbilitySystemComponent.h"
-#include "UObject/Object.h"
+#include "UObject/NoExportTypes.h"
 #include "RpgWidgetController.generated.h"
 
-/**
- * 
- */
+class UAttributeSet;
+class UAbilitySystemComponent;
+
 UCLASS()
 class AURA_API URpgWidgetController : public UObject
 {
 	GENERATED_BODY()
-
-public:
-
 protected:
-
-	UPROPERTY(BlueprintReadOnly, Category="Widget\|Controller")
+	
+	UPROPERTY(BlueprintReadOnly, Category="WidgetController")
 	TObjectPtr<APlayerController> PlayerController;
-
-	UPROPERTY(BlueprintReadOnly, Category="Widget\|Controller")
+	
+	UPROPERTY(BlueprintReadOnly, Category="WidgetController")
 	TObjectPtr<APlayerState> PlayerState;
 	
-	UPROPERTY(BlueprintReadOnly, Category="Widget\|Controller")
+	UPROPERTY(BlueprintReadOnly, Category="WidgetController")
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
-
-	UPROPERTY(BlueprintReadOnly, Category="Widget\|Controller")
-	TObjectPtr<UAttributeSet> AttributeSet;
 	
-private:
+	UPROPERTY(BlueprintReadOnly, Category="WidgetController")
+	TObjectPtr<UAttributeSet> AttributeSet;
+
 };
