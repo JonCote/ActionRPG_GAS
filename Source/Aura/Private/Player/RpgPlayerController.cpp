@@ -88,6 +88,7 @@ void ARpgPlayerController::SetupInputComponent()
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
 	
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARpgPlayerController::Move);
+	EnhancedInputComponent->BindAction(RotateCameraAction, ETriggerEvent::Triggered, this, &ARpgPlayerController::RotateCamera);
 }
 
 void ARpgPlayerController::Move(const FInputActionValue& InputActionValue)
@@ -103,6 +104,20 @@ void ARpgPlayerController::Move(const FInputActionValue& InputActionValue)
 	{
 		ControlledPawn->AddMovementInput(ForwardDirection, InputAxisVector.Y);
 		ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.X);
+	}
+}
+
+void ARpgPlayerController::RotateCamera(const FInputActionValue& InputActionValue)
+{
+	/**
+	 * Can't seem to figure out why camera wont rotate at all...
+	 */
+	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
+
+	if (APawn* ControlledPawn = GetPawn<APawn>())
+	{
+		ControlledPawn->AddControllerYawInput(InputAxisVector.X);
+		ControlledPawn->AddControllerPitchInput(InputAxisVector.Y);
 	}
 }
 

@@ -1,16 +1,13 @@
 // Copyright Jonathan Cote
 
 
-#include "Character/RpgEnemy.h"
+#include "Player/RpgPlayerState.h"
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
 #include "AbilitySystem/RpgAttributeSet.h"
-#include "Aura/Aura.h"
 
 
-ARpgEnemy::ARpgEnemy()
+ARpgPlayerState::ARpgPlayerState()
 {
-	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-
 	AbilitySystemComponent = CreateDefaultSubobject<URpgAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
 	/** EGameplayEffectReplicationMode 
@@ -28,28 +25,14 @@ ARpgEnemy::ARpgEnemy()
 	 *			Description: Gameplay Effects are not replicated
 	 *						 Gameplay Cues and Gameplay Tags replicated to all clients
 	 */
-	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 	
 	AttributeSet = CreateDefaultSubobject<URpgAttributeSet>("AttributeSet");
+
+	NetUpdateFrequency = 100.f;
 }
 
-void ARpgEnemy::HighlightActor()
+UAbilitySystemComponent* ARpgPlayerState::GetAbilitySystemComponent() const
 {
-	GetMesh()->SetRenderCustomDepth(true);
-	GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
-	Weapon->SetRenderCustomDepth(true);
-	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
-}
-
-void ARpgEnemy::UnHighlightActor()
-{
-	GetMesh()->SetRenderCustomDepth(false);
-	Weapon->SetRenderCustomDepth(false);
-}
-
-void ARpgEnemy::BeginPlay()
-{
-	Super::BeginPlay();
-
-	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	return AbilitySystemComponent;
 }

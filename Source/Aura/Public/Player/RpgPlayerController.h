@@ -33,10 +33,16 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> MoveAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> RotateCameraAction;
+	
 	void Move(const FInputActionValue& InputActionValue);
-
+	void RotateCamera(const FInputActionValue& InputActionValue);
+	
 	void CursorTrace();
 	TScriptInterface<IEnemyInterface> LastActor;
 	TScriptInterface<IEnemyInterface> ThisActor;
+	
 };
+
 
