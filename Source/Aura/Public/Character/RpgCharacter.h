@@ -8,9 +8,10 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "RpgCharacter.generated.h"
 
-/**
- * 
- */
+
+class ARpgPlayerController;
+class ARpgPlayerState;
+
 UCLASS()
 class AURA_API ARpgCharacter : public ARpgCharacterBase
 {
@@ -30,6 +31,13 @@ public:
 
 protected:
 
+	UPROPERTY()
+	TObjectPtr<ARpgPlayerState> RpgPlayerState;
+
+	UPROPERTY()
+	TObjectPtr<ARpgPlayerController> RpgPlayerController;
+
 private:
 	void InitAbilityActorInfo();
+	void InitPlayerHUD();
 };

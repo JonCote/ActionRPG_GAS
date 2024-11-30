@@ -24,19 +24,19 @@ public:
 	URpgAttributeSet();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Health, Category="Attribute\|Vitality")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Health, Category="Attribute|Vitality")
 	FGameplayAttributeData Health;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Health);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxHealth, Category="Attribute\|Vitality")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxHealth, Category="Attribute|Vitality")
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, MaxHealth);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Mana, Category="Attribute\|Vitality")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Mana, Category="Attribute|Vitality")
 	FGameplayAttributeData Mana;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Mana);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxMana, Category="Attribute\|Vitality")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxMana, Category="Attribute|Vitality")
 	FGameplayAttributeData MaxMana;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, MaxMana);
 

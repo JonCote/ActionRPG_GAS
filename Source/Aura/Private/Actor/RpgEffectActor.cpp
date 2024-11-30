@@ -30,6 +30,7 @@ void ARpgEffectActor::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor
 		
 		URpgAttributeSet* MutableRpgAttributeSet = const_cast<URpgAttributeSet*>(RpgAttributeSet);
 		MutableRpgAttributeSet->SetHealth(RpgAttributeSet->GetHealth() + 25.f);
+		MutableRpgAttributeSet->SetMana(RpgAttributeSet->GetMana() - 15.f);
 		Destroy();
 	}
 }

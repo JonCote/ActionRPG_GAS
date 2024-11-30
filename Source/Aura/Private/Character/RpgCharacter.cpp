@@ -2,10 +2,11 @@
 
 
 #include "Character/RpgCharacter.h"
-
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/RpgPlayerState.h"
 #include "AbilitySystem/RpgAttributeSet.h"
+#include "Player/RpgPlayerController.h"
+#include "UI/HUD/RpgHUD.h"
 
 
 ARpgCharacter::ARpgCharacter()
@@ -37,6 +38,7 @@ void ARpgCharacter::PossessedBy(AController* NewController)
 
 	// Init ability actor info for the server
 	InitAbilityActorInfo();
+	InitPlayerHUD();
 }
 
 void ARpgCharacter::OnRep_PlayerState()
@@ -45,13 +47,29 @@ void ARpgCharacter::OnRep_PlayerState()
 
 	// Init ability actor info for the client
 	InitAbilityActorInfo();
+	InitPlayerHUD();
 }
 
 void ARpgCharacter::InitAbilityActorInfo()
 {
-	ARpgPlayerState* RpgPlayerState = GetPlayerState<ARpgPlayerState>();
+	RpgPlayerState = GetPlayerState<ARpgPlayerState>();
 	check(RpgPlayerState);
 	RpgPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(RpgPlayerState, this);
 	AbilitySystemComponent = RpgPlayerState->GetAbilitySystemComponent();
 	AttributeSet = RpgPlayerState->GetAttributeSet();
 }
+
+void ARpgCharacter::InitPlayerHUD()
+{
+	RpgPlayerController = Cast<ARpgPlayerController>(GetController());
+	if (RpgPlayerController)
+	{
+		if (ARpgHUD* RpgHUD = Cast<ARpgHUD>(RpgPlayerController->GetHUD()))
+		{
+			RpgHUD->InitOverlay(RpgPlayerController, RpgPlayerState, AbilitySystemComponent, AttributeSet);
+		}
+	}
+}
+
+
+
