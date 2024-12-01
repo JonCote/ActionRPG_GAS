@@ -22,3 +22,4 @@ void ARpgCharacterBase::BeginPlay()
 	Super::BeginPlay();
 }
 
+
