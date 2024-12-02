@@ -38,6 +38,6 @@ protected:
 	TObjectPtr<ARpgPlayerController> RpgPlayerController;
 
 private:
-	void InitAbilityActorInfo();
+	virtual void InitAbilityActorInfo() override;
 	void InitPlayerHUD();
 };

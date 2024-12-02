@@ -4,33 +4,20 @@
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
 
 
-// Sets default values for this component's properties
-URpgAbilitySystemComponent::URpgAbilitySystemComponent()
+void URpgAbilitySystemComponent::AbilityActorInfoSet()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &URpgAbilitySystemComponent::EffectApplied);
 }
 
-
-// Called when the game starts
-void URpgAbilitySystemComponent::BeginPlay()
+void URpgAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* ASC, const FGameplayEffectSpec& EffectSpec,
+                                               FActiveGameplayEffectHandle ActiveEffectHandle)
 {
-	Super::BeginPlay();
+	FGameplayTagContainer TagContainer;
+	EffectSpec.GetAllAssetTags(TagContainer);
 
-	// ...
+	EffectAssetTags.Broadcast(TagContainer);
 	
 }
 
 
-// Called every frame
-void URpgAbilitySystemComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                               FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
 

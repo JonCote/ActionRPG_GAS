@@ -60,19 +60,19 @@ public:
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Health, Category="Attribute|Vitality")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Health, Category="Attribute|Vitality|Health")
 	FGameplayAttributeData Health;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Health);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxHealth, Category="Attribute|Vitality")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxHealth, Category="Attribute|Vitality|Health")
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, MaxHealth);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Mana, Category="Attribute|Vitality")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Mana, Category="Attribute|Vitality|Mana")
 	FGameplayAttributeData Mana;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Mana);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxMana, Category="Attribute|Vitality")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxMana, Category="Attribute|Vitality|Mana")
 	FGameplayAttributeData MaxMana;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, MaxMana);
 

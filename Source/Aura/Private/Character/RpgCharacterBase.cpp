@@ -22,4 +22,8 @@ void ARpgCharacterBase::BeginPlay()
 	Super::BeginPlay();
 }
 
+void ARpgCharacterBase::InitAbilityActorInfo()
+{
+}
+
 
