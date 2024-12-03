@@ -48,6 +48,11 @@ struct FEffectProperties
 	ACharacter* TargetCharacter = nullptr;
 };
 
+
+template<class T>
+using TStaticFuncPtr = typename TBaseStaticDelegateInstance<T, FDefaultDelegateUserPolicy>::FFuncPtr;
+
+
 UCLASS()
 class AURA_API URpgAttributeSet : public UAttributeSet
 {
@@ -59,7 +64,10 @@ public:
 
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
-
+	
+	TMap<FGameplayTag, TStaticFuncPtr<FGameplayAttribute()>> TagsToAttributes;
+	
+	
 	//~ Begin Primary Attributes
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Strength, Category="Attribute|Primary")
 	FGameplayAttributeData Strength;
@@ -88,9 +96,9 @@ public:
 	FGameplayAttributeData Defense;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Defense);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_CriticalHitChance, Category="Attribute|Secondary")
-	FGameplayAttributeData CriticalHitChance;
-	ATTRIBUTE_ACCESSORS(URpgAttributeSet, CriticalHitChance);
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_CriticalHitRate, Category="Attribute|Secondary")
+	FGameplayAttributeData CriticalHitRate;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, CriticalHitRate);
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxHealth, Category="Attribute|Secondary")
 	FGameplayAttributeData MaxHealth;
@@ -158,7 +166,7 @@ public:
 	void OnRep_Defense(const FGameplayAttributeData& OldDefense) const;
 
 	UFUNCTION()
-	void OnRep_CriticalHitChance(const FGameplayAttributeData& OldCriticalHitChance) const;
+	void OnRep_CriticalHitRate(const FGameplayAttributeData& OldCriticalHitRate) const;
 
 	UFUNCTION()
 	void OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const;

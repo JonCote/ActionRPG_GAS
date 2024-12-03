@@ -6,40 +6,58 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
+#include "RpgGameplayTags.h"
 
 
 URpgAttributeSet::URpgAttributeSet()
 {
+	const FRpgGameplayTags& GameplayTags = FRpgGameplayTags::Get();
+	
+	//~ Primary Attributes
+	TagsToAttributes.Add(GameplayTags.Attributes_Primary_Strength, GetStrengthAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Primary_Intelligence, GetIntelligenceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Primary_Resilience, GetResilienceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Primary_Dexterity, GetDexterityAttribute);
+
+	//~ Secondary Attributes
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_MaxHealth, GetMaxHealthAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_HealthRegeneration, GetHealthRegenerationAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_MaxMana, GetMaxManaAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_ManaRegeneration, GetManaRegenerationAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_MaxStamina, GetMaxStaminaAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_StaminaRegeneration, GetStaminaRegenerationAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_AttackPower, GetAttackPowerAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_Defense, GetDefenseAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_CriticalHitRate, GetCriticalHitRateAttribute);
 }
 
 void URpgAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	//~ Begin Primary Attributes Rep Notify
+	//~ Primary Attributes Rep Notify
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Strength, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Intelligence, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Resilience, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Dexterity, COND_None, REPNOTIFY_Always);
-	//~ End Primary Attribute Rep Notify
 
-	//~ Begin Secondary Attributes Rep Notify
+
+	//~ Secondary Attributes Rep Notify
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, AttackPower, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Defense, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, CriticalHitChance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, CriticalHitRate, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, HealthRegeneration, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, ManaRegeneration, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, MaxStamina, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, StaminaRegeneration, COND_None, REPNOTIFY_Always);
-	//~ End Secondary Attribute Rep Notify
 
-	//~ Begin Vitality Attributes Rep Notify
+	//~ Vitality Attributes Rep Notify
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Health, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Mana, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Stamina, COND_None, REPNOTIFY_Always);
-	//~ End Vitality Attribute Rep Notify
+
 }
 
 void URpgAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
@@ -108,7 +126,7 @@ void URpgAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbac
 	
 }
 
-//~ Begin Primary Attributes OnRep
+//~ Primary Attributes OnRep
 void URpgAttributeSet::OnRep_Strength(const FGameplayAttributeData& OldStrength) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Strength, OldStrength);
@@ -128,9 +146,9 @@ void URpgAttributeSet::OnRep_Dexterity(const FGameplayAttributeData& OldDexterit
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Dexterity, OldDexterity);
 }
-//~ End Primary Attribute OnRep
 
-//~ Begin Secondary Attribute OnRep
+
+//~ Secondary Attribute OnRep
 void URpgAttributeSet::OnRep_AttackPower(const FGameplayAttributeData& OldAttackPower) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, AttackPower, OldAttackPower);
@@ -141,9 +159,9 @@ void URpgAttributeSet::OnRep_Defense(const FGameplayAttributeData& OldDefense) c
 	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Defense, OldDefense);
 }
 
-void URpgAttributeSet::OnRep_CriticalHitChance(const FGameplayAttributeData& OldCriticalHitChance) const
+void URpgAttributeSet::OnRep_CriticalHitRate(const FGameplayAttributeData& OldCriticalHitRate) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, CriticalHitChance, OldCriticalHitChance);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, CriticalHitRate, OldCriticalHitRate);
 }
 
 void URpgAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const
@@ -176,9 +194,7 @@ void URpgAttributeSet::OnRep_StaminaRegeneration(const FGameplayAttributeData& O
 	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, StaminaRegeneration, OldStaminaRegeneration);
 }
 
-//~ End Secondary Attribute OnRep
-
-//~ Begin Vitality Attributes OnRep
+//~ Vitality Attributes OnRep
 void URpgAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Health, OldHealth);
@@ -194,5 +210,4 @@ void URpgAttributeSet::OnRep_Stamina(const FGameplayAttributeData& OldStamina) c
 	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Stamina, OldStamina);
 }
 
-//~ End Vitality Attribute OnRep
 

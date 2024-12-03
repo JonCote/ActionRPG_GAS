@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "RpgHUD.generated.h"
 
+class UAttributeMenuWidgetController;
 struct FWidgetControllerParams;
 class UOverlayWidgetController;
 class URpgUserWidget;
@@ -19,11 +20,9 @@ class AURA_API ARpgHUD : public AHUD
 	GENERATED_BODY()
 
 public:
-	
-	UPROPERTY()
-	TObjectPtr<URpgUserWidget> OverlayWidget;
 
 	UOverlayWidgetController* GetOverlayWidgetController(const FWidgetControllerParams& WCParams);
+	UAttributeMenuWidgetController* GetAttributeMenuWidgetController(const FWidgetControllerParams& WCParams);
 
 	void InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS);
 
@@ -32,6 +31,9 @@ protected:
 	
 private:
 
+	UPROPERTY()
+	TObjectPtr<URpgUserWidget> OverlayWidget;
+	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<URpgUserWidget> OverlayWidgetClass;
 
@@ -40,4 +42,11 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass;
+	
+
+	UPROPERTY()
+	TObjectPtr<UAttributeMenuWidgetController> AttributeMenuWidgetController;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UAttributeMenuWidgetController> AttributeMenuWidgetControllerClass;
 };
