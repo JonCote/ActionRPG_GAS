@@ -47,6 +47,11 @@ void ARpgEnemy::UnHighlightActor()
 	Weapon->SetRenderCustomDepth(false);
 }
 
+int32 ARpgEnemy::GetCharacterLevel()
+{
+	return Level;
+}
+
 void ARpgEnemy::BeginPlay()
 {
 	Super::BeginPlay();

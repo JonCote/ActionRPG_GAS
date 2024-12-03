@@ -1,6 +1,7 @@
 // Copyright Jonathan Cote
 
 #include "Character/RpgCharacterBase.h"
+#include "AbilitySystemComponent.h"
 
 
 ARpgCharacterBase::ARpgCharacterBase()
@@ -25,5 +26,24 @@ void ARpgCharacterBase::BeginPlay()
 void ARpgCharacterBase::InitAbilityActorInfo()
 {
 }
+
+void ARpgCharacterBase::ApplyEffectToSelf(const TSubclassOf<UGameplayEffect> GameplayEffectClass, const float Level) const
+{
+	check(IsValid(GetAbilitySystemComponent()));
+	check(GameplayEffectClass);
+	FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+	ContextHandle.AddSourceObject(this);
+	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(GameplayEffectClass, Level, ContextHandle);
+	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), GetAbilitySystemComponent());
+}
+
+void ARpgCharacterBase::InitDefaultAttributes() const
+{
+	ApplyEffectToSelf(DefaultPrimaryAttributes, 1.f);
+	ApplyEffectToSelf(DefaultSecondaryAttributes, 1.f);
+	ApplyEffectToSelf(DefaultVitalityAttributes, 1.f);
+}
+
+
 
 

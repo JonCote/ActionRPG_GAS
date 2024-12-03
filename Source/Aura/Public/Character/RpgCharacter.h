@@ -29,6 +29,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	TObjectPtr<USpringArmComponent> CameraBoom;
 
+	//~ Begin Combat Interface
+	virtual int32 GetCharacterLevel() override;
+	//~ End Combat Interface
+	
 protected:
 
 	UPROPERTY()

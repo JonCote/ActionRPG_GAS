@@ -4,6 +4,7 @@
 #include "Player/RpgPlayerState.h"
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
 #include "AbilitySystem/RpgAttributeSet.h"
+#include "Net/UnrealNetwork.h"
 
 
 ARpgPlayerState::ARpgPlayerState()
@@ -32,7 +33,19 @@ ARpgPlayerState::ARpgPlayerState()
 	NetUpdateFrequency = 100.f;
 }
 
+void ARpgPlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARpgPlayerState, Level);
+}
+
 UAbilitySystemComponent* ARpgPlayerState::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
+}
+
+void ARpgPlayerState::OnRep_Level(int32 OldLevel)
+{
+	
 }

@@ -60,33 +60,138 @@ public:
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Health, Category="Attribute|Vitality|Health")
-	FGameplayAttributeData Health;
-	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Health);
+	//~ Begin Primary Attributes
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Strength, Category="Attribute|Primary")
+	FGameplayAttributeData Strength;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Strength);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxHealth, Category="Attribute|Vitality|Health")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Intelligence, Category="Attribute|Primary")
+	FGameplayAttributeData Intelligence;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Intelligence);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Resilience, Category="Attribute|Primary")
+	FGameplayAttributeData Resilience;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Resilience);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Dexterity, Category="Attribute|Primary")
+	FGameplayAttributeData Dexterity;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Dexterity);
+
+	//~ End Primary Attribute
+
+	//~ Begin Secondary Attribute
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_AttackPower, Category="Attribute|Secondary")
+	FGameplayAttributeData AttackPower;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, AttackPower);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Defense, Category="Attribute|Secondary")
+	FGameplayAttributeData Defense;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Defense);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_CriticalHitChance, Category="Attribute|Secondary")
+	FGameplayAttributeData CriticalHitChance;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, CriticalHitChance);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxHealth, Category="Attribute|Secondary")
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, MaxHealth);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Mana, Category="Attribute|Vitality|Mana")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_HealthRegeneration, Category="Attribute|Secondary")
+	FGameplayAttributeData HealthRegeneration;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, HealthRegeneration);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxMana, Category="Attribute|Secondary")
+	FGameplayAttributeData MaxMana;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, MaxMana);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_ManaRegeneration, Category="Attribute|Secondary")
+	FGameplayAttributeData ManaRegeneration;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, ManaRegeneration);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxStamina, Category="Attribute|Secondary")
+	FGameplayAttributeData MaxStamina;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, MaxStamina);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_StaminaRegeneration, Category="Attribute|Secondary")
+	FGameplayAttributeData StaminaRegeneration;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, StaminaRegeneration);
+	
+	//~ End Secondary Attribute
+
+	
+	//~ Begin Vitality Attributes
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Health, Category="Attribute|Vitality")
+	FGameplayAttributeData Health;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Health);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Mana, Category="Attribute|Vitality")
 	FGameplayAttributeData Mana;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Mana);
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxMana, Category="Attribute|Vitality|Mana")
-	FGameplayAttributeData MaxMana;
-	ATTRIBUTE_ACCESSORS(URpgAttributeSet, MaxMana);
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Stamina, Category="Attribute|Vitality")
+	FGameplayAttributeData Stamina;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Stamina);
+
+	//~ End Vitality Attribute
+	
+	
+	//~ Begin Primary Attributes OnRep
+	UFUNCTION()
+	void OnRep_Strength(const FGameplayAttributeData& OldStrength) const;
 
 	UFUNCTION()
-	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;
+	void OnRep_Intelligence(const FGameplayAttributeData& OldIntelligence) const;
+
+	UFUNCTION()
+	void OnRep_Resilience(const FGameplayAttributeData& OldResilience) const;
+
+	UFUNCTION()
+	void OnRep_Dexterity(const FGameplayAttributeData& OldDexterity) const;
+	
+	//~ End Primary Attribute OnRep
+
+	//~ Begin Secondary Attribute OnRep
+	UFUNCTION()
+	void OnRep_AttackPower(const FGameplayAttributeData& OldAttackPower) const;
+
+	UFUNCTION()
+	void OnRep_Defense(const FGameplayAttributeData& OldDefense) const;
+
+	UFUNCTION()
+	void OnRep_CriticalHitChance(const FGameplayAttributeData& OldCriticalHitChance) const;
 
 	UFUNCTION()
 	void OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const;
+	
+	UFUNCTION()
+	void OnRep_HealthRegeneration(const FGameplayAttributeData& OldHealthRegeneration) const;
+
+	UFUNCTION()
+	void OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const;
+	
+	UFUNCTION()
+	void OnRep_ManaRegeneration(const FGameplayAttributeData& OldManaRegeneration) const;
+	
+	UFUNCTION()
+	void OnRep_MaxStamina(const FGameplayAttributeData& OldMaxStamina) const;
+
+	UFUNCTION()
+	void OnRep_StaminaRegeneration(const FGameplayAttributeData& OldStaminaRegeneration) const;
+	
+	//~ End Secondary Attribute OnRep
+
+
+	//~ Begin Vitality Attributes OnRep
+	UFUNCTION()
+	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;
 
 	UFUNCTION()
 	void OnRep_Mana(const FGameplayAttributeData& OldMana) const;
 
 	UFUNCTION()
-	void OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const;
+	void OnRep_Stamina(const FGameplayAttributeData& OldStamina) const;
+
+	//~ End Vitality Attribute OnRep
 
 private:
 

@@ -10,21 +10,36 @@
 
 URpgAttributeSet::URpgAttributeSet()
 {
-	InitHealth(50.f);
-	InitMaxHealth(100.f);
-	InitMana(30.f);
-	InitMaxMana(50.f);
 }
 
 void URpgAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Health, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
+	//~ Begin Primary Attributes Rep Notify
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Strength, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Intelligence, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Resilience, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Dexterity, COND_None, REPNOTIFY_Always);
+	//~ End Primary Attribute Rep Notify
 
-	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Mana, COND_None, REPNOTIFY_Always);
+	//~ Begin Secondary Attributes Rep Notify
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, AttackPower, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Defense, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, CriticalHitChance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, HealthRegeneration, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, ManaRegeneration, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, MaxStamina, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, StaminaRegeneration, COND_None, REPNOTIFY_Always);
+	//~ End Secondary Attribute Rep Notify
+
+	//~ Begin Vitality Attributes Rep Notify
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Health, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Mana, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Stamina, COND_None, REPNOTIFY_Always);
+	//~ End Vitality Attribute Rep Notify
 }
 
 void URpgAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
@@ -93,9 +108,42 @@ void URpgAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbac
 	
 }
 
-void URpgAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
+//~ Begin Primary Attributes OnRep
+void URpgAttributeSet::OnRep_Strength(const FGameplayAttributeData& OldStrength) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Health, OldHealth);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Strength, OldStrength);
+}
+
+void URpgAttributeSet::OnRep_Intelligence(const FGameplayAttributeData& OldIntelligence) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Intelligence, OldIntelligence);
+}
+
+void URpgAttributeSet::OnRep_Resilience(const FGameplayAttributeData& OldResilience) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Resilience, OldResilience);
+}
+
+void URpgAttributeSet::OnRep_Dexterity(const FGameplayAttributeData& OldDexterity) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Dexterity, OldDexterity);
+}
+//~ End Primary Attribute OnRep
+
+//~ Begin Secondary Attribute OnRep
+void URpgAttributeSet::OnRep_AttackPower(const FGameplayAttributeData& OldAttackPower) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, AttackPower, OldAttackPower);
+}
+
+void URpgAttributeSet::OnRep_Defense(const FGameplayAttributeData& OldDefense) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Defense, OldDefense);
+}
+
+void URpgAttributeSet::OnRep_CriticalHitChance(const FGameplayAttributeData& OldCriticalHitChance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, CriticalHitChance, OldCriticalHitChance);
 }
 
 void URpgAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const
@@ -103,13 +151,48 @@ void URpgAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealt
 	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, MaxHealth, OldMaxHealth);
 }
 
-void URpgAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldMana) const
+void URpgAttributeSet::OnRep_HealthRegeneration(const FGameplayAttributeData& OldHealthRegeneration) const
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Mana, OldMana);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, HealthRegeneration, OldHealthRegeneration);
 }
 
 void URpgAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, MaxMana, OldMaxMana);
 }
+
+void URpgAttributeSet::OnRep_ManaRegeneration(const FGameplayAttributeData& OldManaRegeneration) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, ManaRegeneration, OldManaRegeneration);
+}
+
+void URpgAttributeSet::OnRep_MaxStamina(const FGameplayAttributeData& OldMaxStamina) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, MaxStamina, OldMaxStamina);
+}
+
+void URpgAttributeSet::OnRep_StaminaRegeneration(const FGameplayAttributeData& OldStaminaRegeneration) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, StaminaRegeneration, OldStaminaRegeneration);
+}
+
+//~ End Secondary Attribute OnRep
+
+//~ Begin Vitality Attributes OnRep
+void URpgAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Health, OldHealth);
+}
+
+void URpgAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldMana) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Mana, OldMana);
+}
+
+void URpgAttributeSet::OnRep_Stamina(const FGameplayAttributeData& OldStamina) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, Stamina, OldStamina);
+}
+
+//~ End Vitality Attribute OnRep
 

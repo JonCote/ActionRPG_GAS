@@ -41,6 +41,7 @@ void ARpgCharacter::PossessedBy(AController* NewController)
 	// Init ability actor info for the server
 	InitAbilityActorInfo();
 	InitPlayerHUD();
+	InitDefaultAttributes();
 }
 
 void ARpgCharacter::OnRep_PlayerState()
@@ -50,6 +51,14 @@ void ARpgCharacter::OnRep_PlayerState()
 	// Init ability actor info for the client
 	InitAbilityActorInfo();
 	InitPlayerHUD();
+	InitDefaultAttributes();
+}
+
+int32 ARpgCharacter::GetCharacterLevel()
+{
+	//RpgPlayerState = GetPlayerState<ARpgPlayerState>();
+	check(RpgPlayerState);
+	return RpgPlayerState->GetPlayerLevel();
 }
 
 void ARpgCharacter::InitAbilityActorInfo()
