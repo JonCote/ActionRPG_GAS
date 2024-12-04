@@ -13,5 +13,9 @@ UCLASS()
 class AURA_API URpgGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
+
+public:
 	
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	FGameplayTag StartupInputTag;
 };

@@ -3,9 +3,12 @@
 
 #include "Player/RpgPlayerController.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputSubsystems.h"
-#include "EnhancedInputComponent.h"
+#include "AbilitySystem/RpgAbilitySystemComponent.h"
+#include "Input/RpgInputComponent.h"
 #include "Interaction/EnemyInterface.h"
+
 
 
 ARpgPlayerController::ARpgPlayerController()
@@ -63,6 +66,32 @@ void ARpgPlayerController::CursorTrace()
 	
 }
 
+void ARpgPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
+{
+	//GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Red, *InputTag.ToString());
+}
+
+void ARpgPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
+{
+	if (GetASC() == nullptr) return;
+	GetASC()->AbilityInputTagReleased(InputTag);
+}
+
+void ARpgPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
+{
+	if (GetASC() == nullptr) return;
+	GetASC()->AbilityInputTagHeld(InputTag);
+}
+
+URpgAbilitySystemComponent* ARpgPlayerController::GetASC()
+{
+	if (RpgAbilitySystemComponent == nullptr)
+	{
+		RpgAbilitySystemComponent = Cast<URpgAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
+	}
+	return RpgAbilitySystemComponent;
+}
+
 void ARpgPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -87,10 +116,9 @@ void ARpgPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
-	
-	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARpgPlayerController::Move);
-	EnhancedInputComponent->BindAction(RotateCameraAction, ETriggerEvent::Triggered, this, &ARpgPlayerController::RotateCamera);
+	URpgInputComponent* RpgInputComponent = CastChecked<URpgInputComponent>(InputComponent);
+	RpgInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARpgPlayerController::Move);
+	RpgInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 }
 
 void ARpgPlayerController::Move(const FInputActionValue& InputActionValue)
@@ -106,20 +134,6 @@ void ARpgPlayerController::Move(const FInputActionValue& InputActionValue)
 	{
 		ControlledPawn->AddMovementInput(ForwardDirection, InputAxisVector.Y);
 		ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.X);
-	}
-}
-
-void ARpgPlayerController::RotateCamera(const FInputActionValue& InputActionValue)
-{
-	/**
-	 * Can't seem to figure out why camera wont rotate at all...
-	 */
-	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
-
-	if (APawn* ControlledPawn = GetPawn<APawn>())
-	{
-		ControlledPawn->AddControllerYawInput(InputAxisVector.X);
-		ControlledPawn->AddControllerPitchInput(InputAxisVector.Y);
 	}
 }
 
