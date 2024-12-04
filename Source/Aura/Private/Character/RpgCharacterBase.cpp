@@ -2,6 +2,7 @@
 
 #include "Character/RpgCharacterBase.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/RpgAbilitySystemComponent.h"
 
 
 ARpgCharacterBase::ARpgCharacterBase()
@@ -42,6 +43,16 @@ void ARpgCharacterBase::InitDefaultAttributes() const
 	ApplyEffectToSelf(DefaultPrimaryAttributes, 1.f);
 	ApplyEffectToSelf(DefaultSecondaryAttributes, 1.f);
 	ApplyEffectToSelf(DefaultVitalityAttributes, 1.f);
+}
+
+void ARpgCharacterBase::AddCharacterAbilities()
+{
+	URpgAbilitySystemComponent* RpgASC = CastChecked<URpgAbilitySystemComponent>(AbilitySystemComponent);
+	if (!HasAuthority()) return;
+
+	RpgASC->AddCharacterAbilities(DefaultAbilities);
+
+	
 }
 
 

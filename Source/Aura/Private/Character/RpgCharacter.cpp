@@ -42,6 +42,7 @@ void ARpgCharacter::PossessedBy(AController* NewController)
 	InitAbilityActorInfo();
 	InitPlayerHUD();
 	InitDefaultAttributes();
+	AddCharacterAbilities();
 }
 
 void ARpgCharacter::OnRep_PlayerState()

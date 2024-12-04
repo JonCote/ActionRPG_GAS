@@ -8,6 +8,7 @@
 #include "Interaction/CombatInterface.h"
 #include "RpgCharacterBase.generated.h"
 
+class UGameplayAbility;
 class UGameplayEffect;
 class UAbilitySystemComponent;
 class UAttributeSet;
@@ -47,4 +48,11 @@ protected:
 	
 	void ApplyEffectToSelf(const TSubclassOf<UGameplayEffect> GameplayEffectClass, const float Level) const;
 	void InitDefaultAttributes() const;
+
+	void AddCharacterAbilities();
+	
+private:
+
+	UPROPERTY(EditAnywhere, Category = "Abilities")
+	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
 };

@@ -17,6 +17,7 @@ class AURA_API URpgAbilitySystemComponent : public UAbilitySystemComponent
 public:
 
 	void AbilityActorInfoSet();
+	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities);
 
 	FEffectAssetTags EffectAssetTags;
 
