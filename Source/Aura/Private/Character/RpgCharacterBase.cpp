@@ -3,11 +3,15 @@
 #include "Character/RpgCharacterBase.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
+#include "Components/CapsuleComponent.h"
 
 
 ARpgCharacterBase::ARpgCharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
 	Weapon->SetupAttachment(GetMesh(), FName("WeaponHandSocket"));
@@ -22,6 +26,11 @@ UAbilitySystemComponent* ARpgCharacterBase::GetAbilitySystemComponent() const
 void ARpgCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+FVector ARpgCharacterBase::GetCombatSocketLocation()
+{
+	return Weapon->GetSocketLocation(WeaponTipSocketName);
 }
 
 void ARpgCharacterBase::InitAbilityActorInfo()

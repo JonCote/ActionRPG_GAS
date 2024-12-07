@@ -5,11 +5,13 @@
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
 #include "AbilitySystem/RpgAttributeSet.h"
 #include "Aura/Aura.h"
+#include "Components/CapsuleComponent.h"
 
 
 ARpgEnemy::ARpgEnemy()
 {
 	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_PROJECTILE, ECR_Overlap);
 
 	AbilitySystemComponent = CreateDefaultSubobject<URpgAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
@@ -62,4 +64,6 @@ void ARpgEnemy::InitAbilityActorInfo()
 {
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<URpgAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
+
+	InitDefaultAttributes();
 }

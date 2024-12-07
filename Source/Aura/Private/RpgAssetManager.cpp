@@ -2,6 +2,8 @@
 
 
 #include "RpgAssetManager.h"
+
+#include "AbilitySystemGlobals.h"
 #include "RpgGameplayTags.h"
 
 URpgAssetManager& URpgAssetManager::Get()
@@ -13,6 +15,6 @@ URpgAssetManager& URpgAssetManager::Get()
 void URpgAssetManager::StartInitialLoading()
 {
 	Super::StartInitialLoading();
-
 	FRpgGameplayTags::InitNativeGameplayTags();
+	UAbilitySystemGlobals::Get().InitGlobalData();
 }

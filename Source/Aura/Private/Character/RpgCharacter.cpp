@@ -22,16 +22,15 @@ ARpgCharacter::ARpgCharacter()
 	CameraBoom->bInheritRoll = false;
 	CameraBoom->bInheritYaw = false;
 	CameraBoom->bUsePawnControlRotation = true;
+	CameraBoom->bDoCollisionTest = false;  // Might want this true later to prevent camera going into scene objects
 
 	PlayerCamera->bUsePawnControlRotation = false;
 	
-	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0, 400.f, 0);
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
-	
 }
 
 void ARpgCharacter::PossessedBy(AController* NewController)

@@ -12,6 +12,7 @@ class UInputMappingContext;
 class UInputAction;
 class IEnemyInterface;
 class URpgAbilitySystemComponent;
+class USplineComponent;
 
 struct FInputActionValue;
 
@@ -39,8 +40,10 @@ private:
 	void Move(const FInputActionValue& InputActionValue);
 	
 	void CursorTrace();
+	void RotateToMouse();
 	TScriptInterface<IEnemyInterface> LastActor;
 	TScriptInterface<IEnemyInterface> ThisActor;
+	FHitResult CursorHit;
 
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);
@@ -53,6 +56,27 @@ private:
 	TObjectPtr<URpgAbilitySystemComponent> RpgAbilitySystemComponent;
 
 	URpgAbilitySystemComponent* GetASC();
+
+	bool bTargeting = false;
+	
+	//~ Click To Move Stuff
+	UPROPERTY(EditAnywhere, Category = "Input|ClickToMove")
+	bool bClickToMove = false;
+	
+	FVector CachedDestination = FVector::ZeroVector;
+	float FollowTime = 0.f;
+	float ShortPressThreshold = 0.5f;
+	bool bAutoRunning = false;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Input|ClickToMove")
+	float AutoRunAcceptanceRadius = 50.f;
+
+	UPROPERTY(VisibleAnywhere, Category = "Input|ClickToMove")
+	TObjectPtr<USplineComponent> Spline;
+
+	void AutoRun();
+	
+	//~ end of click to move stuff
 };
 
 
