@@ -3,6 +3,7 @@
 
 #include "Character/RpgEnemy.h"
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
+#include "AbilitySystem/RpgAbilitySystemLibrary.h"
 #include "AbilitySystem/RpgAttributeSet.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
@@ -96,4 +97,9 @@ void ARpgEnemy::InitAbilityActorInfo()
 	Cast<URpgAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 
 	InitDefaultAttributes();
+}
+
+void ARpgEnemy::InitDefaultAttributes() const
+{
+	URpgAbilitySystemLibrary::InitDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
 }
