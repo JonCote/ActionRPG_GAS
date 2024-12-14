@@ -68,3 +68,16 @@ void URpgAbilitySystemLibrary::InitDefaultAttributes(const UObject* WorldContext
 		ASC->ApplyGameplayEffectSpecToSelf(*VitalAttributesSpecHandle.Data.Get());
 	}
 }
+
+void URpgAbilitySystemLibrary::GiveStartupAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* ASC)
+{
+	if (const ARpgGameModeBase* RpgGM = Cast<ARpgGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	{
+		const UCharacterClassInfo* CharacterClassInfo = RpgGM->CharacterClassInfo;
+		for (TSubclassOf<UGameplayAbility> AbilityClass : CharacterClassInfo->CommonAbilities)
+		{
+			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
+			ASC->GiveAbility(AbilitySpec);
+		}
+	}
+}

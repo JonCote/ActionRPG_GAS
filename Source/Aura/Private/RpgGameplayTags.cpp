@@ -91,5 +91,15 @@ void FRpgGameplayTags::InitNativeGameplayTags()
 													FName("InputTag.4"),
 													FString("")
 													);
+
+
+	GameplayTags.Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Damage"),
+													FString("Damage")
+													);
+	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Effects.HitReact"),
+													FString("Reaction effect for being hit")
+													);
 	
 }

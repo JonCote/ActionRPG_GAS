@@ -141,6 +141,13 @@ public:
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, Stamina);
 
 	//~ End Vitality Attribute
+
+	//~ Begin Meta Attributes
+	UPROPERTY(BlueprintReadOnly, Category="Meta Attribute")
+	FGameplayAttributeData IncomingDamage;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, IncomingDamage);
+
+	//~ End Meta Attributes
 	
 	
 	//~ Begin Primary Attributes OnRep
@@ -204,5 +211,8 @@ public:
 private:
 
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
+	void ShowFloatingText(const FEffectProperties& Props, const float Damage) const;
+	
+	
 };
 

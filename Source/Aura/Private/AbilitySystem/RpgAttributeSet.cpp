@@ -8,6 +8,9 @@
 #include "Net/UnrealNetwork.h"
 #include "RpgGameplayTags.h"
 #include "GameFramework/Character.h"
+#include "Interaction/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
+#include "Player/RpgPlayerController.h"
 
 
 URpgAttributeSet::URpgAttributeSet()
@@ -125,7 +128,45 @@ void URpgAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbac
 	{
 		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
 	}
-	
+	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute())
+	{
+		const float LocalIncomingDamage = GetIncomingDamage();
+		SetIncomingDamage(0.f);
+
+		if (LocalIncomingDamage <= 0.f) return;
+
+		const float NewHealth = GetHealth() - LocalIncomingDamage;
+		SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
+
+		const bool bFatal = NewHealth <= 0.f;
+		if (bFatal)
+		{
+			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Props.TargetAvatarActor))
+			{
+				CombatInterface->Die();
+			}
+		}
+		else
+		{
+			FGameplayTagContainer TagContainer;
+			TagContainer.AddTag(FRpgGameplayTags::Get().Effects_HitReact);
+			Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
+		}
+
+		ShowFloatingText(Props, LocalIncomingDamage);
+	}
+}
+
+void URpgAttributeSet::ShowFloatingText(const FEffectProperties& Props, const float Damage) const
+{
+	// Check if damage is not to self
+	if (Props.SourceCharacter != Props.TargetCharacter)
+	{
+		if (ARpgPlayerController* PC = Cast<ARpgPlayerController>(UGameplayStatics::GetPlayerController(Props.SourceCharacter, 0)))
+		{
+			PC->ShowDamageNumber(Damage, Props.TargetCharacter);
+		}
+	}
 }
 
 //~ Primary Attributes OnRep

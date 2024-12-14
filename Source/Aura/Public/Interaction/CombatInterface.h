@@ -7,12 +7,14 @@
 #include "CombatInterface.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, BlueprintType)
 class UCombatInterface : public UInterface
 {
 	GENERATED_BODY()
 };
 
+
+class UAnimMontage;
 /**
  * 
  */
@@ -25,4 +27,11 @@ public:
 	virtual int32 GetCharacterLevel();
 
 	virtual FVector GetCombatSocketLocation();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface")
+	UAnimMontage* GetHitReactMontage();
+
+	virtual void Die() = 0;
+	
 };
+
