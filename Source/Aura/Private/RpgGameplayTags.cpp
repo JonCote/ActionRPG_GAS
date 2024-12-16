@@ -64,6 +64,10 @@ void FRpgGameplayTags::InitNativeGameplayTags()
 													FName("Attributes.Secondary.CriticalHitRate"),
 													FString("")
 													);
+	GameplayTags.Attributes_Secondary_CriticalHitDamage = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Attributes.Secondary.CriticalHitDamage"),
+													FString("")
+													);
 
 	
 	// Input keys
@@ -92,11 +96,62 @@ void FRpgGameplayTags::InitNativeGameplayTags()
 													FString("")
 													);
 
-
+	// Damage Types
 	GameplayTags.Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
 													FName("Damage"),
 													FString("Damage")
 													);
+	GameplayTags.Damage_Fire = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Damage.Fire"),
+													FString("Fire Damage Type")
+													);
+	GameplayTags.Damage_Ice = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Damage.Ice"),
+													FString("Ice Damage Type")
+													);
+	GameplayTags.Damage_Lightning = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Damage.Lightning"),
+													FString("Lightning Damage Type")
+													);
+	GameplayTags.Damage_Curse = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Damage.Curse"),
+													FString("Curse Damage Type")
+													);
+	GameplayTags.Damage_Physical = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Damage.Physical"),
+													FString("Physical Damage Type")
+													);
+
+	// Damage Resistance Types
+	GameplayTags.Attributes_Resistance_Fire = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Attributes.Resistance.Fire"),
+													FString("Resistance to Fire Damage")
+													);
+	GameplayTags.Attributes_Resistance_Ice = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Attributes.Resistance.Ice"),
+													FString("Resistance to Ice Damage")
+													);
+	GameplayTags.Attributes_Resistance_Lightning = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Attributes.Resistance.Lightning"),
+													FString("Resistance to Lightning Damage")
+													);
+	GameplayTags.Attributes_Resistance_Curse = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Attributes.Resistance.Curse"),
+													FString("Resistance to Curse Damage")
+													);
+	GameplayTags.Attributes_Resistance_Physical = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Attributes.Resistance.Physical"),
+													FString("Resistance to Physical Damage")
+													);
+
+	// Map of Damage Types to Resistances
+	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_Fire, GameplayTags.Attributes_Resistance_Fire);
+	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_Ice, GameplayTags.Attributes_Resistance_Ice);
+	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_Lightning, GameplayTags.Attributes_Resistance_Lightning);
+	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_Curse, GameplayTags.Attributes_Resistance_Curse);
+	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_Physical, GameplayTags.Attributes_Resistance_Physical);
+	
+	// Effects
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(
 													FName("Effects.HitReact"),
 													FString("Reaction effect for being hit")

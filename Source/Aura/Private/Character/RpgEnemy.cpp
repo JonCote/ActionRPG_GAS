@@ -73,7 +73,10 @@ void ARpgEnemy::BeginPlay()
 	Super::BeginPlay();
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	InitAbilityActorInfo();
-	URpgAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent);
+	if (HasAuthority())
+	{
+		URpgAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent);	
+	}
 
 	if (URpgUserWidget* RpgUserWidget = Cast<URpgUserWidget>(HealthBar->GetUserWidgetObject()))
 	{
@@ -117,7 +120,10 @@ void ARpgEnemy::InitAbilityActorInfo()
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<URpgAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 
-	InitDefaultAttributes();
+	if (HasAuthority())
+	{
+		InitDefaultAttributes();	
+	}
 }
 
 void ARpgEnemy::InitDefaultAttributes() const

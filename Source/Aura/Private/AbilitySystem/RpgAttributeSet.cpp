@@ -7,6 +7,7 @@
 #include "GameplayEffectExtension.h"
 #include "Net/UnrealNetwork.h"
 #include "RpgGameplayTags.h"
+#include "AbilitySystem/RpgAbilitySystemLibrary.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
@@ -33,6 +34,14 @@ URpgAttributeSet::URpgAttributeSet()
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_AttackPower, GetAttackPowerAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_Defense, GetDefenseAttribute);
 	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_CriticalHitRate, GetCriticalHitRateAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Secondary_CriticalHitDamage, GetCriticalHitDamageAttribute);
+
+	//~ Damage Type Resistances
+	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Fire, GetFireResistanceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Ice, GetIceResistanceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Lightning, GetLightningResistanceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Curse, GetCurseResistanceAttribute);
+	TagsToAttributes.Add(GameplayTags.Attributes_Resistance_Physical, GetPhysicalResistanceAttribute);
 }
 
 void URpgAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -50,12 +59,20 @@ void URpgAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, AttackPower, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Defense, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, CriticalHitRate, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, CriticalHitDamage, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, HealthRegeneration, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, MaxMana, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, ManaRegeneration, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, MaxStamina, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, StaminaRegeneration, COND_None, REPNOTIFY_Always);
+
+	//~ Damage Type Resistances
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, FireResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, IceResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, LightningResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, CurseResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, PhysicalResistance, COND_None, REPNOTIFY_Always);
 
 	//~ Vitality Attributes Rep Notify
 	DOREPLIFETIME_CONDITION_NOTIFY(URpgAttributeSet, Health, COND_None, REPNOTIFY_Always);
@@ -133,7 +150,7 @@ void URpgAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbac
 		const float LocalIncomingDamage = GetIncomingDamage();
 		SetIncomingDamage(0.f);
 
-		if (LocalIncomingDamage <= 0.f) return;
+		if (LocalIncomingDamage < 0.f) return;
 
 		const float NewHealth = GetHealth() - LocalIncomingDamage;
 		SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
@@ -152,19 +169,21 @@ void URpgAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbac
 			TagContainer.AddTag(FRpgGameplayTags::Get().Effects_HitReact);
 			Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
 		}
-
-		ShowFloatingText(Props, LocalIncomingDamage);
+		
+		const bool bCrit = URpgAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
+		const bool bBlock = URpgAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
+		ShowFloatingText(Props, LocalIncomingDamage, bBlock, bCrit);
 	}
 }
 
-void URpgAttributeSet::ShowFloatingText(const FEffectProperties& Props, const float Damage) const
+void URpgAttributeSet::ShowFloatingText(const FEffectProperties& Props, const float Damage, bool bBlockedHit, bool bCriticalHit) const
 {
 	// Check if damage is not to self
 	if (Props.SourceCharacter != Props.TargetCharacter)
 	{
-		if (ARpgPlayerController* PC = Cast<ARpgPlayerController>(UGameplayStatics::GetPlayerController(Props.SourceCharacter, 0)))
+		if (ARpgPlayerController* PC = Cast<ARpgPlayerController>(Props.SourceCharacter->Controller))
 		{
-			PC->ShowDamageNumber(Damage, Props.TargetCharacter);
+			PC->ShowDamageNumber(Damage, Props.TargetCharacter, bBlockedHit, bCriticalHit);
 		}
 	}
 }
@@ -207,6 +226,11 @@ void URpgAttributeSet::OnRep_CriticalHitRate(const FGameplayAttributeData& OldCr
 	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, CriticalHitRate, OldCriticalHitRate);
 }
 
+void URpgAttributeSet::OnRep_CriticalHitDamage(const FGameplayAttributeData& OldCriticalHitDamage) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, CriticalHitDamage, OldCriticalHitDamage);
+}
+
 void URpgAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, MaxHealth, OldMaxHealth);
@@ -236,6 +260,33 @@ void URpgAttributeSet::OnRep_StaminaRegeneration(const FGameplayAttributeData& O
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, StaminaRegeneration, OldStaminaRegeneration);
 }
+
+//~ Damage Type Resistance OnRep
+void URpgAttributeSet::OnRep_FireResistance(const FGameplayAttributeData& OldFireResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, FireResistance, OldFireResistance);
+}
+
+void URpgAttributeSet::OnRep_IceResistance(const FGameplayAttributeData& OldIceResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, IceResistance, OldIceResistance);
+}
+
+void URpgAttributeSet::OnRep_LightningResistance(const FGameplayAttributeData& OldLightningResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, LightningResistance, OldLightningResistance);
+}
+
+void URpgAttributeSet::OnRep_CurseResistance(const FGameplayAttributeData& OldCurseResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, CurseResistance, OldCurseResistance);
+}
+
+void URpgAttributeSet::OnRep_PhysicalResistance(const FGameplayAttributeData& OldPhysicalResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(URpgAttributeSet, PhysicalResistance, OldPhysicalResistance);
+}
+
 
 //~ Vitality Attributes OnRep
 void URpgAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const

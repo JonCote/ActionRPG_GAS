@@ -100,6 +100,10 @@ public:
 	FGameplayAttributeData CriticalHitRate;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, CriticalHitRate);
 
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_CriticalHitDamage, Category="Attribute|Secondary")
+	FGameplayAttributeData CriticalHitDamage;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, CriticalHitDamage);
+
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_MaxHealth, Category="Attribute|Secondary")
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, MaxHealth);
@@ -126,6 +130,28 @@ public:
 	
 	//~ End Secondary Attribute
 
+	//~ Begin Damage Type Resistance Attributes
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_FireResistance, Category="Attribute|Resistances")
+	FGameplayAttributeData FireResistance;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, FireResistance);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_IceResistance, Category="Attribute|Resistances")
+	FGameplayAttributeData IceResistance;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, IceResistance);
+	
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_LightningResistance, Category="Attribute|Resistances")
+	FGameplayAttributeData LightningResistance;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, LightningResistance);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_CurseResistance, Category="Attribute|Resistances")
+	FGameplayAttributeData CurseResistance;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, CurseResistance);
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_PhysicalResistance, Category="Attribute|Resistances")
+	FGameplayAttributeData PhysicalResistance;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, PhysicalResistance);
+	
+	//~ End Damage Type Resistance Attributes
 	
 	//~ Begin Vitality Attributes
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Health, Category="Attribute|Vitality")
@@ -176,6 +202,9 @@ public:
 	void OnRep_CriticalHitRate(const FGameplayAttributeData& OldCriticalHitRate) const;
 
 	UFUNCTION()
+	void OnRep_CriticalHitDamage(const FGameplayAttributeData& OldCriticalHitDamage) const;
+
+	UFUNCTION()
 	void OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const;
 	
 	UFUNCTION()
@@ -195,7 +224,24 @@ public:
 	
 	//~ End Secondary Attribute OnRep
 
+	//~ Begin Damage Type Resistance OnRep
+	UFUNCTION()
+	void OnRep_FireResistance(const FGameplayAttributeData& OldFireResistance) const;
 
+	UFUNCTION()
+	void OnRep_IceResistance(const FGameplayAttributeData& OldIceResistance) const;
+
+	UFUNCTION()
+	void OnRep_LightningResistance(const FGameplayAttributeData& OldLightningResistance) const;
+
+	UFUNCTION()
+	void OnRep_CurseResistance(const FGameplayAttributeData& OldCurseResistance) const;
+
+	UFUNCTION()
+	void OnRep_PhysicalResistance(const FGameplayAttributeData& OldPhysicalResistance) const;
+
+	//~ End Damage Type Resistance OnRep
+	
 	//~ Begin Vitality Attributes OnRep
 	UFUNCTION()
 	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;
@@ -211,7 +257,7 @@ public:
 private:
 
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
-	void ShowFloatingText(const FEffectProperties& Props, const float Damage) const;
+	void ShowFloatingText(const FEffectProperties& Props, const float Damage, bool bBlockedHit, bool bCriticalHit) const;
 	
 	
 };

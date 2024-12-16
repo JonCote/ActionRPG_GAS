@@ -33,6 +33,7 @@ public:
 	FGameplayTag Attributes_Secondary_AttackPower;
 	FGameplayTag Attributes_Secondary_Defense;
 	FGameplayTag Attributes_Secondary_CriticalHitRate;
+	FGameplayTag Attributes_Secondary_CriticalHitDamage;
 
 	// Input keys
 	FGameplayTag InputTag_LMB;
@@ -42,8 +43,26 @@ public:
 	FGameplayTag InputTag_3;
 	FGameplayTag InputTag_4;
 
+	// Damage Types
 	FGameplayTag Damage;
+	FGameplayTag Damage_Fire;
+	FGameplayTag Damage_Ice;
+	FGameplayTag Damage_Lightning;
+	FGameplayTag Damage_Curse;
+	FGameplayTag Damage_Physical;
+	
+	// Damage Type Resistances
+	FGameplayTag Attributes_Resistance_Fire;
+	FGameplayTag Attributes_Resistance_Ice;
+	FGameplayTag Attributes_Resistance_Lightning;
+	FGameplayTag Attributes_Resistance_Curse;
+	FGameplayTag Attributes_Resistance_Physical;
+	
+	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
+
+	// Effects
 	FGameplayTag Effects_HitReact;
+
 
 private:
 	static FRpgGameplayTags GameplayTags;
