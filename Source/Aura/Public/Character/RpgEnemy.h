@@ -10,6 +10,9 @@
 #include "RpgEnemy.generated.h"
 
 class UWidgetComponent;
+class UBehaviorTree;
+class ARpgAIController;
+
 /**
  * 
  */
@@ -20,6 +23,7 @@ class AURA_API ARpgEnemy : public ARpgCharacterBase, public IEnemyInterface
 
 public:
 	ARpgEnemy();
+	virtual void PossessedBy(AController* NewController) override;
 
 	//~ Begin Enemy Interface
 	virtual void HighlightActor() override;
@@ -29,6 +33,9 @@ public:
 	//~ Begin Combat Interface
 	virtual int32 GetCharacterLevel() override;
 	virtual void Die() override;
+	virtual void SetCombatTarget_Implementation(AActor* InCombatTarget) override;
+	virtual AActor* GetCombatTarget_Implementation() const override;
+	
 	//~ End Combat Interface
 
 	UPROPERTY(BlueprintAssignable)
@@ -47,6 +54,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat")
 	float LifeSpan = 5.f;
+
+	UPROPERTY(BlueprintReadWrite, Category="Combat")
+	TObjectPtr<AActor> CombatTarget;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -61,5 +71,11 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> HealthBar;
+
+	UPROPERTY(EditAnywhere, Category="AI")
+	TObjectPtr<UBehaviorTree> BehaviorTree;
+
+	UPROPERTY()
+	TObjectPtr<ARpgAIController> RpgAIController;
 	
 };

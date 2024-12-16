@@ -24,6 +24,8 @@ void ARpgEffectActor::BeginPlay()
 
 void ARpgEffectActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEffect> GameplayEffectClass)
 {
+	if (TargetActor->ActorHasTag(FName("Enemy")) && !bApplyEffectsToEnemies) { return; }
+	
 	check(GameplayEffectClass);
 	if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor))
 	{
@@ -37,6 +39,11 @@ void ARpgEffectActor::ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGame
 			&& InfiniteEffectRemovalPolicy != EEffectRemovalPolicy::DoNotRemove)
 		{
 			ActiveEffectHandles.Add(ActiveEffectHandle, TargetASC);
+		}
+
+		if (bDestroyOnEffectApplication && EffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy != EGameplayEffectDurationType::Infinite)
+		{
+			Destroy();
 		}
 	}
 }
@@ -63,6 +70,8 @@ void ARpgEffectActor::RemoveEffectFromTarget(AActor* TargetActor)
 
 void ARpgEffectActor::OnOverlap(AActor* TargetActor)
 {
+	if (TargetActor->ActorHasTag(FName("Enemy")) && !bApplyEffectsToEnemies) { return; }
+	
 	// Apply effect
 	if (InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnOverlap)
 	{
@@ -80,6 +89,8 @@ void ARpgEffectActor::OnOverlap(AActor* TargetActor)
 
 void ARpgEffectActor::OnEndOverlap(AActor* TargetActor)
 {
+	if (TargetActor->ActorHasTag(FName("Enemy")) && !bApplyEffectsToEnemies) { return; }
+	
 	// Apply effect
 	if (InstantEffectApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap)
 	{

@@ -93,7 +93,8 @@ void ARpgPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	if (InputTag.MatchesTagExact(FRpgGameplayTags::Get().InputTag_LMB))
 	{
-		bTargeting = ThisActor ? true : false;
+		//bTargeting = ThisActor ? true : false;
+		bTargeting = true;
 		
 		if (bClickToMove)
 		{

@@ -7,6 +7,9 @@
 #include "AbilitySystem/RpgAttributeSet.h"
 #include "Aura/Aura.h"
 #include "RpgGameplayTags.h"
+#include "AI/RpgAIController.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -20,27 +23,30 @@ ARpgEnemy::ARpgEnemy()
 
 	AbilitySystemComponent = CreateDefaultSubobject<URpgAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
-	/** EGameplayEffectReplicationMode 
-	 *		Full:
-	 *			Use Case: Single Player
-	 *			Description: Gameplay Effects are replicated to all clients
-	 *
-	 *		Mixed:
-	 *			Use Case: Multiplayer, Player-Controlled
-	 *			Description: GameplayEffects are replicated to the owning client only
-	 *						 Gameplay Cues and Gameplay Tags replicated to all clients
-	 *
-	 *		Minimal:
-	 *			Use Case: Multiplayer, AI-Controlled
-	 *			Description: Gameplay Effects are not replicated
-	 *						 Gameplay Cues and Gameplay Tags replicated to all clients
-	 */
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	
 	AttributeSet = CreateDefaultSubobject<URpgAttributeSet>("AttributeSet");
 	
 	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
 	HealthBar->SetupAttachment(GetRootComponent());
+}
+
+void ARpgEnemy::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (!HasAuthority()) { return; }
+	RpgAIController = Cast<ARpgAIController>(NewController);
+	RpgAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
+	RpgAIController->RunBehaviorTree(BehaviorTree);
+	RpgAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), false);
+	RpgAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"), CharacterClass != ECharacterClass::Warrior);
+	
 }
 
 void ARpgEnemy::HighlightActor()
@@ -68,6 +74,16 @@ void ARpgEnemy::Die()
 	Super::Die();
 }
 
+void ARpgEnemy::SetCombatTarget_Implementation(AActor* InCombatTarget)
+{
+	CombatTarget = InCombatTarget;
+}
+
+AActor* ARpgEnemy::GetCombatTarget_Implementation() const
+{
+	return CombatTarget;
+}
+
 void ARpgEnemy::BeginPlay()
 {
 	Super::BeginPlay();
@@ -75,7 +91,7 @@ void ARpgEnemy::BeginPlay()
 	InitAbilityActorInfo();
 	if (HasAuthority())
 	{
-		URpgAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent);	
+		URpgAbilitySystemLibrary::GiveStartupAbilities(this, AbilitySystemComponent, CharacterClass);	
 	}
 
 	if (URpgUserWidget* RpgUserWidget = Cast<URpgUserWidget>(HealthBar->GetUserWidgetObject()))
@@ -112,6 +128,7 @@ void ARpgEnemy::HitReactTagChanged(const FGameplayTag CallBackTag, int32 NewCoun
 {
 	bHitReacting = NewCount > 0;
 	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.f : BaseWalkSpeed;
+	RpgAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
 	
 }
 

@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "RpgAbilityTypes.h"
 #include "Game/RpgGameModeBase.h"
+#include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/RpgPlayerState.h"
 #include "UI/HUD/RpgHUD.h"
@@ -70,16 +71,29 @@ void URpgAbilitySystemLibrary::InitDefaultAttributes(const UObject* WorldContext
 	}
 }
 
-void URpgAbilitySystemLibrary::GiveStartupAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* ASC)
+void URpgAbilitySystemLibrary::GiveStartupAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* ASC, ECharacterClass CharacterClass)
 {
 	if (const ARpgGameModeBase* RpgGM = Cast<ARpgGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
 	{
 		const UCharacterClassInfo* CharacterClassInfo = RpgGM->CharacterClassInfo;
+		if (CharacterClassInfo == nullptr) return;
+		
 		for (TSubclassOf<UGameplayAbility> AbilityClass : CharacterClassInfo->CommonAbilities)
 		{
 			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
 			ASC->GiveAbility(AbilitySpec);
 		}
+		
+		const FCharacterClassDefaultInfo& DefaultInfo = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
+		for (TSubclassOf<UGameplayAbility> AbilityClass : DefaultInfo.StartupAbilities)
+		{
+			if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(ASC->GetAvatarActor()))
+			{
+				FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, CombatInterface->GetCharacterLevel());
+				ASC->GiveAbility(AbilitySpec);
+			}
+		}
+		
 	}
 }
 

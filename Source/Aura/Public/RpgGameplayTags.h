@@ -60,6 +60,10 @@ public:
 	
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
 
+	// Abilities
+	FGameplayTag Abilities_Attack;
+	
+
 	// Effects
 	FGameplayTag Effects_HitReact;
 
