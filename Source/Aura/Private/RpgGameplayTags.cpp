@@ -157,7 +157,21 @@ void FRpgGameplayTags::InitNativeGameplayTags()
 													FName("Abilities.Attack"),
 													FString("Attack Ability Tag")
 													);
-	
+
+	// Montages
+	GameplayTags.Montage_Attack_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Montage.Attack.Weapon"),
+													FString("Weapon based attack")
+													);
+	GameplayTags.Montage_Attack_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Montage.Attack.RightHand"),
+													FString("Right Hand based attack")
+													);
+	GameplayTags.Montage_Attack_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Montage.Attack.LeftHand"),
+													FString("Left Hand based attack")
+													);
+
 	
 	// Effects
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(

@@ -30,7 +30,10 @@ void URpgProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocatio
 {
 	if (!GetAvatarActorFromActorInfo()->HasAuthority()) return;
 	
-	const FVector SocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo());
+	const FVector SocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(
+		GetAvatarActorFromActorInfo(),
+		FRpgGameplayTags::Get().Montage_Attack_Weapon);
+	
 	FRotator Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
 	Rotation.Pitch = 0.f;
 	

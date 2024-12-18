@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystem/Abilities/RpgGameplayAbility.h"
+#include "Interaction/CombatInterface.h"
 #include "RpgDamageGameplayAbility.generated.h"
 
 /**
@@ -14,6 +15,10 @@ class AURA_API URpgDamageGameplayAbility : public URpgGameplayAbility
 {
 	GENERATED_BODY()
 
+public:
+
+	UFUNCTION(BlueprintCallable)
+	void CauseDamage(AActor* TargetActor);
 	
 protected:
 	
@@ -22,4 +27,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	TMap<FGameplayTag, FScalableFloat> DamageTypes;
+
+	UFUNCTION(BlueprintPure)
+	FTaggedMontage GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& TaggedMontages) const;
 };

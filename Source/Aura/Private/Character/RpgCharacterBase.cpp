@@ -2,6 +2,7 @@
 
 #include "Character/RpgCharacterBase.h"
 #include "AbilitySystemComponent.h"
+#include "RpgGameplayTags.h"
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
 
@@ -47,6 +48,7 @@ void ARpgCharacterBase::MulticastHandleDeath_Implementation()
 	
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Dissolve();
+	bDead = true;
 }
 
 void ARpgCharacterBase::BeginPlay()
@@ -54,10 +56,40 @@ void ARpgCharacterBase::BeginPlay()
 	Super::BeginPlay();
 }
 
-FVector ARpgCharacterBase::GetCombatSocketLocation_Implementation()
+FVector ARpgCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag)
 {
-	check(Weapon);
-	return Weapon->GetSocketLocation(WeaponTipSocketName);
+	// TODO: Make data driven so alteration of this function is not needed when a new MontageTag->SocketLocation pair is added to game
+
+	const FRpgGameplayTags& GameplayTags = FRpgGameplayTags::Get();
+	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_Weapon) && IsValid(Weapon))
+	{
+		return Weapon->GetSocketLocation(WeaponTipSocketName);
+	}
+	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_LeftHand))
+	{
+		return GetMesh()->GetSocketLocation(LeftHandSocketName);
+	}
+	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_RightHand))
+	{
+		return GetMesh()->GetSocketLocation(RightHandSocketName);
+	}
+	
+	return FVector();
+}
+
+bool ARpgCharacterBase::IsDead_Implementation() const
+{
+	return bDead;
+}
+
+AActor* ARpgCharacterBase::GetAvatar_Implementation()
+{
+	return this;
+}
+
+TArray<FTaggedMontage> ARpgCharacterBase::GetAttackMontages_Implementation()
+{
+	return AttackMontages;
 }
 
 void ARpgCharacterBase::InitAbilityActorInfo()

@@ -128,8 +128,10 @@ void ARpgEnemy::HitReactTagChanged(const FGameplayTag CallBackTag, int32 NewCoun
 {
 	bHitReacting = NewCount > 0;
 	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.f : BaseWalkSpeed;
-	RpgAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
-	
+	if (RpgAIController && RpgAIController->GetBlackboardComponent())
+	{
+		RpgAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
+	}
 }
 
 void ARpgEnemy::InitAbilityActorInfo()

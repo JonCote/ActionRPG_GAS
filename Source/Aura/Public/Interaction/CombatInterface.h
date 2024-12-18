@@ -3,8 +3,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "UObject/Interface.h"
 #include "CombatInterface.generated.h"
+
+
+USTRUCT(BlueprintType)
+struct FTaggedMontage
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* Montage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag MontageTag;
+};
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI, BlueprintType)
@@ -27,12 +41,20 @@ public:
 	virtual int32 GetCharacterLevel();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface")
-	FVector GetCombatSocketLocation();
+	FVector GetCombatSocketLocation(const FGameplayTag& MontageTag);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface")
 	UAnimMontage* GetHitReactMontage();
 
 	virtual void Die() = 0;
-	
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface")
+	bool IsDead() const;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface")
+	AActor* GetAvatar();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface")
+	TArray<FTaggedMontage> GetAttackMontages();
 };
 
