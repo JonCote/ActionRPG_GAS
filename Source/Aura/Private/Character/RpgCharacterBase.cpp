@@ -5,6 +5,7 @@
 #include "RpgGameplayTags.h"
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 ARpgCharacterBase::ARpgCharacterBase()
@@ -37,6 +38,8 @@ void ARpgCharacterBase::Die()
 
 void ARpgCharacterBase::MulticastHandleDeath_Implementation()
 {
+	UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation(), GetActorRotation());
+	
 	Weapon->SetSimulatePhysics(true);
 	Weapon->SetEnableGravity(true);
 	Weapon->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
@@ -61,17 +64,21 @@ FVector ARpgCharacterBase::GetCombatSocketLocation_Implementation(const FGamepla
 	// TODO: Make data driven so alteration of this function is not needed when a new MontageTag->SocketLocation pair is added to game
 
 	const FRpgGameplayTags& GameplayTags = FRpgGameplayTags::Get();
-	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_Weapon) && IsValid(Weapon))
+	if (MontageTag.MatchesTagExact(GameplayTags.CombatSocket_Weapon) && IsValid(Weapon))
 	{
 		return Weapon->GetSocketLocation(WeaponTipSocketName);
 	}
-	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_LeftHand))
+	if (MontageTag.MatchesTagExact(GameplayTags.CombatSocket_LeftHand))
 	{
 		return GetMesh()->GetSocketLocation(LeftHandSocketName);
 	}
-	if (MontageTag.MatchesTagExact(GameplayTags.Montage_Attack_RightHand))
+	if (MontageTag.MatchesTagExact(GameplayTags.CombatSocket_RightHand))
 	{
 		return GetMesh()->GetSocketLocation(RightHandSocketName);
+	}
+	if (MontageTag.MatchesTagExact(GameplayTags.CombatSocket_Tail))
+	{
+		return GetMesh()->GetSocketLocation(TailSocketName);
 	}
 	
 	return FVector();
@@ -90,6 +97,30 @@ AActor* ARpgCharacterBase::GetAvatar_Implementation()
 TArray<FTaggedMontage> ARpgCharacterBase::GetAttackMontages_Implementation()
 {
 	return AttackMontages;
+}
+
+UNiagaraSystem* ARpgCharacterBase::GetBloodEffect_Implementation()
+{
+	return BloodEffect;
+}
+
+FTaggedMontage ARpgCharacterBase::GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag)
+{
+	for (FTaggedMontage TaggedMontage : AttackMontages)
+	{
+		if (TaggedMontage.MontageTag == MontageTag) return TaggedMontage;
+	}
+	return FTaggedMontage();
+}
+
+int32 ARpgCharacterBase::GetMinionCount_Implementation()
+{
+	return MinionCount;
+}
+
+void ARpgCharacterBase::SetMinionCount_Implementation(const int32 Value)
+{
+	MinionCount = Value;
 }
 
 void ARpgCharacterBase::InitAbilityActorInfo()

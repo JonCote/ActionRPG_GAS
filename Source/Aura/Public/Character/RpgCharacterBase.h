@@ -8,6 +8,7 @@
 #include "Interaction/CombatInterface.h"
 #include "RpgCharacterBase.generated.h"
 
+class UNiagaraSystem;
 class UGameplayAbility;
 class UGameplayEffect;
 class UAbilitySystemComponent;
@@ -31,6 +32,10 @@ public:
 	virtual bool IsDead_Implementation() const override;
 	virtual AActor* GetAvatar_Implementation() override;
 	virtual TArray<FTaggedMontage> GetAttackMontages_Implementation() override;
+	virtual UNiagaraSystem* GetBloodEffect_Implementation() override;
+	virtual FTaggedMontage GetTaggedMontageByTag_Implementation(const FGameplayTag& MontageTag) override;
+	virtual int32 GetMinionCount_Implementation() override;
+	virtual void SetMinionCount_Implementation(const int32 Value) override;
 	//~ End Combat Interface
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -54,7 +59,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	FName RightHandSocketName;
-	
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	FName TailSocketName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	UNiagaraSystem* BloodEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
+	USoundBase* DeathSound;
 	
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -80,8 +93,7 @@ protected:
 
 	void AddCharacterAbilities();
 
-	/* Dissolve Effects */
-	
+	//~ Start Dissolve Effects
 	void Dissolve();
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -95,6 +107,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UMaterialInstance> WeaponDissolveMaterialInstance;
+	//~ End Dissolve Effects
+
+	//~ Start Minions
+	int32 MinionCount = 0;
+
+	//~ End Minions
 	
 private:
 

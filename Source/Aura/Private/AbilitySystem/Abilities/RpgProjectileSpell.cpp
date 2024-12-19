@@ -26,13 +26,13 @@ void URpgProjectileSpell::PreActivate(const FGameplayAbilitySpecHandle Handle,
 	
 }
 
-void URpgProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
+void URpgProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation, const FGameplayTag& SocketTag)
 {
 	if (!GetAvatarActorFromActorInfo()->HasAuthority()) return;
 	
 	const FVector SocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(
 		GetAvatarActorFromActorInfo(),
-		FRpgGameplayTags::Get().Montage_Attack_Weapon);
+		SocketTag);
 	
 	FRotator Rotation = (ProjectileTargetLocation - SocketLocation).Rotation();
 	Rotation.Pitch = 0.f;
@@ -61,9 +61,14 @@ void URpgProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocatio
 	
 	
 	const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
-
 	const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
-
+	
+	for (TTuple<FGameplayTag, FScalableFloat> Pair : DamageMultipliers)
+	{
+		float ScaledMultiplier = Pair.Value.GetValueAtLevel(GetAbilityLevel());
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledMultiplier);
+	}
+	
 	for (auto& Pair : DamageTypes)
 	{
 		const float ScaledDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());

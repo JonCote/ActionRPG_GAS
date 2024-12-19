@@ -151,27 +151,78 @@ void FRpgGameplayTags::InitNativeGameplayTags()
 	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_Curse, GameplayTags.Attributes_Resistance_Curse);
 	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_Physical, GameplayTags.Attributes_Resistance_Physical);
 
+	// Damage Multiplier
+	GameplayTags.DamageMultiplier_Source_AttackPower = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("DamageMultiplier.Source.AttackPower"),
+													FString("Damage Multiplier for Attack Power from Source (Deal a % of Sources Attack Power as Damage)")
+													);
+	GameplayTags.DamageMultiplier_Source_MaxHealth = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("DamageMultiplier.Source.MaxHealth"),
+													FString("Damage Multiplier for Max Health from Source (Deal a % of Sources Max Health as Damage)")
+													);
+	GameplayTags.DamageMultiplier_Source_Defense = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("DamageMultiplier.Source.Defense"),
+													FString("Damage Multiplier for Defense from Source (Deal a % of Sources Defense as Damage)")
+													);
+
+	GameplayTags.DamageMultiplier_Target_MaxHealth = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("DamageMultiplier.Target.MaxHealth"),
+													FString("Damage Multiplier for Max Health from Target (Deal a % of Sources Max Health as Damage)")
+													);
+	
+	GameplayTags.DamageMultipliersToSourceAttributes.Add(GameplayTags.DamageMultiplier_Source_AttackPower, GameplayTags.Attributes_Secondary_AttackPower);
+	GameplayTags.DamageMultipliersToSourceAttributes.Add(GameplayTags.DamageMultiplier_Source_MaxHealth, GameplayTags.Attributes_Secondary_MaxHealth);
+	GameplayTags.DamageMultipliersToSourceAttributes.Add(GameplayTags.DamageMultiplier_Source_Defense, GameplayTags.Attributes_Secondary_Defense);
+
+	GameplayTags.DamageMultipliersToTargetAttributes.Add(GameplayTags.DamageMultiplier_Target_MaxHealth, GameplayTags.Attributes_Secondary_MaxHealth);
+
 	
 	// Abilities
 	GameplayTags.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(
 													FName("Abilities.Attack"),
 													FString("Attack Ability Tag")
 													);
+	GameplayTags.Abilities_Summon = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Abilities.Summon"),
+													FString("Summon Ability Tag")
+													);
+	
 
-	// Montages
-	GameplayTags.Montage_Attack_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(
-													FName("Montage.Attack.Weapon"),
+	// CombatSockets
+	GameplayTags.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("CombatSocket.Weapon"),
 													FString("Weapon based attack")
 													);
-	GameplayTags.Montage_Attack_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(
-													FName("Montage.Attack.RightHand"),
+	GameplayTags.CombatSocket_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("CombatSocket.RightHand"),
 													FString("Right Hand based attack")
 													);
-	GameplayTags.Montage_Attack_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(
-													FName("Montage.Attack.LeftHand"),
+	GameplayTags.CombatSocket_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("CombatSocket.LeftHand"),
 													FString("Left Hand based attack")
 													);
+	GameplayTags.CombatSocket_Tail = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("CombatSocket.Tail"),
+													FString("Tail based attack")
+													);
 
+	// Montages
+	GameplayTags.Montage_Attack_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Montage.Attack.1"),
+													FString("Attack 1")
+													);
+	GameplayTags.Montage_Attack_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Montage.Attack.2"),
+													FString("Attack 2")
+													);
+	GameplayTags.Montage_Attack_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Montage.Attack.3"),
+													FString("Attack 3")
+													);
+	GameplayTags.Montage_Attack_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Montage.Attack.4"),
+													FString("Attack 4")
+													);
 	
 	// Effects
 	GameplayTags.Effects_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(

@@ -8,6 +8,10 @@
 #include "CombatInterface.generated.h"
 
 
+class UNiagaraSystem;
+class UAnimMontage;
+
+
 USTRUCT(BlueprintType)
 struct FTaggedMontage
 {
@@ -18,6 +22,12 @@ struct FTaggedMontage
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FGameplayTag MontageTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGameplayTag CombatSocketTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	USoundBase* ImpactSound = nullptr;
 };
 
 // This class does not need to be modified.
@@ -28,7 +38,7 @@ class UCombatInterface : public UInterface
 };
 
 
-class UAnimMontage;
+
 /**
  * 
  */
@@ -41,7 +51,7 @@ public:
 	virtual int32 GetCharacterLevel();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface")
-	FVector GetCombatSocketLocation(const FGameplayTag& MontageTag);
+	FVector GetCombatSocketLocation(const FGameplayTag& SocketTag);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface")
 	UAnimMontage* GetHitReactMontage();
@@ -56,5 +66,17 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface")
 	TArray<FTaggedMontage> GetAttackMontages();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface")
+	UNiagaraSystem* GetBloodEffect();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface")
+	FTaggedMontage GetTaggedMontageByTag(const FGameplayTag& MontageTag);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface|Minions")
+	int32 GetMinionCount();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface|Minions")
+	void SetMinionCount(const int32 Value);
 };
 

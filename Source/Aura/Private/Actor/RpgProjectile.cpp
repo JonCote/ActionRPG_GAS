@@ -9,7 +9,6 @@
 #include "AbilitySystem/RpgAbilitySystemLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/AudioComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -19,7 +18,6 @@ ARpgProjectile::ARpgProjectile()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
-
 	
 	Sphere = CreateDefaultSubobject<USphereComponent>("Sphere");
 	SetRootComponent(Sphere);
@@ -46,19 +44,21 @@ void ARpgProjectile::BeginPlay()
 
 void ARpgProjectile::Destroyed()
 {
-	if (!bHit && !HasAuthority())
+	if (!bHit)
 	{
 		if (TravelSoundComponent) TravelSoundComponent->Stop();
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+		bHit = true;
 	}
+	
 	Super::Destroyed();
 }
 
 void ARpgProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                      UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (DamageEffectSpecHandle.Data.IsValid() && DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor) { return; }
+	if (!DamageEffectSpecHandle.Data.IsValid() || DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor) { return; }
 	if (!URpgAbilitySystemLibrary::IsNotFriendly(DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser(), OtherActor)) { return; }
 	
 	if (!bHit)
@@ -66,6 +66,7 @@ void ARpgProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, A
 		if (TravelSoundComponent) TravelSoundComponent->Stop();
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+		bHit = true;
 	}
 	
 	if (HasAuthority())

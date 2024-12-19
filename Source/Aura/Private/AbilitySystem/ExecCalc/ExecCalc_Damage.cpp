@@ -6,69 +6,108 @@
 #include "AbilitySystemComponent.h"
 #include "RpgAbilityTypes.h"
 #include "RpgGameplayTags.h"
-#include "RpgAbilityTypes.h"
 #include "AbilitySystem/RpgAbilitySystemLibrary.h"
 #include "AbilitySystem/RpgAttributeSet.h"
 
-struct RpgDamageStatics
+struct RpgTargetStatics
 {
 	// Capture from Target
 	DECLARE_ATTRIBUTE_CAPTUREDEF(Defense);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(MaxHealth);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(FireResistance);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(LightningResistance);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(CurseResistance);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(IceResistance);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(PhysicalResistance);
-
-	// Capture from Source
-	DECLARE_ATTRIBUTE_CAPTUREDEF(CriticalHitRate)
-	DECLARE_ATTRIBUTE_CAPTUREDEF(CriticalHitDamage);
+	
 
 	// GameplayTag to AttributeCaptureDefinition
 	TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition> TagsToCaptureDefs;
 	
-	RpgDamageStatics()
+	RpgTargetStatics()
 	{
 		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, Defense, Target, false);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, MaxHealth, Target, false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, FireResistance, Target, false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, LightningResistance, Target, false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, CurseResistance, Target, false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, IceResistance, Target, false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, PhysicalResistance, Target, false);
-		
-		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, CriticalHitRate, Source, true);
-		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, CriticalHitDamage, Source, true);
 
 		const FRpgGameplayTags& Tags = FRpgGameplayTags::Get();
 		TagsToCaptureDefs.Add(Tags.Attributes_Secondary_Defense, DefenseDef);
+		TagsToCaptureDefs.Add(Tags.Attributes_Secondary_MaxHealth, MaxHealthDef);
 		TagsToCaptureDefs.Add(Tags.Attributes_Resistance_Fire, FireResistanceDef);
 		TagsToCaptureDefs.Add(Tags.Attributes_Resistance_Lightning, LightningResistanceDef);
 		TagsToCaptureDefs.Add(Tags.Attributes_Resistance_Curse, CurseResistanceDef);
 		TagsToCaptureDefs.Add(Tags.Attributes_Resistance_Ice, IceResistanceDef);
 		TagsToCaptureDefs.Add(Tags.Attributes_Resistance_Physical, PhysicalResistanceDef);
 		
-		TagsToCaptureDefs.Add(Tags.Attributes_Secondary_CriticalHitRate, CriticalHitRateDef);
-		TagsToCaptureDefs.Add(Tags.Attributes_Secondary_CriticalHitDamage, CriticalHitDamageDef);
 	}
 };
 
-static const RpgDamageStatics& DamageStatics()
+static const RpgTargetStatics& TargetDamageStatics()
 {
-	static RpgDamageStatics DmgStatics;
-	return DmgStatics;
+	static RpgTargetStatics TrgDmgStatics;
+	return TrgDmgStatics;
 }
+
+
+struct RpgSourceDamageStatics
+{
+	// Capture from Source
+	DECLARE_ATTRIBUTE_CAPTUREDEF(CriticalHitRate)
+	DECLARE_ATTRIBUTE_CAPTUREDEF(CriticalHitDamage);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(AttackPower);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(MaxHealth);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(Defense);
+
+	// GameplayTag to AttributeCaptureDefinition
+	TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition> TagsToCaptureDefs;
+	
+	RpgSourceDamageStatics()
+	{
+		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, CriticalHitRate, Source, true);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, CriticalHitDamage, Source, true);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, AttackPower, Source, true);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, MaxHealth, Source, true);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(URpgAttributeSet, Defense, Source, true);
+
+		const FRpgGameplayTags& Tags = FRpgGameplayTags::Get();
+		
+		TagsToCaptureDefs.Add(Tags.Attributes_Secondary_CriticalHitRate, CriticalHitRateDef);
+		TagsToCaptureDefs.Add(Tags.Attributes_Secondary_CriticalHitDamage, CriticalHitDamageDef);
+		TagsToCaptureDefs.Add(Tags.Attributes_Secondary_AttackPower, AttackPowerDef);
+		TagsToCaptureDefs.Add(Tags.Attributes_Secondary_MaxHealth, MaxHealthDef);
+		TagsToCaptureDefs.Add(Tags.Attributes_Secondary_Defense, DefenseDef);
+	}
+};
+
+static const RpgSourceDamageStatics& SourceDamageStatics()
+{
+	static RpgSourceDamageStatics SrcDmgStatics;
+	return SrcDmgStatics;
+}
+
 
 UExecCalc_Damage::UExecCalc_Damage()
 {
-	RelevantAttributesToCapture.Add(DamageStatics().DefenseDef);
-	RelevantAttributesToCapture.Add(DamageStatics().FireResistanceDef);
-	RelevantAttributesToCapture.Add(DamageStatics().LightningResistanceDef);
-	RelevantAttributesToCapture.Add(DamageStatics().CurseResistanceDef);
-	RelevantAttributesToCapture.Add(DamageStatics().IceResistanceDef);
-	RelevantAttributesToCapture.Add(DamageStatics().PhysicalResistanceDef);
+	// Target Attribute Capture
+	RelevantAttributesToCapture.Add(TargetDamageStatics().DefenseDef);
+	RelevantAttributesToCapture.Add(TargetDamageStatics().MaxHealthDef);
+	RelevantAttributesToCapture.Add(TargetDamageStatics().FireResistanceDef);
+	RelevantAttributesToCapture.Add(TargetDamageStatics().LightningResistanceDef);
+	RelevantAttributesToCapture.Add(TargetDamageStatics().CurseResistanceDef);
+	RelevantAttributesToCapture.Add(TargetDamageStatics().IceResistanceDef);
+	RelevantAttributesToCapture.Add(TargetDamageStatics().PhysicalResistanceDef);
 
-	RelevantAttributesToCapture.Add(DamageStatics().CriticalHitRateDef);
-	RelevantAttributesToCapture.Add(DamageStatics().CriticalHitDamageDef);
+	
+	// Source Attribute Capture
+	RelevantAttributesToCapture.Add(SourceDamageStatics().CriticalHitRateDef);
+	RelevantAttributesToCapture.Add(SourceDamageStatics().CriticalHitDamageDef);
+	RelevantAttributesToCapture.Add(SourceDamageStatics().AttackPowerDef);
+	RelevantAttributesToCapture.Add(SourceDamageStatics().MaxHealthDef);
+	RelevantAttributesToCapture.Add(SourceDamageStatics().DefenseDef);
 }
 
 void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
@@ -88,15 +127,53 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	// Get Damage Set by Caller Magnitude
 	float Damage = 0.f;
+
+	// Damage Scaled by Source Attribute value
+	for (const auto& Pair : FRpgGameplayTags::Get().DamageMultipliersToSourceAttributes)
+	{
+		const FGameplayTag& MultiplierTag = Pair.Key;
+		const FGameplayTag& AttributeTag = Pair.Value;
+
+		checkf(RpgSourceDamageStatics().TagsToCaptureDefs.Contains(AttributeTag), TEXT("TagsToCaptureDefs doesn't contain Tag: [%s] in ExecCalc_Damage"), *AttributeTag.ToString());
+		const FGameplayEffectAttributeCaptureDefinition CaptureDefinition = RpgSourceDamageStatics().TagsToCaptureDefs[AttributeTag];
+		
+		float MultiplierValue = Spec.GetSetByCallerMagnitude(MultiplierTag, false);
+
+		float AttributeValue = 0.f;
+		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDefinition, EvalParams, AttributeValue);
+		AttributeValue = FMath::Max(0.f, AttributeValue);
+
+		Damage += MultiplierValue * AttributeValue;
+	}
+
+	// Damage Scaled by Target Attribute value
+	for (const auto& Pair : FRpgGameplayTags::Get().DamageMultipliersToTargetAttributes)
+	{
+		const FGameplayTag& MultiplierTag = Pair.Key;
+		const FGameplayTag& AttributeTag = Pair.Value;
+
+		checkf(RpgTargetStatics().TagsToCaptureDefs.Contains(AttributeTag), TEXT("TagsToCaptureDefs doesn't contain Tag: [%s] in ExecCalc_Damage"), *AttributeTag.ToString());
+		const FGameplayEffectAttributeCaptureDefinition CaptureDefinition = RpgTargetStatics().TagsToCaptureDefs[AttributeTag];
+		
+		float MultiplierValue = Spec.GetSetByCallerMagnitude(MultiplierTag, false);
+
+		float AttributeValue = 0.f;
+		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDefinition, EvalParams, AttributeValue);
+		AttributeValue = FMath::Max(0.f, AttributeValue);
+
+		Damage += MultiplierValue * AttributeValue;
+	}
+
+	// Base Elemental Damage reduced by elemental resistances
 	for (const auto& Pair : FRpgGameplayTags::Get().DamageTypesToResistances)
 	{
 		const FGameplayTag& DamageTypeTag = Pair.Key;
 		const FGameplayTag& ResistanceTag = Pair.Value;
 		
-		checkf(RpgDamageStatics().TagsToCaptureDefs.Contains(ResistanceTag), TEXT("TagsToCaptureDefs doesn't contain Tag: [%s] in ExecCalc_Damage"), *ResistanceTag.ToString());
-		const FGameplayEffectAttributeCaptureDefinition CaptureDefinition = RpgDamageStatics().TagsToCaptureDefs[ResistanceTag];
+		checkf(RpgTargetStatics().TagsToCaptureDefs.Contains(ResistanceTag), TEXT("TagsToCaptureDefs doesn't contain Tag: [%s] in ExecCalc_Damage"), *ResistanceTag.ToString());
+		const FGameplayEffectAttributeCaptureDefinition CaptureDefinition = RpgTargetStatics().TagsToCaptureDefs[ResistanceTag];
 
-		float DamageTypeValue = Spec.GetSetByCallerMagnitude(Pair.Key);
+		float DamageTypeValue = Spec.GetSetByCallerMagnitude(DamageTypeTag, false);
 		
 		float Resistance = 0.f;
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDefinition, EvalParams, Resistance);
@@ -108,11 +185,11 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	// Determine if a Critical Hit was caused using Source's Critical Hit Rate
 	float CritRate = 0.f;
-	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().CriticalHitRateDef, EvalParams, CritRate);
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(SourceDamageStatics().CriticalHitRateDef, EvalParams, CritRate);
 	CritRate = FMath::Clamp(CritRate, 0.f, 100.f);
 
 	float CritDamage = 0.f;
-	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().CriticalHitDamageDef, EvalParams, CritDamage);
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(SourceDamageStatics().CriticalHitDamageDef, EvalParams, CritDamage);
 	const bool bCrit = FMath::RandRange(1.f, 100.f) <= CritRate;
 	
 	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
@@ -120,7 +197,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	
 	// Reduce the Damage based on targets Defense
 	float Defense = 0.f;
-	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(DamageStatics().DefenseDef, EvalParams, Defense);
+	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(TargetDamageStatics().DefenseDef, EvalParams, Defense);
 	Defense = FMath::Max<float>(0.f, Defense);
 	const float DamageReduction = Defense * 0.1f;
 

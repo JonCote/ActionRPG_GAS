@@ -60,14 +60,33 @@ public:
 	
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
 
-	// Abilities
-	FGameplayTag Abilities_Attack;
+	// Damage Multipliers
+	FGameplayTag DamageMultiplier_Source_AttackPower;
+	FGameplayTag DamageMultiplier_Source_MaxHealth;
+	FGameplayTag DamageMultiplier_Source_Defense;
+
+	FGameplayTag DamageMultiplier_Target_MaxHealth;
+
+	TMap<FGameplayTag, FGameplayTag> DamageMultipliersToSourceAttributes;
+	TMap<FGameplayTag, FGameplayTag> DamageMultipliersToTargetAttributes;
 	
 
+	// Abilities
+	FGameplayTag Abilities_Attack;
+	FGameplayTag Abilities_Summon;
+	
+
+	// CombatSockets
+	FGameplayTag CombatSocket_Weapon;
+	FGameplayTag CombatSocket_RightHand;
+	FGameplayTag CombatSocket_LeftHand;
+	FGameplayTag CombatSocket_Tail;
+
 	// Montages
-	FGameplayTag Montage_Attack_Weapon;
-	FGameplayTag Montage_Attack_RightHand;
-	FGameplayTag Montage_Attack_LeftHand;
+	FGameplayTag Montage_Attack_1;
+	FGameplayTag Montage_Attack_2;
+	FGameplayTag Montage_Attack_3;
+	FGameplayTag Montage_Attack_4;
 
 	// Effects
 	FGameplayTag Effects_HitReact;
