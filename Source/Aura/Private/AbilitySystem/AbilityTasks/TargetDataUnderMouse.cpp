@@ -28,6 +28,7 @@ void UTargetDataUnderMouse::Activate()
 		if (!bCalledDelegate)
 		{
 			SetWaitingOnRemotePlayerData();
+			
 		}
 	}
 }
@@ -60,7 +61,7 @@ void UTargetDataUnderMouse::SendMouseCursorData() const
 	}
 }
 
-void UTargetDataUnderMouse::OnTargetDataReplicatedCallback(const FGameplayAbilityTargetDataHandle& DataHandle, FGameplayTag ActivationTag)
+void UTargetDataUnderMouse::OnTargetDataReplicatedCallback(const FGameplayAbilityTargetDataHandle& DataHandle, FGameplayTag ActivationTag) const
 {
 	AbilitySystemComponent->ConsumeClientReplicatedTargetData(GetAbilitySpecHandle(), GetActivationPredictionKey());
 	if (ShouldBroadcastAbilityTaskDelegates())

@@ -26,6 +26,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Projectile")
 	void SpawnProjectile(const FVector& ProjectileTargetLocation, const FGameplayTag& SocketTag);
+
+	UFUNCTION(BlueprintCallable, Category = "Projectile")
+	void SpawnProjectileAtLocation(const FVector& ProjectileTargetLocation, const FVector SocketLocation);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<ARpgProjectile> ProjectileClass;

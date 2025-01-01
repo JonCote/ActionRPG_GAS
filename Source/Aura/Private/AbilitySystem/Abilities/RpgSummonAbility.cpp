@@ -37,3 +37,9 @@ TSubclassOf<APawn> URpgSummonAbility::GetRandomMinionClass()
 	const int32 Selection = FMath::RandRange(0, MinionClasses.Num() - 1);
 	return MinionClasses[Selection];
 }
+
+int32 URpgSummonAbility::GetMaxMinionCount() const
+{
+	return NumMinions;
+}
+

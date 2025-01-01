@@ -28,7 +28,7 @@ void URpgProjectileSpell::PreActivate(const FGameplayAbilitySpecHandle Handle,
 
 void URpgProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation, const FGameplayTag& SocketTag)
 {
-	if (!GetAvatarActorFromActorInfo()->HasAuthority()) return;
+	if (!GetAvatarActorFromActorInfo()->HasAuthority()) { return; }
 	
 	const FVector SocketLocation = ICombatInterface::Execute_GetCombatSocketLocation(
 		GetAvatarActorFromActorInfo(),
@@ -47,7 +47,9 @@ void URpgProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocatio
 		GetOwningActorFromActorInfo(),
 		Cast<APawn>(GetOwningActorFromActorInfo()),
 		ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-
+	
+	UE_LOG(LogTemp, Display, TEXT("Projectile created: [%s]"), *Projectile->GetName());
+	
 	const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
 	FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
 	EffectContextHandle.SetAbility(this);
@@ -78,5 +80,60 @@ void URpgProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocatio
 	Projectile->DamageEffectSpecHandle = SpecHandle;
 	
 	Projectile->FinishSpawning(SpawnTransform);
+	UE_LOG(LogTemp, Display, TEXT("Projectile Spawned: [%s]"), *Projectile->GetName());
+	
+}
+
+void URpgProjectileSpell::SpawnProjectileAtLocation(const FVector& ProjectileTargetLocation, const FVector SpawnLocation)
+{
+	if (!GetAvatarActorFromActorInfo()->HasAuthority()) { return; }
+	
+	FRotator Rotation = (ProjectileTargetLocation - SpawnLocation).Rotation();
+	Rotation.Pitch = 0.f;
+	
+	FTransform SpawnTransform;
+	SpawnTransform.SetLocation(SpawnLocation);
+	SpawnTransform.SetRotation(Rotation.Quaternion());
+
+	ARpgProjectile* Projectile = GetWorld()->SpawnActorDeferred<ARpgProjectile>(
+		ProjectileClass,
+		SpawnTransform,
+		GetOwningActorFromActorInfo(),
+		Cast<APawn>(GetOwningActorFromActorInfo()),
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	
+	UE_LOG(LogTemp, Display, TEXT("Projectile created: [%s]"), *Projectile->GetName());
+	
+	const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo());
+	FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
+	EffectContextHandle.SetAbility(this);
+	EffectContextHandle.AddSourceObject(Projectile);
+	TArray<TWeakObjectPtr<AActor>> Actors;
+	Actors.Add(Projectile);
+	EffectContextHandle.AddActors(Actors);
+	FHitResult HitResult;
+	HitResult.Location = ProjectileTargetLocation;
+	EffectContextHandle.AddHitResult(HitResult);
+	
+	
+	const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
+	const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
+	
+	for (TTuple<FGameplayTag, FScalableFloat> Pair : DamageMultipliers)
+	{
+		float ScaledMultiplier = Pair.Value.GetValueAtLevel(GetAbilityLevel());
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledMultiplier);
+	}
+	
+	for (auto& Pair : DamageTypes)
+	{
+		const float ScaledDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledDamage);
+	}
+	
+	Projectile->DamageEffectSpecHandle = SpecHandle;
+	
+	Projectile->FinishSpawning(SpawnTransform);
+	UE_LOG(LogTemp, Display, TEXT("Projectile Spawned: [%s]"), *Projectile->GetName());
 	
 }

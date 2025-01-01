@@ -5,6 +5,7 @@
 
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
 #include "AbilitySystem/RpgAttributeSet.h"
+#include "AbilitySystem/Data/AbilityInfo.h"
 
 void UOverlayWidgetController::BroadCastInitialValues()
 {
@@ -54,19 +55,48 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 			}
 		);
 
-	Cast<URpgAbilitySystemComponent>(AbilitySystemComponent)->EffectAssetTags.AddLambda(
-		[this](const FGameplayTagContainer& AssetTags)
+	if (URpgAbilitySystemComponent* RpgASC = Cast<URpgAbilitySystemComponent>(AbilitySystemComponent))
+	{
+		if (RpgASC->bStartupAbilitiesGiven)
 		{
-			for (const FGameplayTag& Tag : AssetTags)
-			{
-				if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Message"))))
-				{
-					const FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageWidgetDataTable, Tag);
-					MessageWidgetRowDelegate.Broadcast(*Row);
-				}
-				
-			}
+			OnInitializeStartupAbilities(RpgASC);
 		}
-	);
+		else
+		{
+			RpgASC->AbilitiesGivenDelegate.AddUObject(this, &UOverlayWidgetController::OnInitializeStartupAbilities);
+		}
+		
+		RpgASC->EffectAssetTags.AddLambda(
+			[this](const FGameplayTagContainer& AssetTags)
+			{
+				for (const FGameplayTag& Tag : AssetTags)
+				{
+					if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Message"))))
+					{
+						const FUIWidgetRow* Row = GetDataTableRowByTag<FUIWidgetRow>(MessageWidgetDataTable, Tag);
+						MessageWidgetRowDelegate.Broadcast(*Row);
+					}
+					
+				}
+			}
+		);
+	}
+	
+}
+
+
+void UOverlayWidgetController::OnInitializeStartupAbilities(URpgAbilitySystemComponent* RpgASC) const
+{
+	if (!RpgASC->bStartupAbilitiesGiven) { return; }
+
+	FForEachAbility BroadcastDelegate;
+	BroadcastDelegate.BindLambda([this, RpgASC](const FGameplayAbilitySpec& AbilitySpec)
+	{
+		FRpgAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(RpgASC->GetAbilityTagFromSpec(AbilitySpec));
+		Info.InputTag = RpgASC->GetInputTagFromSpec(AbilitySpec);
+		AbilityInfoDelegate.Broadcast(Info);
+	});
+
+	RpgASC->ForEachAbility(BroadcastDelegate);
 }
 

@@ -39,14 +39,14 @@ void ARpgProjectile::BeginPlay()
 	Super::BeginPlay();
 	SetLifeSpan(LifeSpan);
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &ARpgProjectile::OnSphereOverlap);
-	TravelSoundComponent = UGameplayStatics::SpawnSoundAttached(TravelSound, GetRootComponent());
+	//TravelSoundComponent = UGameplayStatics::SpawnSoundAttached(TravelSound, GetRootComponent());
 }
 
 void ARpgProjectile::Destroyed()
 {
 	if (!bHit)
 	{
-		if (TravelSoundComponent) TravelSoundComponent->Stop();
+		//if (TravelSoundComponent && TravelSoundComponent->IsPlaying()) TravelSoundComponent->Stop();
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
 		bHit = true;
@@ -63,7 +63,7 @@ void ARpgProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, A
 	
 	if (!bHit)
 	{
-		if (TravelSoundComponent) TravelSoundComponent->Stop();
+		//if (TravelSoundComponent && TravelSoundComponent->IsPlaying()) TravelSoundComponent->Stop();
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
 		bHit = true;

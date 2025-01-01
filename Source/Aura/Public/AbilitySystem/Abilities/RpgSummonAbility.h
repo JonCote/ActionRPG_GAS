@@ -22,6 +22,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Ability|Summoning")
 	TSubclassOf<APawn> GetRandomMinionClass();
 
+	UFUNCTION(BlueprintPure, Category = "Ability|Summoning")
+	int32 GetMaxMinionCount() const;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Ability|Summoning")
 	int32 NumMinions = 5;
 

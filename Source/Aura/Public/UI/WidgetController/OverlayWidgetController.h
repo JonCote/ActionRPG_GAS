@@ -8,6 +8,8 @@
 #include "OverlayWidgetController.generated.h"
 
 
+struct FRpgAbilityInfo;
+
 USTRUCT(BlueprintType)
 struct FUIWidgetRow : public FTableRowBase
 {
@@ -28,8 +30,12 @@ struct FUIWidgetRow : public FTableRowBase
 
 
 class URpgUserWidget;
+class UAbilityInfo;
+class URpgAbilitySystemComponent;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSignature, float, NewValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSignature, FUIWidgetRow, Row);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature, const FRpgAbilityInfo&, Info);
 
 
 UCLASS(BlueprintType, Blueprintable)
@@ -56,15 +62,23 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="GAS|Messages")
 	FMessageWidgetRowSignature MessageWidgetRowDelegate;
 
+	UPROPERTY(BlueprintAssignable, Category="GAS|Messages")
+	FAbilityInfoSignature AbilityInfoDelegate;
+	
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Widget Data")
 	TObjectPtr<UDataTable> MessageWidgetDataTable;
-	
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Widget Data")
+	TObjectPtr<UAbilityInfo> AbilityInfo;
 
 	template<typename T>
-	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag Tag);
+	static T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag Tag);
+
+	void OnInitializeStartupAbilities(URpgAbilitySystemComponent* RpgASC) const;
 };
+
 
 template <typename T>
 T* UOverlayWidgetController::GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag Tag)

@@ -2,6 +2,7 @@
 
 
 #include "AbilitySystem/Data/AttributeInfo.h"
+#include "Aura/RpgLogChannels.h"
 
 FRpgAttributeInfo UAttributeInfo::FindAttributeInfoForTag(const FGameplayTag& AttributeTag, bool bLogNotFound) const
 {
@@ -15,7 +16,7 @@ FRpgAttributeInfo UAttributeInfo::FindAttributeInfoForTag(const FGameplayTag& At
 
 	if (bLogNotFound)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Attribute not found for given AttributeTag [%s] on AttributeInfo [%s]"),
+		UE_LOG(LogRpg, Error, TEXT("Attribute not found for given AttributeTag [%s] on AttributeInfo [%s]"),
 			*AttributeTag.ToString(), *GetNameSafe(this));
 	}
 
