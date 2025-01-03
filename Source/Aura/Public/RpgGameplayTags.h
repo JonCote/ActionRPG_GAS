@@ -35,6 +35,9 @@ public:
 	FGameplayTag Attributes_Secondary_CriticalHitRate;
 	FGameplayTag Attributes_Secondary_CriticalHitDamage;
 
+	// Meta Attributes
+	FGameplayTag Attributes_Meta_IncomingXP;
+	
 	// Input keys
 	FGameplayTag InputTag_LMB;
 	FGameplayTag InputTag_RMB;

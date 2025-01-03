@@ -63,12 +63,12 @@ void ARpgEnemy::UnHighlightActor()
 	Weapon->SetRenderCustomDepth(false);
 }
 
-int32 ARpgEnemy::GetCharacterLevel()
+int32 ARpgEnemy::GetCharacterLevel_Implementation()
 {
 	return Level;
 }
 
-void ARpgEnemy::Die()
+void ARpgEnemy::Die_Implementation()
 {
 	SetLifeSpan(LifeSpan);
 	if (RpgAIController)
@@ -76,7 +76,7 @@ void ARpgEnemy::Die()
 		RpgAIController->GetBlackboardComponent()->SetValueAsBool(FName("Dead"), true);	
 	}
 	
-	Super::Die();
+	Super::Die_Implementation();
 }
 
 void ARpgEnemy::SetCombatTarget_Implementation(AActor* InCombatTarget)

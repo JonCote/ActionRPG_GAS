@@ -3,9 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NiagaraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Character/RpgCharacterBase.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Interaction/PlayerInterface.h"
 #include "RpgCharacter.generated.h"
 
 
@@ -13,7 +15,7 @@ class ARpgPlayerController;
 class ARpgPlayerState;
 
 UCLASS()
-class AURA_API ARpgCharacter : public ARpgCharacterBase
+class AURA_API ARpgCharacter : public ARpgCharacterBase, public IPlayerInterface
 {
 	GENERATED_BODY()
 
@@ -29,10 +31,29 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	TObjectPtr<USpringArmComponent> CameraBoom;
 
-	//~ Begin Combat Interface
-	virtual int32 GetCharacterLevel() override;
-	//~ End Combat Interface
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UNiagaraComponent> LevelUpNiagaraComponent;
 	
+	//~ Begin Player Interface
+	virtual void AddToXP_Implementation(const int32 InXP) override;
+	virtual void AddToPlayerLevel_Implementation(const int32 InLevels) override;
+	virtual void AddToAttributePoints_Implementation(const int32 InAttributePoints) override;
+	virtual void AddToSpellPoints_Implementation(const int32 InSpellPoints) override;
+	
+	virtual int32 GetXP_Implementation() const override;
+	virtual int32 GetAttributePointsReward_Implementation(const int32 Level) const override;
+	virtual int32 GetSpellPointsReward_Implementation(const int32 Level) const override;
+	virtual int32 GetAttributePoints_Implementation() const override;
+	virtual int32 GetSpellPoints_Implementation() const override;
+	
+	virtual void LevelUp_Implementation() override;
+	virtual int32 FindLevelForXP_Implementation(const int32 InXP) const override;
+	//~ End Player Interface
+	
+	//~ Begin Combat Interface
+	virtual int32 GetCharacterLevel_Implementation() override;
+	//~ End Combat Interface
+
 protected:
 
 	UPROPERTY()
@@ -44,4 +65,7 @@ protected:
 private:
 	virtual void InitAbilityActorInfo() override;
 	void InitPlayerHUD();
+
+	UFUNCTION(NetMulticast, reliable)
+	void MulticastLevelUpParticles() const;
 };

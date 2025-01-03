@@ -59,11 +59,17 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="GAS|Attributes")
 	FOnAttributeChangedSignature OnMaxManaChanged;
 
+	UPROPERTY(BlueprintAssignable, Category="GAS|XP")
+	FOnAttributeChangedSignature OnXPPercentChangedDelegate;
+
 	UPROPERTY(BlueprintAssignable, Category="GAS|Messages")
 	FMessageWidgetRowSignature MessageWidgetRowDelegate;
 
 	UPROPERTY(BlueprintAssignable, Category="GAS|Messages")
 	FAbilityInfoSignature AbilityInfoDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category="GAS|Level")
+	FOnPlayerStatChangedSignature OnPlayerLevelChangedDelegate;
 	
 protected:
 
@@ -77,6 +83,8 @@ protected:
 	static T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag Tag);
 
 	void OnInitializeStartupAbilities(URpgAbilitySystemComponent* RpgASC) const;
+
+	void OnXPChanged(const int32 NewXP) const;
 };
 
 

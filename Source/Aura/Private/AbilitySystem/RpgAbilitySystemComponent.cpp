@@ -3,8 +3,10 @@
 
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/Abilities/RpgGameplayAbility.h"
 #include "Aura/RpgLogChannels.h"
+#include "Interaction/PlayerInterface.h"
 
 
 void URpgAbilitySystemComponent::AbilityActorInfoSet()
@@ -25,6 +27,16 @@ void URpgAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<
 	}
 	bStartupAbilitiesGiven = true;
 	AbilitiesGivenDelegate.Broadcast(this);
+}
+
+void URpgAbilitySystemComponent::AddCharacterPassiveAbilities(
+	const TArray<TSubclassOf<UGameplayAbility>>& PassiveAbilities)
+{
+	for (const TSubclassOf<UGameplayAbility> AbilityClass : PassiveAbilities)
+	{
+		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
+		GiveAbilityAndActivateOnce(AbilitySpec);
+	}
 }
 
 void URpgAbilitySystemComponent::AbilityInputTagHeld(const FGameplayTag& InputTag)
@@ -94,6 +106,26 @@ FGameplayTag URpgAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbil
 		}
 	}
 	return FGameplayTag();
+}
+
+void URpgAbilitySystemComponent::UpgradeAttribute(const FGameplayTag& AttributeTag)
+{
+	if (!GetAvatarActor()->Implements<UPlayerInterface>()) { return; }
+	if (IPlayerInterface::Execute_GetAttributePoints(GetAvatarActor()) <= 0) { return; }
+	ServerUpgradeAttribute(AttributeTag);
+	
+}
+
+void URpgAbilitySystemComponent::ServerUpgradeAttribute_Implementation(const FGameplayTag& AttributeTag)
+{
+	if (!GetAvatarActor()->Implements<UPlayerInterface>()) { return; }
+	
+	FGameplayEventData Payload;
+	Payload.EventTag = AttributeTag;
+	Payload.EventMagnitude = 1.f;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetAvatarActor(), AttributeTag, Payload);
+	IPlayerInterface::Execute_AddToAttributePoints(GetAvatarActor(), -1);
 }
 
 void URpgAbilitySystemComponent::OnRep_ActivateAbilities()

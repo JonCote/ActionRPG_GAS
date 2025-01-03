@@ -11,21 +11,6 @@ ARpgPlayerState::ARpgPlayerState()
 {
 	AbilitySystemComponent = CreateDefaultSubobject<URpgAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
-	/** EGameplayEffectReplicationMode 
-	 *		Full:
-	 *			Use Case: Single Player
-	 *			Description: Gameplay Effects are replicated to all clients
-	 *
-	 *		Mixed:
-	 *			Use Case: Multiplayer, Player-Controlled
-	 *			Description: GameplayEffects are replicated to the owning client only
-	 *						 Gameplay Cues and Gameplay Tags replicated to all clients
-	 *
-	 *		Minimal:
-	 *			Use Case: Multiplayer, AI-Controlled
-	 *			Description: Gameplay Effects are not replicated
-	 *						 Gameplay Cues and Gameplay Tags replicated to all clients
-	 */
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 	
 	AttributeSet = CreateDefaultSubobject<URpgAttributeSet>("AttributeSet");
@@ -38,6 +23,9 @@ void ARpgPlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ARpgPlayerState, Level);
+	DOREPLIFETIME(ARpgPlayerState, XP);
+	DOREPLIFETIME(ARpgPlayerState, AttributePoints);
+	DOREPLIFETIME(ARpgPlayerState, SpellPoints);
 }
 
 UAbilitySystemComponent* ARpgPlayerState::GetAbilitySystemComponent() const
@@ -45,7 +33,59 @@ UAbilitySystemComponent* ARpgPlayerState::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
+void ARpgPlayerState::AddToLevel(const int32 InLevel)
+{
+	Level += InLevel;
+	OnLevelChangedDelegate.Broadcast(Level);
+}
+
+void ARpgPlayerState::AddToXP(const int32 InXP)
+{
+	XP += InXP;
+	OnXPChangedDelegate.Broadcast(XP);
+}
+
+void ARpgPlayerState::AddToAttributePoints(const int32 InAttributePoints)
+{
+	AttributePoints += InAttributePoints;
+	OnAttributePointsChangedDelegate.Broadcast(AttributePoints);
+}
+
+void ARpgPlayerState::AddToSpellPoints(const int32 InSpellPoints)
+{
+	SpellPoints += InSpellPoints;
+	OnSpellPointsChangedDelegate.Broadcast(SpellPoints);
+}
+
+void ARpgPlayerState::SetLevel(const int32 InLevel)
+{
+	Level = InLevel;
+	OnLevelChangedDelegate.Broadcast(Level);
+}
+
+void ARpgPlayerState::SetXP(const int32 InXP)
+{
+	XP = InXP;
+	OnXPChangedDelegate.Broadcast(XP);
+}
+
+
 void ARpgPlayerState::OnRep_Level(int32 OldLevel)
 {
-	
+	OnLevelChangedDelegate.Broadcast(Level);
+}
+
+void ARpgPlayerState::OnRep_XP(int32 OldXP)
+{
+	OnXPChangedDelegate.Broadcast(XP);
+}
+
+void ARpgPlayerState::OnRep_AttributePoints(int32 OldAttributePoints)
+{
+	OnAttributePointsChangedDelegate.Broadcast(AttributePoints);
+}
+
+void ARpgPlayerState::OnRep_SpellPoints(int32 OldSpellPoints)
+{
+	OnSpellPointsChangedDelegate.Broadcast(SpellPoints);
 }

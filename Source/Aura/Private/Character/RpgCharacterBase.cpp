@@ -30,7 +30,7 @@ UAnimMontage* ARpgCharacterBase::GetHitReactMontage_Implementation()
 	return HitReactMontage;
 }
 
-void ARpgCharacterBase::Die()
+void ARpgCharacterBase::Die_Implementation()
 {
 	Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
 	MulticastHandleDeath();
@@ -123,6 +123,11 @@ void ARpgCharacterBase::SetMinionCount_Implementation(const int32 Value)
 	MinionCount = Value;
 }
 
+ECharacterClass ARpgCharacterBase::GetCharacterClass_Implementation()
+{
+	return CharacterClass;
+}
+
 void ARpgCharacterBase::InitAbilityActorInfo()
 {
 }
@@ -150,7 +155,7 @@ void ARpgCharacterBase::AddCharacterAbilities()
 	if (!HasAuthority()) return;
 
 	RpgASC->AddCharacterAbilities(DefaultAbilities);
-
+	RpgASC->AddCharacterPassiveAbilities(StartupPassiveAbilities);
 	
 }
 

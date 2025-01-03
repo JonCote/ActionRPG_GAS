@@ -68,7 +68,12 @@ void FRpgGameplayTags::InitNativeGameplayTags()
 													FName("Attributes.Secondary.CriticalHitDamage"),
 													FString("")
 													);
-
+	
+	// Meta Attributes
+	GameplayTags.Attributes_Meta_IncomingXP = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Attributes.Meta.IncomingXP"),
+													FString("Incoming XP Meta Attribute Tag")
+													);
 	
 	// Input keys
 	GameplayTags.InputTag_LMB = UGameplayTagsManager::Get().AddNativeGameplayTag(

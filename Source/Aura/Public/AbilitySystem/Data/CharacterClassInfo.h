@@ -3,11 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ScalableFloat.h"
 #include "Engine/DataAsset.h"
 #include "CharacterClassInfo.generated.h"
 
+
 class UGameplayEffect;
 class UGameplayAbility;
+
+/* TODO: Change this to be Enemy specific instead of by Enemy Class type.
+ * This change will allow for more control of each enemies abilities, XP rewards, stats, etc...
+**/
 
 UENUM(BlueprintType)
 enum class ECharacterClass : uint8
@@ -27,6 +33,9 @@ struct FCharacterClassDefaultInfo
 
 	UPROPERTY(EditDefaultsOnly, Category="Class Defaults")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
+
+	UPROPERTY(EditDefaultsOnly, Category="Class Defaults")
+	FScalableFloat XPReward = FScalableFloat();
 };
 
 /**
