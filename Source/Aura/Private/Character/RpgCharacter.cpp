@@ -71,6 +71,11 @@ void ARpgCharacter::AddToPlayerLevel_Implementation(const int32 InLevels)
 {
 	check(RpgPlayerState);
 	RpgPlayerState->AddToLevel(InLevels);
+
+	if (URpgAbilitySystemComponent* RpgASC = Cast<URpgAbilitySystemComponent>(GetAbilitySystemComponent()))
+	{
+		RpgASC->UpdateAbilityStatuses(RpgPlayerState->GetPlayerLevel());
+	}
 }
 
 void ARpgCharacter::AddToAttributePoints_Implementation(const int32 InAttributePoints)

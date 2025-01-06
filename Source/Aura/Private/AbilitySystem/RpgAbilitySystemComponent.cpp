@@ -4,7 +4,10 @@
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "RpgGameplayTags.h"
+#include "AbilitySystem/RpgAbilitySystemLibrary.h"
 #include "AbilitySystem/Abilities/RpgGameplayAbility.h"
+#include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/RpgLogChannels.h"
 #include "Interaction/PlayerInterface.h"
 
@@ -22,11 +25,12 @@ void URpgAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<
 		if (const URpgGameplayAbility* RpgAbility = Cast<URpgGameplayAbility>(AbilitySpec.Ability))
 		{
 			AbilitySpec.DynamicAbilityTags.AddTag(RpgAbility->StartupInputTag);
+			AbilitySpec.DynamicAbilityTags.AddTag(FRpgGameplayTags::Get().Abilities_Status_Equipped);
 			GiveAbility(AbilitySpec);
 		}
 	}
 	bStartupAbilitiesGiven = true;
-	AbilitiesGivenDelegate.Broadcast(this);
+	AbilitiesGivenDelegate.Broadcast();
 }
 
 void URpgAbilitySystemComponent::AddCharacterPassiveAbilities(
@@ -108,6 +112,52 @@ FGameplayTag URpgAbilitySystemComponent::GetInputTagFromSpec(const FGameplayAbil
 	return FGameplayTag();
 }
 
+FGameplayTag URpgAbilitySystemComponent::GetStatusTagFromSpec(const FGameplayAbilitySpec& AbilitySpec)
+{
+	for (FGameplayTag StatusTag : AbilitySpec.DynamicAbilityTags)
+	{
+		if (StatusTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Abilities.Status"))))
+		{
+			return StatusTag;
+		}
+	}
+	return FGameplayTag();
+}
+
+FGameplayTag URpgAbilitySystemComponent::GetStatusFromAbilityTag(const FGameplayTag& AbilityTag)
+{
+	if (const FGameplayAbilitySpec* Spec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		return GetStatusTagFromSpec(*Spec);
+	}
+	return FGameplayTag();
+}
+
+FGameplayTag URpgAbilitySystemComponent::GetInputTagFromAbilityTag(const FGameplayTag& AbilityTag)
+{
+	if (const FGameplayAbilitySpec* Spec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		return GetInputTagFromSpec(*Spec);
+	}
+	return FGameplayTag();
+}
+
+FGameplayAbilitySpec* URpgAbilitySystemComponent::GetSpecFromAbilityTag(const FGameplayTag& AbilityTag)
+{
+	FScopedAbilityListLock ActiveScopeLock(*this);
+	for (FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
+	{
+		for (FGameplayTag Tag : AbilitySpec.Ability.Get()->AbilityTags)
+		{
+			if (Tag.MatchesTag(AbilityTag))
+			{
+				return &AbilitySpec;
+			}
+		}
+	}
+	return nullptr;
+}
+
 void URpgAbilitySystemComponent::UpgradeAttribute(const FGameplayTag& AttributeTag)
 {
 	if (!GetAvatarActor()->Implements<UPlayerInterface>()) { return; }
@@ -128,6 +178,164 @@ void URpgAbilitySystemComponent::ServerUpgradeAttribute_Implementation(const FGa
 	IPlayerInterface::Execute_AddToAttributePoints(GetAvatarActor(), -1);
 }
 
+void URpgAbilitySystemComponent::ServerSpendSpellPoint_Implementation(const FGameplayTag& AbilityTag)
+{
+	if (FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		if (GetAvatarActor()->Implements<UPlayerInterface>())
+		{
+			IPlayerInterface::Execute_AddToSpellPoints(GetAvatarActor(), -1);
+		}
+		
+		const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
+		FGameplayTag StatusTag = GetStatusTagFromSpec(*AbilitySpec);
+		if (StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Eligible))
+		{
+			StatusTag = GameplayTags.Abilities_Status_Unlocked;
+			AbilitySpec->DynamicAbilityTags.RemoveTag(GameplayTags.Abilities_Status_Eligible);
+			AbilitySpec->DynamicAbilityTags.AddTag(StatusTag);
+			AbilitySpec->Level = 1;
+			
+		}
+		else if (StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Equipped) || StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
+		{
+			AbilitySpec->Level += 1;
+		}
+		
+		UpdateAbilityStatus(*AbilitySpec, AbilityTag, StatusTag);
+	}
+}
+
+void URpgAbilitySystemComponent::ServerEquipAbility_Implementation(const FGameplayTag& AbilityTag, const FGameplayTag& SlotTag)
+{
+	if (FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
+		const FGameplayTag& PrevSlotTag = GetInputTagFromSpec(*AbilitySpec);
+		const FGameplayTag& StatusTag = GetStatusTagFromSpec(*AbilitySpec);
+
+		if (StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Equipped) || StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
+		{
+			// Remove This InputTag (slot) from any Ability that has it
+			ClearAbilitiesOfSlot(SlotTag);
+
+			// Clear this Ability's slot, just in case, it's a different slot
+			ClearAbilitySlot(AbilitySpec);
+
+			// Now, assign Slot to this Ability
+			AbilitySpec->DynamicAbilityTags.AddTag(SlotTag);
+			if (StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
+			{
+				AbilitySpec->DynamicAbilityTags.RemoveTag(GameplayTags.Abilities_Status_Unlocked);
+				AbilitySpec->DynamicAbilityTags.AddTag(GameplayTags.Abilities_Status_Equipped);
+			}
+			MarkAbilitySpecDirty(*AbilitySpec);
+			ClientEquipAbility(AbilityTag, GameplayTags.Abilities_Status_Equipped, SlotTag, PrevSlotTag);
+		}
+	}
+}
+
+void URpgAbilitySystemComponent::ClientEquipAbility(const FGameplayTag& AbilityTag,
+	const FGameplayTag& StatusTag, const FGameplayTag& SlotTag, const FGameplayTag& PrevSlotTag)
+{
+	AbilityEquippedDelegate.Broadcast(AbilityTag, StatusTag, SlotTag, PrevSlotTag);
+}
+
+/*
+ * Update all Ability Statuses
+**/
+void URpgAbilitySystemComponent::UpdateAbilityStatuses(const int32 PlayerLevel)
+{
+	UAbilityInfo* AbilityInfo = URpgAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
+	check(AbilityInfo);
+	
+	for (const FRpgAbilityInfo& Info : AbilityInfo->AbilityInformation)
+	{
+		// Give Ability when player achieves the abilities required level
+		if (Info.AbilityTag.IsValid() &&
+			PlayerLevel >= Info.LevelRequirement &&
+			GetSpecFromAbilityTag(Info.AbilityTag) == nullptr)
+		{
+			FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(Info.AbilityClass, 1);
+			AbilitySpec.DynamicAbilityTags.AddTag(FRpgGameplayTags::Get().Abilities_Status_Eligible);
+			GiveAbility(AbilitySpec);
+			UpdateAbilityStatus(AbilitySpec, Info.AbilityTag, FRpgGameplayTags::Get().Abilities_Status_Eligible);
+			//MarkAbilitySpecDirty(AbilitySpec);	// Force Replication of the given Ability
+			//ClientUpdateAbilityStatus(Info.AbilityTag, FRpgGameplayTags::Get().Abilities_Status_Eligible, 1);
+		}
+	}
+}
+
+/*
+ * Update a specific Ability Status
+**/
+void URpgAbilitySystemComponent::UpdateAbilityStatus(FGameplayAbilitySpec& AbilitySpec, const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag)
+{
+	ClientUpdateAbilityStatus(AbilityTag, StatusTag, AbilitySpec.Level);
+	MarkAbilitySpecDirty(AbilitySpec);
+}
+
+bool URpgAbilitySystemComponent::GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FString& OutDescription,
+	FString& OutNextLevelDescription)
+{
+	if (AbilityTag.MatchesTagExact(FRpgGameplayTags::Get().Abilities_None))
+	{
+		OutDescription = FString();
+		OutNextLevelDescription = FString();
+		return false;
+	}
+
+	const UAbilityInfo* AbilityInfo = URpgAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
+	check(AbilityInfo);
+	const FString AbilityName = AbilityInfo->FindAbilityInfoForTag(AbilityTag).AbilityName;
+	
+	if (const FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		if (URpgGameplayAbility* RpgAbility = Cast<URpgGameplayAbility>(AbilitySpec->Ability))
+		{
+			OutDescription = RpgAbility->GetDescription(AbilityName, AbilitySpec->Level);
+			OutNextLevelDescription = RpgAbility->GetDescription(AbilityName,AbilitySpec->Level + 1);
+			return true;
+		}
+	}
+	
+	OutDescription = URpgGameplayAbility::GetLockedDescription(AbilityName, AbilityInfo->FindAbilityInfoForTag(AbilityTag).LevelRequirement);
+	OutNextLevelDescription = FString();
+
+	return false;
+}
+
+void URpgAbilitySystemComponent::ClearAbilitySlot(FGameplayAbilitySpec* Spec)
+{
+	const FGameplayTag Slot = GetInputTagFromSpec(*Spec);
+	Spec->DynamicAbilityTags.RemoveTag(Slot);
+	MarkAbilitySpecDirty(*Spec);
+}
+
+void URpgAbilitySystemComponent::ClearAbilitiesOfSlot(const FGameplayTag& SlotTag)
+{
+	FScopedAbilityListLock ActiveScopeLock(*this);
+	for (FGameplayAbilitySpec& Spec: GetActivatableAbilities())
+	{
+		if (AbilityHasSlot(&Spec, SlotTag))
+		{
+			ClearAbilitySlot(&Spec);
+		}
+	}
+}
+
+bool URpgAbilitySystemComponent::AbilityHasSlot(FGameplayAbilitySpec* Spec, const FGameplayTag& SlotTag)
+{
+	for (FGameplayTag Tag : Spec->DynamicAbilityTags)
+	{
+		if (Tag.MatchesTagExact(SlotTag))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void URpgAbilitySystemComponent::OnRep_ActivateAbilities()
 {
 	Super::OnRep_ActivateAbilities();
@@ -135,11 +343,15 @@ void URpgAbilitySystemComponent::OnRep_ActivateAbilities()
 	if (!bStartupAbilitiesGiven)
 	{
 		bStartupAbilitiesGiven = true;
-		AbilitiesGivenDelegate.Broadcast(this);
+		AbilitiesGivenDelegate.Broadcast();
 	}
-	
 }
 
+void URpgAbilitySystemComponent::ClientUpdateAbilityStatus_Implementation(const FGameplayTag& AbilityTag,
+	const FGameplayTag& StatusTag, const int32 AbilityLevel)
+{
+	AbilityStatusChangedDelegate.Broadcast(AbilityTag, StatusTag, AbilityLevel);
+}
 
 void URpgAbilitySystemComponent::ClientEffectApplied_Implementation(UAbilitySystemComponent* ASC, const FGameplayEffectSpec& EffectSpec,
                                                                     FActiveGameplayEffectHandle ActiveEffectHandle)

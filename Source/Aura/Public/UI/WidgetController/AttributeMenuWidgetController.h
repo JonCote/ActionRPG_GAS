@@ -30,9 +30,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="GAS|AttributePoints")
 	FOnPlayerStatChangedSignature OnPlayerAttributePointsChangedDelegate;
 
-	UPROPERTY(BlueprintAssignable, Category="GAS|SpellPoints")
-	FOnPlayerStatChangedSignature OnPlayerSpellPointsChangedDelegate;
-
 	UFUNCTION(BlueprintCallable, Category="GAS|Attributes")
 	void UpgradeAttribute(const FGameplayTag& AttributeTag);
 

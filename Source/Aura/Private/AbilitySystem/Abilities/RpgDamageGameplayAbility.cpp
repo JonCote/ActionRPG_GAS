@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "RpgGameplayTags.h"
 
 void URpgDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 {
@@ -32,4 +33,16 @@ FTaggedMontage URpgDamageGameplayAbility::GetRandomTaggedMontageFromArray(const 
 	const int32 Selection = FMath::RandRange(0, TaggedMontages.Num() - 1);
 
 	return TaggedMontages[Selection];
+}
+
+float URpgDamageGameplayAbility::GetDamageByDamageType(const FGameplayTag& DamageType, const int32 InLevel) const
+{
+	checkf(DamageTypes.Contains(DamageType), TEXT("GameplayAbility [%s] does not contain DamageType [%s]"), *GetNameSafe(this), *DamageType.ToString());
+	return DamageTypes[DamageType].GetValueAtLevel(InLevel);
+}
+
+float URpgDamageGameplayAbility::GetDamageMultiplierByTag(const FGameplayTag& MultiplierTag, const int32 InLevel) const
+{
+	checkf(DamageMultipliers.Contains(MultiplierTag), TEXT("GameplayAbility [%s] does not contain MultiplierTag [%s]"), *GetNameSafe(this), *MultiplierTag.ToString());
+	return DamageMultipliers[MultiplierTag].GetValueAtLevel(InLevel);
 }

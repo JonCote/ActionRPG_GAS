@@ -6,10 +6,16 @@
 #include "AttributeSet.h"
 #include "RpgWidgetController.generated.h"
 
+class URpgAbilitySystemComponent;
+class UAbilityInfo;
+class URpgAttributeSet;
+class ARpgPlayerState;
+class ARpgPlayerController;
 class UAttributeSet;
 class UAbilitySystemComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerStatChangedSignature, int32, NewValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature, const FRpgAbilityInfo&, Info);
 
 USTRUCT(BlueprintType)
 struct FWidgetControllerParams
@@ -46,6 +52,9 @@ public:
 	virtual void BroadCastInitialValues();
 	
 	virtual void BindCallbacksToDependencies();
+
+	UPROPERTY(BlueprintAssignable, Category="GAS|Messages")
+	FAbilityInfoSignature AbilityInfoDelegate;
 	
 protected:
 	
@@ -61,4 +70,26 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category="WidgetController")
 	TObjectPtr<UAttributeSet> AttributeSet;
 
+	UPROPERTY(BlueprintReadOnly, Category="WidgetController")
+	TObjectPtr<ARpgPlayerController> RpgPlayerController;
+	
+	UPROPERTY(BlueprintReadOnly, Category="WidgetController")
+	TObjectPtr<ARpgPlayerState> RpgPlayerState;
+	
+	UPROPERTY(BlueprintReadOnly, Category="WidgetController")
+	TObjectPtr<URpgAbilitySystemComponent> RpgAbilitySystemComponent;
+	
+	UPROPERTY(BlueprintReadOnly, Category="WidgetController")
+	TObjectPtr<URpgAttributeSet> RpgAttributeSet;
+
+	ARpgPlayerController* GetRpgPlayerController();
+	ARpgPlayerState* GetRpgPlayerState();
+	URpgAbilitySystemComponent* GetRpgAbilitySystemComponent();
+	URpgAttributeSet* GetRpgAttributeSet();
+	
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Widget Data")
+	TObjectPtr<UAbilityInfo> AbilityInfo;
+	
+	void BroadcastAbilityInfo();
 };

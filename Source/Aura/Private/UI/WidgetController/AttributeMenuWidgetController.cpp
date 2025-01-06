@@ -10,22 +10,19 @@
 
 void UAttributeMenuWidgetController::BroadCastInitialValues()
 {
-	URpgAttributeSet* AS = Cast<URpgAttributeSet>(AttributeSet);
 	check(AttributeInfo);
 
-	for (auto& Pair : AS->TagsToAttributes)
+	for (auto& Pair : GetRpgAttributeSet()->TagsToAttributes)
 	{
 		BroadcastAttributeInfo(Pair.Key, Pair.Value());
 	}
-
-	ARpgPlayerState* RpgPlayerState = CastChecked<ARpgPlayerState>(PlayerState);
-	OnPlayerAttributePointsChangedDelegate.Broadcast(RpgPlayerState->GetAttributePoints());
+	
+	OnPlayerAttributePointsChangedDelegate.Broadcast(GetRpgPlayerState()->GetAttributePoints());
 }
 
 void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 {
-	URpgAttributeSet* AS = CastChecked<URpgAttributeSet>(AttributeSet);
-	for (auto& Pair : AS->TagsToAttributes)
+	for (auto& Pair : GetRpgAttributeSet()->TagsToAttributes)
 	{
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Pair.Value()).AddLambda(
 			[this, Pair](const FOnAttributeChangeData& Data)
@@ -35,25 +32,18 @@ void UAttributeMenuWidgetController::BindCallbacksToDependencies()
 		);
 	}
 
-	ARpgPlayerState* RpgPlayerState = CastChecked<ARpgPlayerState>(PlayerState);
-	RpgPlayerState->OnAttributePointsChangedDelegate.AddLambda(
+	
+	GetRpgPlayerState()->OnAttributePointsChangedDelegate.AddLambda(
 		[this](int32 NewValue)
 		{
 			OnPlayerAttributePointsChangedDelegate.Broadcast(NewValue);
-		}
-	);
-	RpgPlayerState->OnSpellPointsChangedDelegate.AddLambda(
-		[this](int32 NewValue)
-		{
-			OnPlayerSpellPointsChangedDelegate.Broadcast(NewValue);
 		}
 	);
 }
 
 void UAttributeMenuWidgetController::UpgradeAttribute(const FGameplayTag& AttributeTag)
 {
-	URpgAbilitySystemComponent* RpgASC = CastChecked<URpgAbilitySystemComponent>(AbilitySystemComponent);
-	RpgASC->UpgradeAttribute(AttributeTag);
+	GetRpgAbilitySystemComponent()->UpgradeAttribute(AttributeTag);
 }
 
 void UAttributeMenuWidgetController::BroadcastAttributeInfo(const FGameplayTag& AttributeTag,
