@@ -164,7 +164,8 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 		Damage += MultiplierValue * AttributeValue;
 	}
 
-	// Base Elemental Damage reduced by elemental resistances
+	// Base Elemental Damage added to Total Damage, and get TargetResistance value to damage type
+	float TargetResistance = 0.f;
 	for (const auto& Pair : FRpgGameplayTags::Get().DamageTypesToResistances)
 	{
 		const FGameplayTag& DamageTypeTag = Pair.Key;
@@ -173,17 +174,15 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 		checkf(RpgTargetStatics().TagsToCaptureDefs.Contains(ResistanceTag), TEXT("TagsToCaptureDefs doesn't contain Tag: [%s] in ExecCalc_Damage"), *ResistanceTag.ToString());
 		const FGameplayEffectAttributeCaptureDefinition CaptureDefinition = RpgTargetStatics().TagsToCaptureDefs[ResistanceTag];
 
-		float DamageTypeValue = Spec.GetSetByCallerMagnitude(DamageTypeTag, false);
+		// Add the base damage for spell to Damage Total
+		Damage += Spec.GetSetByCallerMagnitude(DamageTypeTag, false);
 		
 		float Resistance = 0.f;
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDefinition, EvalParams, Resistance);
-		Resistance = FMath::Clamp(Resistance, 0.f, 100.f);
-		
-		DamageTypeValue *= (100.f - Resistance) / 100.f;
-		Damage += DamageTypeValue;
+		TargetResistance = FMath::Clamp(Resistance, 0.f, 100.f);
 	}
 
-	// Determine if a Critical Hit was caused using Source's Critical Hit Rate
+	// Determine if a Critical Hit was caused using Source's Critical Hit Rate, and Get Source's CritDamage Multiplier value
 	float CritRate = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(SourceDamageStatics().CriticalHitRateDef, EvalParams, CritRate);
 	CritRate = FMath::Clamp(CritRate, 0.f, 100.f);
@@ -195,22 +194,28 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 	URpgAbilitySystemLibrary::SetIsCriticalHit(EffectContextHandle, bCrit);
 	
-	// Reduce the Damage based on targets Defense
+	// Calculate DamageReduction based on Targets Defense
 	float Defense = 0.f;
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(TargetDamageStatics().DefenseDef, EvalParams, Defense);
 	Defense = FMath::Max<float>(0.f, Defense);
 	const float DamageReduction = Defense * 0.1f;
 
+	/* Calculate Final Damage Applied to Target */
+	// Apply DamageReduction
+	Damage -= FMath::Max<float>(0.f, DamageReduction);
+
+	// Apply CritDamage Multiplier
 	if (bCrit)
 	{
-		Damage = FMath::Max<float>(0.f, ((Damage * CritDamage) - DamageReduction));
-	}
-	else
-	{
-		Damage = FMath::Max<float>(0.f, (Damage - DamageReduction));
+		Damage *= CritDamage;
 	}
 
-	Damage = FMath::CeilToFloat(Damage);
+	// Apply TargetResistance
+	Damage *= (100.f - TargetResistance) / 100.f;
+
+	// Round to nearest int value
+	Damage += 0.5f;
+	Damage = FMath::FloorToFloat(Damage);
 	
 	const FGameplayModifierEvaluatedData EvalData(URpgAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);
 	OutExecutionOutput.AddOutputModifier(EvalData);

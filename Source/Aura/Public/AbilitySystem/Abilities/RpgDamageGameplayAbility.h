@@ -7,11 +7,19 @@
 #include "Interaction/CombatInterface.h"
 #include "RpgDamageGameplayAbility.generated.h"
 
+USTRUCT(BlueprintType)
 struct FDamageInfo
 {
+	GENERATED_BODY()
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FGameplayTag DamageTypeTag = FGameplayTag();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FScalableFloat BaseDamage = 0.0f;
-	TMap<FGameplayTag, FScalableFloat> DamagesMultipliers = TMap<FGameplayTag, FScalableFloat>();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TMap<FGameplayTag, FScalableFloat> DamageMultipliers = TMap<FGameplayTag, FScalableFloat>();
 };
 
 /**
@@ -32,16 +40,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	TMap<FGameplayTag, FScalableFloat> DamageTypes;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	TMap<FGameplayTag, FScalableFloat> DamageMultipliers;
+	UPROPERTY(EditDefaultsOnly, Category = "DamageInfo")
+	FDamageInfo DamageInfo;
 	
 	UFUNCTION(BlueprintPure)
 	FTaggedMontage GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& TaggedMontages) const;
 
-	float GetDamageByDamageType(const FGameplayTag& DamageType, const int32 InLevel) const;
+	float GetBaseDamage(const int32 InLevel) const;
 	float GetDamageMultiplierByTag(const FGameplayTag& MultiplierTag, const int32 InLevel) const;
 	
 	

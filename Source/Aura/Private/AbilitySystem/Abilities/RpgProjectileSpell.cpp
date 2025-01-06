@@ -66,17 +66,14 @@ void URpgProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocatio
 	const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
 	const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
 	
-	for (TTuple<FGameplayTag, FScalableFloat> Pair : DamageMultipliers)
+	for (TTuple<FGameplayTag, FScalableFloat> Pair : DamageInfo.DamageMultipliers)
 	{
 		float ScaledMultiplier = Pair.Value.GetValueAtLevel(GetAbilityLevel());
 		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledMultiplier);
 	}
 	
-	for (auto& Pair : DamageTypes)
-	{
-		const float ScaledDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledDamage);
-	}
+	const float ScaledBaseDamage = DamageInfo.BaseDamage.GetValueAtLevel(GetAbilityLevel());
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageInfo.DamageTypeTag, ScaledBaseDamage);
 	
 	Projectile->DamageEffectSpecHandle = SpecHandle;
 	
@@ -120,17 +117,14 @@ void URpgProjectileSpell::SpawnProjectileAtLocation(const FVector& ProjectileTar
 	const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffectClass, GetAbilityLevel(), EffectContextHandle);
 	const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
 	
-	for (TTuple<FGameplayTag, FScalableFloat> Pair : DamageMultipliers)
+	for (TTuple<FGameplayTag, FScalableFloat> Pair : DamageInfo.DamageMultipliers)
 	{
 		float ScaledMultiplier = Pair.Value.GetValueAtLevel(GetAbilityLevel());
 		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledMultiplier);
 	}
 	
-	for (auto& Pair : DamageTypes)
-	{
-		const float ScaledDamage = Pair.Value.GetValueAtLevel(GetAbilityLevel());
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledDamage);
-	}
+	const float ScaledBaseDamage = DamageInfo.BaseDamage.GetValueAtLevel(GetAbilityLevel());
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageInfo.DamageTypeTag, ScaledBaseDamage);
 	
 	Projectile->DamageEffectSpecHandle = SpecHandle;
 	
