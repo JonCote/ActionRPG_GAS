@@ -10,15 +10,11 @@ FString URpgFireBolt::GetDescription(const FString& AbilityName, const int32 Lev
 {
 	const float ManaCost = FMath::Abs(GetManaCost(Level));
 	const float Cooldown = GetCooldown(Level);
-	float BaseDamage = 0.f;
-	for (auto& Pair : DamageTypes)
-	{
-		BaseDamage += GetDamageByDamageType(Pair.Key, Level);
-	}
+	const float BaseDamage = GetBaseDamage(Level);
 	
 	TMap<FString, float> Multipliers;
 	const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
-	for (TTuple<FGameplayTag, FScalableFloat> Pair : DamageMultipliers)
+	for (TTuple<FGameplayTag, FScalableFloat> Pair : DamageInfo.DamageMultipliers)
 	{
 		if (Pair.Key.MatchesTagExact(GameplayTags.DamageMultiplier_Source_AttackPower))
 		{
