@@ -7,6 +7,13 @@
 #include "Interaction/CombatInterface.h"
 #include "RpgDamageGameplayAbility.generated.h"
 
+struct FDamageInfo
+{
+	FGameplayTag DamageTypeTag = FGameplayTag();
+	FScalableFloat BaseDamage = 0.0f;
+	TMap<FGameplayTag, FScalableFloat> DamagesMultipliers = TMap<FGameplayTag, FScalableFloat>();
+};
+
 /**
  * 
  */

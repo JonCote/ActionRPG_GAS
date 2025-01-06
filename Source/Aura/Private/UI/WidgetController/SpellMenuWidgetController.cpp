@@ -51,6 +51,7 @@ void USpellMenuWidgetController::SpendPointsButtonPressed()
 	if (GetRpgAbilitySystemComponent())
 	{
 		GetRpgAbilitySystemComponent()->ServerSpendSpellPoint(SelectedAbility.AbilityTag);
+		GetRpgAbilitySystemComponent()->ServerGetDescriptionsByAbilityTag(SelectedAbility.AbilityTag);
 	}
 	
 }
