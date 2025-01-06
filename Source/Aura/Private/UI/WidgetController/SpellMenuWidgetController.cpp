@@ -34,6 +34,7 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 	);
 
 	GetRpgAbilitySystemComponent()->AbilityEquippedDelegate.AddUObject(this, &USpellMenuWidgetController::OnAbilityEquipped);
+	GetRpgAbilitySystemComponent()->AbilityDescriptionDelegate.AddUObject(this, &USpellMenuWidgetController::OnDescriptionAcquired);
 
 	GetRpgPlayerState()->OnSpellPointsChangedDelegate.AddLambda(
 		[this](int32 NewValue)
@@ -42,8 +43,7 @@ void USpellMenuWidgetController::BindCallbacksToDependencies()
 
 			CurrentSpellPoints = NewValue;
 			BroadcastSpellGlobeSelected();
-		}
-	);
+		});
 }
 
 void USpellMenuWidgetController::SpendPointsButtonPressed()
@@ -67,6 +67,8 @@ void USpellMenuWidgetController::SpellGlobeSelected(const FGameplayTag& AbilityT
 		SelectedAbility.AbilityTag = GameplayTags.Abilities_None;
 		SelectedAbility.StatusTag = GameplayTags.Abilities_Status_Locked;
 		SelectedAbility.InputTag = FGameplayTag();
+		SelectedAbility.DescriptionString = FString();
+		SelectedAbility.NextLevelDescriptionString = FString();
 	}
 	else
 	{
@@ -82,9 +84,13 @@ void USpellMenuWidgetController::SpellGlobeSelected(const FGameplayTag& AbilityT
 		else
 		{
 			AbilityStatus = GetRpgAbilitySystemComponent()->GetStatusTagFromSpec(*AbilitySpec);
+			
 		}
-		
 
+		
+		GetRpgAbilitySystemComponent()->ServerGetDescriptionsByAbilityTag(AbilityTag);
+		
+		
 		SelectedAbility.AbilityTag = AbilityTag;
 		SelectedAbility.StatusTag = AbilityStatus;
 	}
@@ -98,6 +104,8 @@ void USpellMenuWidgetController::CloseMenu()
 	SelectedAbility.AbilityTag = FRpgGameplayTags::Get().Abilities_None;
 	SelectedAbility.StatusTag = FRpgGameplayTags::Get().Abilities_Status_Locked;
 	SelectedAbility.InputTag = FGameplayTag();
+	SelectedAbility.DescriptionString = FString();
+	SelectedAbility.NextLevelDescriptionString = FString();
 	BroadcastSpellGlobeSelected();
 }
 
@@ -115,7 +123,7 @@ void USpellMenuWidgetController::SpellRowGlobePressed(const FGameplayTag& SlotTa
 	// Check selected ability against the slot's ability type. (don't equip an active spell in a passive slot and vice versa)
 	const FGameplayTag& SelectedAbilityTypeTag = AbilityInfo->FindAbilityInfoForTag(SelectedAbility.AbilityTag).AbilityTypeTag;
 	if (!SelectedAbilityTypeTag.MatchesTagExact(AbilityTypeTag)) { return; }
-
+	
 	GetRpgAbilitySystemComponent()->ServerEquipAbility(SelectedAbility.AbilityTag, SlotTag);
 		
 }
@@ -143,6 +151,14 @@ void USpellMenuWidgetController::OnAbilityEquipped(const FGameplayTag& AbilityTa
 	
 }
 
+void USpellMenuWidgetController::OnDescriptionAcquired(const FGameplayTag& AbilityTag, const FString& Description,
+	const FString& NextLevelDescription)
+{
+	SelectedAbility.DescriptionString = Description;
+	SelectedAbility.NextLevelDescriptionString = NextLevelDescription;
+	BroadcastSpellGlobeSelected();
+}
+
 bool USpellMenuWidgetController::GetIsWaitForEquipSelection() const
 {
 	return bWaitForEquipSelection;
@@ -154,10 +170,6 @@ void USpellMenuWidgetController::BroadcastSpellGlobeSelected()
 	bool bEnableEquip = false;
 	ShouldEnableButtons(SelectedAbility.StatusTag, CurrentSpellPoints, bEnableSpendPoints, bEnableEquip);
 	
-	FString Description = FString();
-	FString NextLevelDescription =  FString();
-	GetRpgAbilitySystemComponent()->GetDescriptionsByAbilityTag(SelectedAbility.AbilityTag, Description, NextLevelDescription);
-
 	if (bEnableEquip)
 	{
 		bWaitForEquipSelection = true;
@@ -172,8 +184,9 @@ void USpellMenuWidgetController::BroadcastSpellGlobeSelected()
 		StopWaitingForEquipSelectionDelegate.Broadcast(AbilityInfo->FindAbilityInfoForTag(SelectedAbility.AbilityTag).AbilityTypeTag);
 	}
 	
-	OnSpellGlobeSelectedDelegate.Broadcast(bEnableSpendPoints, bEnableEquip, Description, NextLevelDescription);
+	OnSpellGlobeSelectedDelegate.Broadcast(bEnableSpendPoints, bEnableEquip, SelectedAbility.DescriptionString, SelectedAbility.NextLevelDescriptionString);
 }
+
 
 void USpellMenuWidgetController::ShouldEnableButtons(const FGameplayTag& AbilityStatus, const int32 SpellPoints,
                                                      bool& bEnableSpendPointsButton, bool& bEnableEquipButton)
@@ -181,7 +194,7 @@ void USpellMenuWidgetController::ShouldEnableButtons(const FGameplayTag& Ability
 	const FRpgGameplayTags& GameplayTags = FRpgGameplayTags::Get();
 	bEnableSpendPointsButton = false;
 	bEnableEquipButton = false;
-
+	
 	if (AbilityStatus.MatchesTagExact(GameplayTags.Abilities_Status_Equipped))
 	{
 		bEnableEquipButton = true;

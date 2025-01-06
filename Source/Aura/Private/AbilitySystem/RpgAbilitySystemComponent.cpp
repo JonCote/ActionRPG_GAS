@@ -158,6 +158,43 @@ FGameplayAbilitySpec* URpgAbilitySystemComponent::GetSpecFromAbilityTag(const FG
 	return nullptr;
 }
 
+bool URpgAbilitySystemComponent::GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FString& OutDescription,
+	FString& OutNextLevelDescription)
+{
+	if (AbilityTag.MatchesTagExact(FRpgGameplayTags::Get().Abilities_None))
+	{
+		OutDescription = FString();
+		OutNextLevelDescription = FString();
+		return false;
+	}
+	
+
+	const UAbilityInfo* AbilityInfo = URpgAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
+	if (!AbilityInfo)
+	{
+		OutDescription = FString();
+		OutNextLevelDescription = FString();
+		return false;
+	}
+	
+	const FString AbilityName = AbilityInfo->FindAbilityInfoForTag(AbilityTag).AbilityName;
+	if (const FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
+	{
+		if (URpgGameplayAbility* RpgAbility = Cast<URpgGameplayAbility>(AbilitySpec->Ability))
+		{
+			OutDescription = RpgAbility->GetDescription(AbilityName, AbilitySpec->Level);
+			OutNextLevelDescription = RpgAbility->GetDescription(AbilityName,AbilitySpec->Level + 1);
+			return true;
+		}
+	}
+
+	
+	OutDescription = URpgGameplayAbility::GetLockedDescription(AbilityName, AbilityInfo->FindAbilityInfoForTag(AbilityTag).LevelRequirement);
+	OutNextLevelDescription = FString();
+
+	return false;
+}
+
 void URpgAbilitySystemComponent::UpgradeAttribute(const FGameplayTag& AttributeTag)
 {
 	if (!GetAvatarActor()->Implements<UPlayerInterface>()) { return; }
@@ -210,6 +247,24 @@ void URpgAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamepl
 {
 	if (FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
 	{
+		/* Check If the ability and Slot are valid for rebinding (ability and ability in slot are not on a cooldown) */
+		const FGameplayAbilitySpecHandle AbilitySpecHandle = AbilitySpec->Handle;
+		const FGameplayAbilityActorInfo* ActorInfo = AbilityActorInfo.Get();
+
+		// Check if Selected Ability is on Cooldown
+		bool bNotOnCooldown = GetSpecFromAbilityTag(AbilityTag)->Ability->CheckCooldown(AbilitySpecHandle, ActorInfo);
+		if (!bNotOnCooldown) { return; }
+
+		// Check if Selected Slot has a ability that is on Cooldown
+		for (FGameplayAbilitySpec& Spec : GetActivatableAbilities())
+		{
+			if (AbilityHasSlot(&Spec, SlotTag))
+			{
+				if (!Spec.Ability->CheckCooldown(Spec.Handle, ActorInfo)) { return; }
+			}
+		}
+
+		/* Equip the ability */
 		const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
 		const FGameplayTag& PrevSlotTag = GetInputTagFromSpec(*AbilitySpec);
 		const FGameplayTag& StatusTag = GetStatusTagFromSpec(*AbilitySpec);
@@ -235,11 +290,27 @@ void URpgAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamepl
 	}
 }
 
-void URpgAbilitySystemComponent::ClientEquipAbility(const FGameplayTag& AbilityTag,
+
+void URpgAbilitySystemComponent::ClientEquipAbility_Implementation(const FGameplayTag& AbilityTag,
 	const FGameplayTag& StatusTag, const FGameplayTag& SlotTag, const FGameplayTag& PrevSlotTag)
 {
 	AbilityEquippedDelegate.Broadcast(AbilityTag, StatusTag, SlotTag, PrevSlotTag);
 }
+
+void URpgAbilitySystemComponent::ServerGetDescriptionsByAbilityTag_Implementation(const FGameplayTag& AbilityTag)
+{
+	FString Description = FString();
+	FString NextLevelDescription = FString();
+	GetDescriptionsByAbilityTag(AbilityTag, Description, NextLevelDescription);
+	ClientGetDescriptionsByAbilityTag(AbilityTag, Description, NextLevelDescription);
+
+}
+
+void URpgAbilitySystemComponent::ClientGetDescriptionsByAbilityTag_Implementation(const FGameplayTag& AbilityTag, const FString& Description, const FString& NextLevelDescription)
+{
+	AbilityDescriptionDelegate.Broadcast(AbilityTag, Description, NextLevelDescription);
+}
+
 
 /*
  * Update all Ability Statuses
@@ -260,8 +331,6 @@ void URpgAbilitySystemComponent::UpdateAbilityStatuses(const int32 PlayerLevel)
 			AbilitySpec.DynamicAbilityTags.AddTag(FRpgGameplayTags::Get().Abilities_Status_Eligible);
 			GiveAbility(AbilitySpec);
 			UpdateAbilityStatus(AbilitySpec, Info.AbilityTag, FRpgGameplayTags::Get().Abilities_Status_Eligible);
-			//MarkAbilitySpecDirty(AbilitySpec);	// Force Replication of the given Ability
-			//ClientUpdateAbilityStatus(Info.AbilityTag, FRpgGameplayTags::Get().Abilities_Status_Eligible, 1);
 		}
 	}
 }
@@ -273,36 +342,6 @@ void URpgAbilitySystemComponent::UpdateAbilityStatus(FGameplayAbilitySpec& Abili
 {
 	ClientUpdateAbilityStatus(AbilityTag, StatusTag, AbilitySpec.Level);
 	MarkAbilitySpecDirty(AbilitySpec);
-}
-
-bool URpgAbilitySystemComponent::GetDescriptionsByAbilityTag(const FGameplayTag& AbilityTag, FString& OutDescription,
-	FString& OutNextLevelDescription)
-{
-	if (AbilityTag.MatchesTagExact(FRpgGameplayTags::Get().Abilities_None))
-	{
-		OutDescription = FString();
-		OutNextLevelDescription = FString();
-		return false;
-	}
-
-	const UAbilityInfo* AbilityInfo = URpgAbilitySystemLibrary::GetAbilityInfo(GetAvatarActor());
-	check(AbilityInfo);
-	const FString AbilityName = AbilityInfo->FindAbilityInfoForTag(AbilityTag).AbilityName;
-	
-	if (const FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
-	{
-		if (URpgGameplayAbility* RpgAbility = Cast<URpgGameplayAbility>(AbilitySpec->Ability))
-		{
-			OutDescription = RpgAbility->GetDescription(AbilityName, AbilitySpec->Level);
-			OutNextLevelDescription = RpgAbility->GetDescription(AbilityName,AbilitySpec->Level + 1);
-			return true;
-		}
-	}
-	
-	OutDescription = URpgGameplayAbility::GetLockedDescription(AbilityName, AbilityInfo->FindAbilityInfoForTag(AbilityTag).LevelRequirement);
-	OutNextLevelDescription = FString();
-
-	return false;
 }
 
 void URpgAbilitySystemComponent::ClearAbilitySlot(FGameplayAbilitySpec* Spec)

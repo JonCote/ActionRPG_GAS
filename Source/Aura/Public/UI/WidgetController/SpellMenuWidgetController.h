@@ -22,6 +22,8 @@ struct FSelectedAbility
 	FGameplayTag AbilityTag = FGameplayTag();
 	FGameplayTag StatusTag = FGameplayTag();
 	FGameplayTag InputTag = FGameplayTag();
+	FString DescriptionString = FString();
+	FString NextLevelDescriptionString = FString();
 };
 
 /**
@@ -65,7 +67,9 @@ public:
 	void SpellRowGlobePressed(const FGameplayTag& SlotTag, const FGameplayTag& AbilityTypeTag);
 
 	void OnAbilityEquipped(const FGameplayTag& AbilityTag, const FGameplayTag& StatusTag, const FGameplayTag& SlotTag, const FGameplayTag& PrevSlotTag);
+	void OnDescriptionAcquired(const FGameplayTag& AbilityTag, const FString& Description, const FString& NextLevelDescription);
 
+	
 	UFUNCTION(BlueprintCallable)
 	bool GetIsWaitForEquipSelection() const;
 	
@@ -76,6 +80,7 @@ private:
 	
 	static void ShouldEnableButtons(const FGameplayTag& AbilityStatus, const int32 SpellPoints, bool& bEnableSpendPointsButton, bool& bEnableEquipButton);
 	void BroadcastSpellGlobeSelected();
+	
 
 	bool bWaitForEquipSelection = false;
 	
