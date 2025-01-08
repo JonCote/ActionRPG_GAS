@@ -2,6 +2,8 @@
 
 
 #include "RpgGameplayTags.h"
+
+#include "AIController.h"
 #include "GameplayTagsManager.h"
 
 FRpgGameplayTags FRpgGameplayTags::GameplayTags;
@@ -164,6 +166,70 @@ void FRpgGameplayTags::InitNativeGameplayTags()
 	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_Curse, GameplayTags.Attributes_Resistance_Curse);
 	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_Physical, GameplayTags.Attributes_Resistance_Physical);
 
+	// Debuffs
+	GameplayTags.Debuff_Type_Burn = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Type.Burn"),
+													FString("Burn Debuff Tag")
+													);
+	GameplayTags.Debuff_Type_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Type.Stun"),
+													FString("Stun Debuff Tag")
+													);
+	GameplayTags.DebuffTypes.Add(GameplayTags.Debuff_Type_Burn);
+	GameplayTags.DebuffTypes.Add(GameplayTags.Debuff_Type_Stun);
+
+	GameplayTags.DebuffsEffectedByTenacity.Add(GameplayTags.Debuff_Type_Stun);
+	
+	
+	// Debuff Statistics
+	GameplayTags.Debuff_Stats_Damage_Fire = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Stats.Damage.Fire"),
+													FString("Debuff Fire Damage Statistic Tag")
+													);
+
+	GameplayTags.DebuffDamageTypesToResistances.Add(GameplayTags.Debuff_Stats_Damage_Fire, GameplayTags.Attributes_Resistance_Fire);
+
+	
+	GameplayTags.Debuff_Stats_Chance = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Stats.Chance"),
+													FString("Debuff Chance Statistic Tag")
+													);
+	GameplayTags.Debuff_Stats_Frequency = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Stats.Frequency"),
+													FString("Debuff Frequency Statistic Tag")
+													);
+	GameplayTags.Debuff_Stats_Duration = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Stats.Duration"),
+													FString("Debuff Duration Statistic Tag")
+													);
+	
+	// Debuff Damage Multipliers
+	GameplayTags.Debuff_DamageMultiplier_Source_AttackPower = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.DamageMultiplier.Source.AttackPower"),
+													FString("Debuff Damage Multiplier for Attack Power from Source (Deal a % of Sources Attack Power as Damage)")
+													);
+	GameplayTags.Debuff_DamageMultiplier_Source_MaxHealth = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.DamageMultiplier.Source.MaxHealth"),
+													FString("Debuff Damage Multiplier for Max Health from Source (Deal a % of Sources Max Health as Damage)")
+													);
+	GameplayTags.Debuff_DamageMultiplier_Source_Defense = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.DamageMultiplier.Source.Defense"),
+													FString("Debuff Damage Multiplier for Defense from Source (Deal a % of Sources Defense as Damage)")
+													);
+
+	GameplayTags.Debuff_DamageMultiplier_Target_MaxHealth = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.DamageMultiplier.Target.MaxHealth"),
+													FString("Debuff Damage Multiplier for Max Health from Target (Deal a % of Sources Max Health as Damage)")
+													);
+	
+	GameplayTags.DebuffDamageMultipliersToSourceAttributes.Add(GameplayTags.Debuff_DamageMultiplier_Source_AttackPower, GameplayTags.Attributes_Secondary_AttackPower);
+	GameplayTags.DebuffDamageMultipliersToSourceAttributes.Add(GameplayTags.Debuff_DamageMultiplier_Source_MaxHealth, GameplayTags.Attributes_Secondary_MaxHealth);
+	GameplayTags.DebuffDamageMultipliersToSourceAttributes.Add(GameplayTags.Debuff_DamageMultiplier_Source_Defense, GameplayTags.Attributes_Secondary_Defense);
+
+	GameplayTags.DebuffDamageMultipliersToTargetAttributes.Add(GameplayTags.Debuff_DamageMultiplier_Target_MaxHealth, GameplayTags.Attributes_Secondary_MaxHealth);
+
+	
+	
 	// Damage Multiplier
 	GameplayTags.DamageMultiplier_Source_AttackPower = UGameplayTagsManager::Get().AddNativeGameplayTag(
 													FName("DamageMultiplier.Source.AttackPower"),

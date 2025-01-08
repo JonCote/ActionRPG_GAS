@@ -157,6 +157,8 @@ void ARpgCharacter::InitAbilityActorInfo()
 	Cast<URpgAbilitySystemComponent>(RpgPlayerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
 	AbilitySystemComponent = RpgPlayerState->GetAbilitySystemComponent();
 	AttributeSet = RpgPlayerState->GetAttributeSet();
+
+	OnASCRegistered.Broadcast(AbilitySystemComponent);
 }
 
 void ARpgCharacter::InitPlayerHUD()

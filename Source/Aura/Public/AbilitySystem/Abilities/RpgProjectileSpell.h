@@ -30,7 +30,7 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Projectile")
 	void SpawnProjectileAtLocation(const FVector& ProjectileTargetLocation, const FVector SocketLocation);
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability Info")
 	TSubclassOf<ARpgProjectile> ProjectileClass;
 
 

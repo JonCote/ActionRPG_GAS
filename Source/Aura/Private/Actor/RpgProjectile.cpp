@@ -8,7 +8,6 @@
 #include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/RpgAbilitySystemLibrary.h"
 #include "Aura/Aura.h"
-#include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -39,18 +38,18 @@ void ARpgProjectile::BeginPlay()
 	Super::BeginPlay();
 	SetLifeSpan(LifeSpan);
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &ARpgProjectile::OnSphereOverlap);
-	//TravelSoundComponent = UGameplayStatics::SpawnSoundAttached(TravelSound, GetRootComponent());
+}
+
+void ARpgProjectile::OnHit()
+{
+	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
+	bHit = true;
 }
 
 void ARpgProjectile::Destroyed()
 {
-	if (!bHit)
-	{
-		//if (TravelSoundComponent && TravelSoundComponent->IsPlaying()) TravelSoundComponent->Stop();
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-		bHit = true;
-	}
+	if (!bHit) { OnHit(); }
 	
 	Super::Destroyed();
 }
@@ -58,30 +57,23 @@ void ARpgProjectile::Destroyed()
 void ARpgProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                      UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!DamageEffectSpecHandle.Data.IsValid() || DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor) { return; }
-	if (!URpgAbilitySystemLibrary::IsNotFriendly(DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser(), OtherActor)) { return; }
-	
-	if (!bHit)
-	{
-		//if (TravelSoundComponent && TravelSoundComponent->IsPlaying()) TravelSoundComponent->Stop();
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation(), FRotator::ZeroRotator);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation());
-		bHit = true;
-	}
+	if (!bHit) { OnHit(); }
 	
 	if (HasAuthority())
 	{
+		const AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
+		if (SourceAvatarActor == OtherActor) { return; }
+		if (!URpgAbilitySystemLibrary::IsNotFriendly(SourceAvatarActor, OtherActor)) { return; }
+		
 		if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
 		{
-			TargetASC->ApplyGameplayEffectSpecToSelf(*DamageEffectSpecHandle.Data.Get());
+			DamageEffectParams.TargetAbilitySystemComponent = TargetASC;
+			URpgAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
 		}
 		
 		Destroy();
 	}
-	else
-	{
-		bHit = true;
-	}
+	else { bHit = true; }
 }
 
 

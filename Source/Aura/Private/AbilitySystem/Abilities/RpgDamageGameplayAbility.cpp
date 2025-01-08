@@ -19,9 +19,21 @@ void URpgDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 	float ScaledDamage = DamageInfo.BaseDamage.GetValueAtLevel(GetAbilityLevel());
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DamageSpecHandle, DamageInfo.DamageTypeTag, ScaledDamage);
 	
-	
 	GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(*DamageSpecHandle.Data.Get(), UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor));
 	
+}
+
+FDamageEffectParams URpgDamageGameplayAbility::MakeDamageEffectParamsFromClassDefaults(AActor* TargetActor) const
+{
+	FDamageEffectParams Params;
+	Params.WorldContextObject = GetAvatarActorFromActorInfo();
+	Params.DamageGameplayEffectClass = DamageEffectClass;
+	Params.SourceAbilitySystemComponent = GetAbilitySystemComponentFromActorInfo();
+	Params.TargetAbilitySystemComponent = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
+	Params.AbilityLevel = GetAbilityLevel();
+	Params.DamageInfo = DamageInfo;
+	Params.DebuffInfo = DebuffInfo;
+	return Params;
 }
 
 FTaggedMontage URpgDamageGameplayAbility::GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& TaggedMontages) const

@@ -260,7 +260,10 @@ public:
 	//~ End Vitality Attribute OnRep
 
 private:
-
+	
+	void HandleIncomingDamage(const FEffectProperties& Props);
+	void HandleDebuff(const FEffectProperties& Props);
+	void HandleIncomingXP(const FEffectProperties& Props);
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 	static void ShowFloatingText(const FEffectProperties& Props, const float Damage, bool bBlockedHit, bool bCriticalHit);
 	static void SendXPEvent(const FEffectProperties& Props);
@@ -269,4 +272,5 @@ private:
 	bool bTopOffMana = false;
 	
 };
+
 

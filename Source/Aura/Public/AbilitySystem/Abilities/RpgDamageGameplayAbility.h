@@ -3,24 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "RpgAbilityTypes.h"
 #include "AbilitySystem/Abilities/RpgGameplayAbility.h"
 #include "Interaction/CombatInterface.h"
 #include "RpgDamageGameplayAbility.generated.h"
 
-USTRUCT(BlueprintType)
-struct FDamageInfo
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FGameplayTag DamageTypeTag = FGameplayTag();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FScalableFloat BaseDamage = 0.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TMap<FGameplayTag, FScalableFloat> DamageMultipliers = TMap<FGameplayTag, FScalableFloat>();
-};
 
 /**
  * 
@@ -34,14 +21,20 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void CauseDamage(AActor* TargetActor);
+
+	FDamageEffectParams MakeDamageEffectParamsFromClassDefaults(AActor* TargetActor = nullptr) const;
 	
 protected:
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability Info")
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "DamageInfo")
+	
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Ability Info")
 	FDamageInfo DamageInfo;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Ability Info")
+	TArray<FDebuffInfo> DebuffInfo;
 	
 	UFUNCTION(BlueprintPure)
 	FTaggedMontage GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& TaggedMontages) const;

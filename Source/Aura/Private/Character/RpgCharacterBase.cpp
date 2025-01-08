@@ -4,6 +4,7 @@
 #include "AbilitySystemComponent.h"
 #include "RpgGameplayTags.h"
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -12,6 +13,10 @@ ARpgCharacterBase::ARpgCharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
+	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnDebuffComponent");
+	BurnDebuffComponent->SetupAttachment(GetRootComponent());
+	BurnDebuffComponent->DebuffTag = FRpgGameplayTags::Get().Debuff_Type_Burn;
+	
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 
@@ -52,6 +57,7 @@ void ARpgCharacterBase::MulticastHandleDeath_Implementation()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Dissolve();
 	bDead = true;
+	BurnDebuffComponent->Deactivate();
 }
 
 void ARpgCharacterBase::BeginPlay()
@@ -127,6 +133,12 @@ ECharacterClass ARpgCharacterBase::GetCharacterClass_Implementation()
 {
 	return CharacterClass;
 }
+
+FOnASCRegistered ARpgCharacterBase::GetOnASCRegisteredDelegate()
+{
+	return OnASCRegistered;
+}
+
 
 void ARpgCharacterBase::InitAbilityActorInfo()
 {

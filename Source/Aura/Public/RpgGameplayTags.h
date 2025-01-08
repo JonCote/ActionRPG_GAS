@@ -48,7 +48,7 @@ public:
 	FGameplayTag InputTag_Passive_1;
 	FGameplayTag InputTag_Passive_2;
 
-	// Damage Types
+	// Damage Types TODO: Update to Damage_Type_xxx 
 	FGameplayTag Damage;
 	FGameplayTag Damage_Fire;
 	FGameplayTag Damage_Ice;
@@ -65,7 +65,33 @@ public:
 	
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
 
-	// Damage Multipliers
+	// Debuffs
+	FGameplayTag Debuff_Type_Burn;
+	FGameplayTag Debuff_Type_Stun;
+
+	// Debuff Statistics
+	FGameplayTag Debuff_Stats_Damage;
+	FGameplayTag Debuff_Stats_Damage_Fire;
+
+	FGameplayTag Debuff_Stats_Chance;
+	FGameplayTag Debuff_Stats_Frequency;
+	FGameplayTag Debuff_Stats_Duration;
+
+	TArray<FGameplayTag> DebuffTypes;
+	TArray<FGameplayTag> DebuffsEffectedByTenacity;
+	TMap<FGameplayTag, FGameplayTag> DebuffDamageTypesToResistances;
+	
+	// Debuff Damage Multipliers
+	FGameplayTag Debuff_DamageMultiplier_Source_AttackPower;
+	FGameplayTag Debuff_DamageMultiplier_Source_MaxHealth;
+	FGameplayTag Debuff_DamageMultiplier_Source_Defense;
+
+	FGameplayTag Debuff_DamageMultiplier_Target_MaxHealth;
+
+	TMap<FGameplayTag, FGameplayTag> DebuffDamageMultipliersToSourceAttributes;
+	TMap<FGameplayTag, FGameplayTag> DebuffDamageMultipliersToTargetAttributes;
+
+	// Damage Multipliers TODO: Update name to start with Damage_
 	FGameplayTag DamageMultiplier_Source_AttackPower;
 	FGameplayTag DamageMultiplier_Source_MaxHealth;
 	FGameplayTag DamageMultiplier_Source_Defense;
@@ -75,7 +101,6 @@ public:
 	TMap<FGameplayTag, FGameplayTag> DamageMultipliersToSourceAttributes;
 	TMap<FGameplayTag, FGameplayTag> DamageMultipliersToTargetAttributes;
 	
-
 	// Abilities
 	FGameplayTag Abilities_Attack;
 	FGameplayTag Abilities_Summon;

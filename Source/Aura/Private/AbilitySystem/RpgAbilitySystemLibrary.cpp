@@ -3,9 +3,12 @@
 
 #include "AbilitySystem/RpgAbilitySystemLibrary.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "RpgAbilityTypes.h"
+#include "RpgGameplayTags.h"
 #include "Game/RpgGameModeBase.h"
+#include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/RpgPlayerState.h"
@@ -158,6 +161,54 @@ bool URpgAbilitySystemLibrary::IsCriticalHit(const FGameplayEffectContextHandle&
 	return false;
 }
 
+bool URpgAbilitySystemLibrary::IsSuccessfulDebuff(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FRpgGameplayEffectContext* RpgEffectContext = static_cast<const FRpgGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return RpgEffectContext->IsSuccessfulDebuff();
+	}
+	return false;
+}
+
+float URpgAbilitySystemLibrary::GetDebuffDamage(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FRpgGameplayEffectContext* RpgEffectContext = static_cast<const FRpgGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return RpgEffectContext->GetDebuffDamage();
+	}
+	return 0.f;
+}
+
+float URpgAbilitySystemLibrary::GetDebuffDuration(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FRpgGameplayEffectContext* RpgEffectContext = static_cast<const FRpgGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return RpgEffectContext->GetDebuffDuration();
+	}
+	return 0.f;
+}
+
+float URpgAbilitySystemLibrary::GetDebuffFrequency(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FRpgGameplayEffectContext* RpgEffectContext = static_cast<const FRpgGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		return RpgEffectContext->GetDebuffFrequency();
+	}
+	return 0.f;
+}
+
+FGameplayTag URpgAbilitySystemLibrary::GetDebuffTag(const FGameplayEffectContextHandle& EffectContextHandle)
+{
+	if (const FRpgGameplayEffectContext* RpgEffectContext = static_cast<const FRpgGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		if (RpgEffectContext->GetDebuffTag().IsValid())
+		{
+			return *RpgEffectContext->GetDebuffTag();
+		}
+	}
+	return FGameplayTag();
+}
+
 void URpgAbilitySystemLibrary::SetIsBlockedHit(FGameplayEffectContextHandle& EffectContextHandle, const bool bIsBlockedHit)
 {
 	if (FRpgGameplayEffectContext* RpgEffectContext = static_cast<FRpgGameplayEffectContext*>(EffectContextHandle.Get()))
@@ -171,6 +222,51 @@ void URpgAbilitySystemLibrary::SetIsCriticalHit(FGameplayEffectContextHandle& Ef
 	if (FRpgGameplayEffectContext* RpgEffectContext = static_cast<FRpgGameplayEffectContext*>(EffectContextHandle.Get()))
 	{
 		RpgEffectContext->SetCriticalHit(bIsCriticalHit);
+	}
+}
+
+void URpgAbilitySystemLibrary::SetIsSuccessfulDebuff(FGameplayEffectContextHandle& EffectContextHandle,
+	const bool bIsSuccessfulDebuff)
+{
+	if (FRpgGameplayEffectContext* RpgEffectContext = static_cast<FRpgGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		RpgEffectContext->SetIsSuccessfulDebuff(bIsSuccessfulDebuff);
+	}
+}
+
+void URpgAbilitySystemLibrary::SetDebuffDamage(FGameplayEffectContextHandle& EffectContextHandle,
+	const float DebuffDamage)
+{
+	if (FRpgGameplayEffectContext* RpgEffectContext = static_cast<FRpgGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		RpgEffectContext->SetDebuffDamage(DebuffDamage);
+	}
+}
+
+void URpgAbilitySystemLibrary::SetDebuffDuration(FGameplayEffectContextHandle& EffectContextHandle,
+	const float DebuffDuration)
+{
+	if (FRpgGameplayEffectContext* RpgEffectContext = static_cast<FRpgGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		RpgEffectContext->SetDebuffDuration(DebuffDuration);
+	}
+}
+
+void URpgAbilitySystemLibrary::SetDebuffFrequency(FGameplayEffectContextHandle& EffectContextHandle,
+	const float DebuffFrequency)
+{
+	if (FRpgGameplayEffectContext* RpgEffectContext = static_cast<FRpgGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		RpgEffectContext->SetDebuffFrequency(DebuffFrequency);
+	}
+}
+
+void URpgAbilitySystemLibrary::SetDebuffTag(FGameplayEffectContextHandle& EffectContextHandle,
+	const FGameplayTag& DebuffTag)
+{
+	if (FRpgGameplayEffectContext* RpgEffectContext = static_cast<FRpgGameplayEffectContext*>(EffectContextHandle.Get()))
+	{
+		RpgEffectContext->SetDebuffTag(MakeShared<FGameplayTag>(DebuffTag));
 	}
 }
 
@@ -195,7 +291,6 @@ void URpgAbilitySystemLibrary::GetLivePlayersWithinRadius(const UObject* WorldCo
 		}
 	}
 	
-	
 }
 
 bool URpgAbilitySystemLibrary::IsNotFriendly(const AActor* FirstActor, const AActor* SecondActor)
@@ -206,4 +301,61 @@ bool URpgAbilitySystemLibrary::IsNotFriendly(const AActor* FirstActor, const AAc
 	const bool bSecondIsEnemy = SecondActor->ActorHasTag(FName("Enemy"));
 
 	return !((bFirstIsPlayer && bSecondIsPlayer) || (bFirstIsEnemy && bSecondIsEnemy));
+}
+
+FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const FDamageEffectParams& DamageEffectParams)
+{
+	checkf(DamageEffectParams.TargetAbilitySystemComponent, TEXT("Target Ability System Component not set when URpgAbilitySystemLibrary::ApplyDamageEffect is Called!"));
+	checkf(DamageEffectParams.SourceAbilitySystemComponent, TEXT("Source Ability System Component not set when URpgAbilitySystemLibrary::ApplyDamageEffect is Called!"));
+
+	const AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
+	const FRpgGameplayTags& GameplayTags = FRpgGameplayTags::Get();
+	
+	FGameplayEffectContextHandle EffectContextHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeEffectContext();
+	EffectContextHandle.AddSourceObject(SourceAvatarActor);
+	
+	const FGameplayEffectSpecHandle SpecHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeOutgoingSpec(DamageEffectParams.DamageGameplayEffectClass, DamageEffectParams.AbilityLevel, EffectContextHandle);
+
+	/* Assign Caller Magnitudes for DamageInfo */
+	// Base Damage
+	const float ScaledBaseDamage = DamageEffectParams.DamageInfo.BaseDamage.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageEffectParams.DamageInfo.DamageTypeTag, ScaledBaseDamage);
+
+	// Multipliers
+	for (const TTuple<FGameplayTag, FScalableFloat> Pair : DamageEffectParams.DamageInfo.DamageMultipliers)
+	{
+		const float ScaledMultiplier = Pair.Value.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledMultiplier);
+	}
+
+	/* Assign Caller Magnitudes for DebuffInfo */
+	for (const FDebuffInfo Info : DamageEffectParams.DebuffInfo)
+	{
+		// Debuff type (pass value 1.f for a DebuffType if assigned for ability)
+		const float DebuffValid = 1.f;
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Info.DebuffTag, DebuffValid);
+
+		// Debuff Statistics
+		const float ScaledDebuffDamage = Info.DebuffDamageInfo.BaseDamage.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Info.DebuffDamageInfo.DamageTypeTag, ScaledDebuffDamage);
+		
+		for (const TTuple<FGameplayTag, FScalableFloat> Pair : Info.DebuffDamageInfo.DamageMultipliers)
+		{
+			const float ScaledMultiplier = Pair.Value.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledMultiplier);
+		}
+		
+		const float ScaledDebuffChance = Info.DebuffChance.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Stats_Chance, ScaledDebuffChance);
+
+		const float ScaledDebuffFrequency = Info.DebuffFrequency.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Stats_Frequency, ScaledDebuffFrequency);
+
+		const float ScaledDebuffDuration = Info.DebuffDuration.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Stats_Duration, ScaledDebuffDuration);
+	}
+
+	
+	DamageEffectParams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
+	return EffectContextHandle;
 }
