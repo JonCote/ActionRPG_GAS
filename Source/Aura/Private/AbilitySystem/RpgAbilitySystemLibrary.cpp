@@ -293,6 +293,39 @@ void URpgAbilitySystemLibrary::GetLivePlayersWithinRadius(const UObject* WorldCo
 	
 }
 
+void URpgAbilitySystemLibrary::GetClosestTargets(const int32 MaxTargets, const TArray<AActor*>& Actors, TArray<AActor*>& OutClosestTargets, const FVector& Origin)
+{
+	if (Actors.Num() <= MaxTargets)
+	{
+		OutClosestTargets = Actors;
+		return;
+	}
+
+	TArray<AActor*> ActorsToCheck = Actors;
+	int32 NumTargetsFound = 0;
+	while (NumTargetsFound < MaxTargets)
+	{
+		if (ActorsToCheck.Num() == 0) break;
+		
+		double ClosestDistance = TNumericLimits<double>::Max();
+		AActor* ClosestActor;
+		for (AActor* PotentialTargetActor : ActorsToCheck)
+		{
+			const double Distance = (PotentialTargetActor->GetActorLocation() - Origin).Length();
+			if (Distance < ClosestDistance)
+			{
+				ClosestDistance = Distance;
+				ClosestActor = PotentialTargetActor;
+			}
+		}
+		ActorsToCheck.Remove(ClosestActor);
+		OutClosestTargets.AddUnique(ClosestActor);
+		++NumTargetsFound;
+	}
+	
+	
+}
+
 bool URpgAbilitySystemLibrary::IsNotFriendly(const AActor* FirstActor, const AActor* SecondActor)
 {
 	const bool bFirstIsPlayer = FirstActor->ActorHasTag(FName("Player"));
@@ -358,4 +391,50 @@ FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const F
 	
 	DamageEffectParams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
 	return EffectContextHandle;
+}
+
+TArray<FRotator> URpgAbilitySystemLibrary::EvenlySpacedRotators(const FVector& Forward, const FVector& Axis, const float Spread, const int32 NumRotators)
+{
+	TArray<FRotator> Rotators;
+	
+	if (NumRotators < 1) { return Rotators; }
+	if (NumRotators == 1)
+	{
+		Rotators.Add(Forward.Rotation());
+		return Rotators;
+	}
+	
+	const FVector LeftOfSpread = Forward.RotateAngleAxis(-Spread / 2.f, Axis);
+	const float DeltaSpread = Spread / (NumRotators - 1);
+
+	for (int32 i = 0; i < NumRotators; i++)
+	{
+		const FVector Direction = LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector);
+		Rotators.Add(Direction.Rotation());
+	}
+	
+	return Rotators;
+}
+
+TArray<FVector> URpgAbilitySystemLibrary::EvenlyRotatedVectors(const FVector& Forward, const FVector& Axis, const float Spread, const int32 NumVectors)
+{
+	TArray<FVector> Vectors;
+	
+	if (NumVectors < 1) { return Vectors; }
+	if (NumVectors == 1)
+	{
+		Vectors.Add(Forward);
+		return Vectors;
+	}
+	
+	const FVector LeftOfSpread = Forward.RotateAngleAxis(-Spread / 2.f, Axis);
+	const float DeltaSpread = Spread / (NumVectors - 1);
+
+	for (int32 i = 0; i < NumVectors; i++)
+	{
+		const FVector Direction = LeftOfSpread.RotateAngleAxis(DeltaSpread * i, FVector::UpVector);
+		Vectors.Add(Direction);
+	}
+	
+	return Vectors;
 }

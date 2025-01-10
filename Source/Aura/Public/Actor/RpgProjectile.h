@@ -27,6 +27,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn="true"))
 	FDamageEffectParams DamageEffectParams;
 
+	UPROPERTY()
+	TObjectPtr<USceneComponent> HomingTargetSceneComponent;
+	
 protected:
 	virtual void BeginPlay() override;
 	void OnHit();
@@ -38,7 +41,7 @@ protected:
 	
 private:
 	UPROPERTY(EditDefaultsOnly)
-	float LifeSpan = 10.f;	
+	float LifeSpan = 4.f;	
 	
 	bool bHit = false;
 	TObjectPtr<UAudioComponent> TravelSoundComponent;

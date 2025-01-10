@@ -139,6 +139,11 @@ FOnASCRegistered ARpgCharacterBase::GetOnASCRegisteredDelegate()
 	return OnASCRegistered;
 }
 
+USkeletalMeshComponent* ARpgCharacterBase::GetWeaponMesh_Implementation()
+{
+	return Weapon;
+}
+
 
 void ARpgCharacterBase::InitAbilityActorInfo()
 {

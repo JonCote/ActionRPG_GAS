@@ -57,7 +57,6 @@ void ARpgProjectile::Destroyed()
 void ARpgProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                      UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!bHit) { OnHit(); }
 	
 	if (HasAuthority())
 	{
@@ -70,10 +69,8 @@ void ARpgProjectile::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, A
 			DamageEffectParams.TargetAbilitySystemComponent = TargetASC;
 			URpgAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
 		}
-		
 		Destroy();
 	}
-	else { bHit = true; }
 }
 
 

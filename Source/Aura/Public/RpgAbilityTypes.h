@@ -3,11 +3,12 @@
 #pragma once
 
 #include "GameplayEffectTypes.h"
+#include "RpgGameplayTags.h"
 #include "ScalableFloat.h"
 #include "RpgAbilityTypes.generated.h"
 
+struct FRpgGameplayTags;
 class UGameplayEffect;
-
 
 USTRUCT(BlueprintType)
 struct FDamageInfo
@@ -23,6 +24,34 @@ struct FDamageInfo
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TMap<FGameplayTag, FScalableFloat> DamageMultipliers = TMap<FGameplayTag, FScalableFloat>();
 };
+
+
+USTRUCT(BlueprintType)
+struct FBurnInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (EditCondition = "false"))
+	FGameplayTag DebuffTag = FRpgGameplayTags::Get().Debuff_Type_Burn;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FScalableFloat DebuffChance = FScalableFloat();
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FScalableFloat DebuffFrequency = FScalableFloat();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FScalableFloat DebuffDuration = FScalableFloat();
+};
+
+UENUM(BlueprintType)
+enum class EDebuffType
+{
+	None UMETA(DisplayName = "None"),
+	Burn UMETA(DisplayName = "Burn"),
+	Knockback UMETA(DisplayName = "Knockback"),
+};
+
 
 USTRUCT(BlueprintType)
 struct FDebuffInfo
@@ -40,9 +69,17 @@ struct FDebuffInfo
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FScalableFloat DebuffDuration = FScalableFloat();
-
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FDamageInfo DebuffDamageInfo = FDamageInfo();
+
+	// TODO: Revamp the Debuff Structure using Enum and independent structs for each debuff type (seen below)
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	//EDebuffType DebuffType;
+	
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "DebuffType == EDebuffType::Burn"))
+	//FBurnInfo BurnInfo = FBurnInfo();
+	
 };
 
 USTRUCT(BlueprintType)

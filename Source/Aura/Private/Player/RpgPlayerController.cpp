@@ -10,6 +10,7 @@
 #include "NavigationSystem.h"
 #include "RpgGameplayTags.h"
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
+#include "Aura/Aura.h"
 #include "Components/SplineComponent.h"
 #include "Input/RpgInputComponent.h"
 #include "Interaction/EnemyInterface.h"
@@ -66,7 +67,13 @@ void ARpgPlayerController::AutoRun()
 
 void ARpgPlayerController::CursorTrace()
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRpgGameplayTags::Get().Player_Block_CursorTrace))
+	{
+		return;
+	}
+	
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
+	GetHitResultUnderCursor(ECC_GROUND, false, CursorGroundHit);
 	if (!CursorHit.bBlockingHit) return;
 
 	LastActor = ThisActor;
@@ -83,7 +90,7 @@ void ARpgPlayerController::RotateToMouse()
 	{
 		const FVector PawnLocation = GetFocalLocation();
 		const FRotator ControllerRotator = GetControlRotation();
-		const FRotator Rotation = (CursorHit.Location - PawnLocation).Rotation();
+		const FRotator Rotation = (CursorGroundHit.Location - PawnLocation).Rotation();
 		const FRotator YawRotation(ControllerRotator.Pitch, Rotation.Yaw, ControllerRotator.Roll);
 		SetControlRotation(YawRotation);
 	}
@@ -91,6 +98,11 @@ void ARpgPlayerController::RotateToMouse()
 
 void ARpgPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRpgGameplayTags::Get().Player_Block_InputPressed))
+	{
+		return;
+	}
+	
 	if (InputTag.MatchesTagExact(FRpgGameplayTags::Get().InputTag_LMB))
 	{
 		//bTargeting = ThisActor ? true : false;
@@ -101,11 +113,17 @@ void ARpgPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 			bAutoRunning = false;
 		}
 	}
+	if (GetASC()) GetASC()->AbilityInputTagPressed(InputTag);
 	
 }
 
 void ARpgPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRpgGameplayTags::Get().Player_Block_InputReleased))
+	{
+		return;
+	}
+	
 	if (!InputTag.MatchesTagExact(FRpgGameplayTags::Get().InputTag_LMB) || bTargeting)
 	{
 		if (GetASC())
@@ -142,6 +160,10 @@ void ARpgPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 
 void ARpgPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRpgGameplayTags::Get().Player_Block_InputHeld))
+	{
+		return;
+	}
 	
 	if (!InputTag.MatchesTagExact(FRpgGameplayTags::Get().InputTag_LMB) || bTargeting)
 	{
@@ -213,6 +235,11 @@ void ARpgPlayerController::SetupInputComponent()
 
 void ARpgPlayerController::Move(const FInputActionValue& InputActionValue)
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRpgGameplayTags::Get().Player_Block_Movement))
+	{
+		return;
+	}
+	
 	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
 	const FVector UpDirection(1.f, 0.f, 0.f);
 	const FVector SideDirection(0.f, 1.f, 0.f);

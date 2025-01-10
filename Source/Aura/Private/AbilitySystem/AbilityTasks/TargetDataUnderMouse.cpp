@@ -4,12 +4,13 @@
 #include "AbilitySystem/AbilityTasks/TargetDataUnderMouse.h"
 
 #include "AbilitySystemComponent.h"
+#include "Aura/Aura.h"
 
 
-UTargetDataUnderMouse* UTargetDataUnderMouse::CreateTargetDataUnderMouse(UGameplayAbility* OwningAbility)
+UTargetDataUnderMouse* UTargetDataUnderMouse::CreateTargetDataUnderMouse(UGameplayAbility* OwningAbility, const ECollisionChannel CollisionChannel)
 {
 	UTargetDataUnderMouse* MyObj = NewAbilityTask<UTargetDataUnderMouse>(OwningAbility);
-	
+	MyObj->TraceCollisionChannel = CollisionChannel;
 	return MyObj;
 }
 
@@ -17,7 +18,8 @@ void UTargetDataUnderMouse::Activate()
 {
 	if (Ability->GetCurrentActorInfo()->IsLocallyControlled())
 	{
-		SendMouseCursorData();
+		bool bValidHitResult = SendMouseCursorData();
+		if (!bValidHitResult) EndTask();
 	}
 	else
 	{
@@ -34,19 +36,20 @@ void UTargetDataUnderMouse::Activate()
 }
 
 // Using Prediction to send cursor data to server
-void UTargetDataUnderMouse::SendMouseCursorData() const
+bool UTargetDataUnderMouse::SendMouseCursorData() const
 {
 	FScopedPredictionWindow ScopedPrediction(AbilitySystemComponent.Get());
 	
 	APlayerController* PC = Ability->GetCurrentActorInfo()->PlayerController.Get();
 	FHitResult CursorHit;
-	PC->GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
+	bool bValidHitResult = PC->GetHitResultUnderCursor(TraceCollisionChannel, false, CursorHit);
 	
 	FGameplayAbilityTargetData_SingleTargetHit* Data = new FGameplayAbilityTargetData_SingleTargetHit();
 	Data->HitResult = CursorHit;
 	
 	FGameplayAbilityTargetDataHandle DataHandle;
 	DataHandle.Add(Data);
+
 	
 	AbilitySystemComponent->ServerSetReplicatedTargetData(
 		GetAbilitySpecHandle(),
@@ -57,8 +60,16 @@ void UTargetDataUnderMouse::SendMouseCursorData() const
 
 	if (ShouldBroadcastAbilityTaskDelegates())
 	{
-		ValidData.Broadcast(DataHandle);
+		if (!bValidHitResult)
+		{
+			InvalidData.Broadcast(DataHandle);
+		}
+		else
+		{
+			ValidData.Broadcast(DataHandle);
+		}
 	}
+	return bValidHitResult;
 }
 
 void UTargetDataUnderMouse::OnTargetDataReplicatedCallback(const FGameplayAbilityTargetDataHandle& DataHandle, FGameplayTag ActivationTag) const
