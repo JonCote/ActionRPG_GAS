@@ -3,6 +3,8 @@
 
 #include "AbilitySystem/Abilities/RpgBeamSpell.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
 #include "AbilitySystem/RpgAbilitySystemLibrary.h"
 #include "GameFramework/Character.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -60,7 +62,14 @@ void URpgBeamSpell::TraceFirstTarget(const FVector& BeamTargetLocation)
 			}
 		}
 	}
-	
+
+	if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(MouseHitActor))
+	{
+		if (!CombatInterface->GetOnDeathDelegate().IsAlreadyBound(this, &URpgBeamSpell::PrimaryTargetDied))
+		{
+			CombatInterface->GetOnDeathDelegate().AddDynamic(this, &URpgBeamSpell::PrimaryTargetDied);
+		}
+	}
 }
 
 void URpgBeamSpell::StoreAdditionalTargets(TArray<AActor*>& OutAdditionalTargets)
@@ -77,8 +86,37 @@ void URpgBeamSpell::StoreAdditionalTargets(TArray<AActor*>& OutAdditionalTargets
 		ArcRadius,
 		MouseHitActor->GetActorLocation());
 
-	int32 NumAdditionalTargets = MaxNumTargetsPerArc;
+	const int32 NumAdditionalTargets = FMath::Min(GetAbilityLevel(), MaxNumTargetsPerArc);
 	URpgAbilitySystemLibrary::GetClosestTargets(NumAdditionalTargets, OverlappingActors, OutAdditionalTargets, MouseHitActor->GetActorLocation());
 
+	for (AActor* Target : OutAdditionalTargets)
+	{
+		if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(Target))
+		{
+			if (!CombatInterface->GetOnDeathDelegate().IsAlreadyBound(this, &URpgBeamSpell::AdditionalTargetDied))
+			{
+				CombatInterface->GetOnDeathDelegate().AddDynamic(this, &URpgBeamSpell::AdditionalTargetDied);
+			}
+		}
+	}
 	
+}
+
+
+// TODO: This is repetitive since we do same thing in parent CauseDamage
+void URpgBeamSpell::ApplyDamageEffectToTarget(AActor* Target) const
+{
+	if (!GetAvatarActorFromActorInfo()->HasAuthority()) { return; }
+
+	FDamageEffectParams DamageEffectParams = MakeDamageEffectParamsFromClassDefaults();
+	
+	const AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
+	if (SourceAvatarActor == Target) { return; }
+	if (!URpgAbilitySystemLibrary::IsNotFriendly(SourceAvatarActor, Target)) { return; }
+		
+	if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Target))
+	{
+		DamageEffectParams.TargetAbilitySystemComponent = TargetASC;
+		URpgAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
+	}
 }

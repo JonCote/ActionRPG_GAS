@@ -220,7 +220,7 @@ void URpgAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 	//	FGameplayTagContainer TagContainer;
 	//	TagContainer.AddTag(FRpgGameplayTags::Get().Effects_HitReact);
 	//	Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
-		
+	
 	//}
 		
 	const bool bCrit = URpgAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
@@ -244,6 +244,8 @@ void URpgAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 	*/
 }
 
+
+// TODO: Update this to SCALE better with different Debuff Types.
 void URpgAttributeSet::HandleDebuff(const FEffectProperties& Props)
 {
 	FGameplayEffectContextHandle EffectContext = Props.SourceASC->MakeEffectContext();
@@ -262,11 +264,19 @@ void URpgAttributeSet::HandleDebuff(const FEffectProperties& Props)
 	Effect->Period = DebuffFrequency;
 	Effect->bExecutePeriodicEffectOnApplication = false;
 
-	// Grant Debuff Tag to Target
+	// Grant Debuff Tag to Target (Adds to Server ONLY. USE a OnRep to add and remove LooseGameplayTags to Client)
 	FInheritedTagContainer TagContainer = FInheritedTagContainer();
 	UTargetTagsGameplayEffectComponent& GrantTagComponent = Effect->FindOrAddComponent<UTargetTagsGameplayEffectComponent>();
 	TagContainer.Added.AddTag(DebuffTag);
 	TagContainer.CombinedTags.AddTag(DebuffTag);
+	if (DebuffTag.MatchesTagExact(FRpgGameplayTags::Get().Debuff_Stun))
+	{
+		TagContainer.Added.AddTag(FRpgGameplayTags::Get().Player_Block_Movement);
+		TagContainer.Added.AddTag(FRpgGameplayTags::Get().Player_Block_Rotation);
+		TagContainer.CombinedTags.AddTag(FRpgGameplayTags::Get().Player_Block_Movement);
+		TagContainer.CombinedTags.AddTag(FRpgGameplayTags::Get().Player_Block_Rotation);
+	}
+	
 	GrantTagComponent.SetAndApplyTargetTagChanges(TagContainer);
 	
 	if (!Effect->GetGrantedTags().HasTagExact(DebuffTag))
@@ -279,13 +289,20 @@ void URpgAttributeSet::HandleDebuff(const FEffectProperties& Props)
 	Effect->StackPeriodResetPolicy = EGameplayEffectStackingPeriodPolicy::NeverReset;
 	Effect->StackDurationRefreshPolicy = EGameplayEffectStackingDurationPolicy::RefreshOnSuccessfulApplication;
 
-	const int32 Ind = Effect->Modifiers.Num();
-	Effect->Modifiers.Add(FGameplayModifierInfo());
-	FGameplayModifierInfo& ModifierInfo = Effect->Modifiers[Ind];
 	
-	ModifierInfo.ModifierMagnitude = FScalableFloat(DebuffDamage);
-	ModifierInfo.ModifierOp = EGameplayModOp::Additive;
-	ModifierInfo.Attribute = GetIncomingDamageAttribute();
+
+	if (DebuffDamage > 0.f)
+	{
+		const int32 Ind = Effect->Modifiers.Num();
+		Effect->Modifiers.Add(FGameplayModifierInfo());
+		FGameplayModifierInfo& ModifierInfo = Effect->Modifiers[Ind];
+		
+		ModifierInfo.ModifierMagnitude = FScalableFloat(DebuffDamage);
+		ModifierInfo.ModifierMagnitude = FScalableFloat(DebuffDamage);
+		ModifierInfo.ModifierOp = EGameplayModOp::Additive;
+		ModifierInfo.Attribute = GetIncomingDamageAttribute();
+	}
+	
 	
 	if (FGameplayEffectSpec* MutableSpec = new FGameplayEffectSpec(Effect, EffectContext, 1.f))
 	{

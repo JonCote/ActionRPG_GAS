@@ -167,41 +167,54 @@ void FRpgGameplayTags::InitNativeGameplayTags()
 	GameplayTags.DamageTypesToResistances.Add(GameplayTags.Damage_Physical, GameplayTags.Attributes_Resistance_Physical);
 
 	// Debuffs
-	GameplayTags.Debuff_Type_Burn = UGameplayTagsManager::Get().AddNativeGameplayTag(
-													FName("Debuff.Type.Burn"),
+	GameplayTags.Debuff_Burn = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Burn"),
 													FString("Burn Debuff Tag")
 													);
-	GameplayTags.Debuff_Type_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(
-													FName("Debuff.Type.Stun"),
+	GameplayTags.Debuff_Burn_Chance = UGameplayTagsManager::Get().AddNativeGameplayTag(
+														FName("Debuff.Burn.Chance"),
+														FString("Debuff Chance Statistic Tag")
+														);
+	GameplayTags.Debuff_Burn_Frequency = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Burn.Frequency"),
+													FString("Debuff Frequency Statistic Tag")
+													);
+	GameplayTags.Debuff_Burn_Duration = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Burn.Duration"),
+													FString("Debuff Duration Statistic Tag")
+													);
+
+	GameplayTags.Debuff_Stun = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Stun"),
 													FString("Stun Debuff Tag")
 													);
-	GameplayTags.DebuffTypes.Add(GameplayTags.Debuff_Type_Burn);
-	GameplayTags.DebuffTypes.Add(GameplayTags.Debuff_Type_Stun);
-
-	GameplayTags.DebuffsEffectedByTenacity.Add(GameplayTags.Debuff_Type_Stun);
+	GameplayTags.Debuff_Stun_Chance = UGameplayTagsManager::Get().AddNativeGameplayTag(
+														FName("Debuff.Stun.Chance"),
+														FString("Debuff Chance Statistic Tag")
+														);
+	GameplayTags.Debuff_Stun_Frequency = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Stun.Frequency"),
+													FString("Debuff Frequency Statistic Tag")
+													);
+	GameplayTags.Debuff_Stun_Duration = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Stun.Duration"),
+													FString("Debuff Duration Statistic Tag")
+													);
 	
 	
 	// Debuff Statistics
-	GameplayTags.Debuff_Stats_Damage_Fire = UGameplayTagsManager::Get().AddNativeGameplayTag(
-													FName("Debuff.Stats.Damage.Fire"),
+	GameplayTags.Debuff_Damage_Fire = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Damage.Fire"),
 													FString("Debuff Fire Damage Statistic Tag")
 													);
 
-	GameplayTags.DebuffDamageTypesToResistances.Add(GameplayTags.Debuff_Stats_Damage_Fire, GameplayTags.Attributes_Resistance_Fire);
+	GameplayTags.DebuffDamageTypesToResistances.Add(GameplayTags.Debuff_Damage_Fire, GameplayTags.Attributes_Resistance_Fire);
 
+	GameplayTags.DebuffTypes.Add(GameplayTags.Debuff_Burn);
+	GameplayTags.DebuffTypes.Add(GameplayTags.Debuff_Stun);
 	
-	GameplayTags.Debuff_Stats_Chance = UGameplayTagsManager::Get().AddNativeGameplayTag(
-													FName("Debuff.Stats.Chance"),
-													FString("Debuff Chance Statistic Tag")
-													);
-	GameplayTags.Debuff_Stats_Frequency = UGameplayTagsManager::Get().AddNativeGameplayTag(
-													FName("Debuff.Stats.Frequency"),
-													FString("Debuff Frequency Statistic Tag")
-													);
-	GameplayTags.Debuff_Stats_Duration = UGameplayTagsManager::Get().AddNativeGameplayTag(
-													FName("Debuff.Stats.Duration"),
-													FString("Debuff Duration Statistic Tag")
-													);
+	GameplayTags.DebuffsEffectedByTenacity.Add(GameplayTags.Debuff_Stun);
+	
 	
 	// Debuff Damage Multipliers
 	GameplayTags.Debuff_DamageMultiplier_Source_AttackPower = UGameplayTagsManager::Get().AddNativeGameplayTag(
@@ -387,6 +400,10 @@ void FRpgGameplayTags::InitNativeGameplayTags()
 	GameplayTags.Player_Block_Movement = UGameplayTagsManager::Get().AddNativeGameplayTag(
 													FName("Player.Block.Movement"),
 													FString("Block Player Movement")
+													);
+	GameplayTags.Player_Block_Rotation = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Player.Block.Rotation"),
+													FString("Block Player Rotation")
 													);
 
 	

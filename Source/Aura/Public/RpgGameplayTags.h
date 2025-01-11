@@ -66,16 +66,21 @@ public:
 	TMap<FGameplayTag, FGameplayTag> DamageTypesToResistances;
 
 	// Debuffs
-	FGameplayTag Debuff_Type_Burn;
-	FGameplayTag Debuff_Type_Stun;
+	FGameplayTag Debuff_Burn;
+	FGameplayTag Debuff_Burn_Chance;
+	FGameplayTag Debuff_Burn_Frequency;
+	FGameplayTag Debuff_Burn_Duration;
+
+	FGameplayTag Debuff_Stun;
+	FGameplayTag Debuff_Stun_Chance;
+	FGameplayTag Debuff_Stun_Frequency;
+	FGameplayTag Debuff_Stun_Duration;
+	
 
 	// Debuff Statistics
-	FGameplayTag Debuff_Stats_Damage;
-	FGameplayTag Debuff_Stats_Damage_Fire;
-
-	FGameplayTag Debuff_Stats_Chance;
-	FGameplayTag Debuff_Stats_Frequency;
-	FGameplayTag Debuff_Stats_Duration;
+	FGameplayTag Debuff_Damage;
+	FGameplayTag Debuff_Damage_Fire;
+	
 
 	TArray<FGameplayTag> DebuffTypes;
 	TArray<FGameplayTag> DebuffsEffectedByTenacity;
@@ -149,6 +154,7 @@ public:
 	FGameplayTag Player_Block_InputReleased;
 	FGameplayTag Player_Block_CursorTrace;
 	FGameplayTag Player_Block_Movement;
+	FGameplayTag Player_Block_Rotation;
 
 
 private:

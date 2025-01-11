@@ -364,28 +364,46 @@ FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const F
 	/* Assign Caller Magnitudes for DebuffInfo */
 	for (const FDebuffInfo Info : DamageEffectParams.DebuffInfo)
 	{
-		// Debuff type (pass value 1.f for a DebuffType if assigned for ability)
-		const float DebuffValid = 1.f;
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Info.DebuffTag, DebuffValid);
 
-		// Debuff Statistics
-		const float ScaledDebuffDamage = Info.DebuffDamageInfo.BaseDamage.GetValueAtLevel(DamageEffectParams.AbilityLevel);
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Info.DebuffDamageInfo.DamageTypeTag, ScaledDebuffDamage);
-		
-		for (const TTuple<FGameplayTag, FScalableFloat> Pair : Info.DebuffDamageInfo.DamageMultipliers)
+		if (Info.DebuffType == EDebuffType::Burn)
 		{
-			const float ScaledMultiplier = Pair.Value.GetValueAtLevel(DamageEffectParams.AbilityLevel);
-			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledMultiplier);
+			// Debuff Tag (pass value 1.f for a DebuffTag if assigned for ability)
+			const float DebuffValid = 1.f;
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Info.BurnInfo.DebuffTag, DebuffValid);
+
+			// Debuff Statistics
+			const float ScaledDebuffDamage = Info.BurnInfo.DebuffDamageInfo.BaseDamage.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Info.BurnInfo.DebuffDamageInfo.DamageTypeTag, ScaledDebuffDamage);
+		
+			for (const TTuple<FGameplayTag, FScalableFloat> Pair : Info.BurnInfo.DebuffDamageInfo.DamageMultipliers)
+			{
+				const float ScaledMultiplier = Pair.Value.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+				UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledMultiplier);
+			}
+		
+			const float ScaledDebuffChance = Info.BurnInfo.DebuffChance.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Burn_Chance, ScaledDebuffChance);
+
+			const float ScaledDebuffFrequency = Info.BurnInfo.DebuffFrequency.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Burn_Frequency, ScaledDebuffFrequency);
+
+			const float ScaledDebuffDuration = Info.BurnInfo.DebuffDuration.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Burn_Duration, ScaledDebuffDuration);
+		}
+		else if (Info.DebuffType == EDebuffType::Stun)
+		{
+			// Debuff Tag (pass value 1.f for a DebuffTag if assigned for ability)
+			const float DebuffValid = 1.f;
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Info.StunInfo.DebuffTag, DebuffValid);
+
+			// Debuff Statistics
+			const float ScaledDebuffChance = Info.StunInfo.DebuffChance.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Stun_Chance, ScaledDebuffChance);
+
+			const float ScaledDebuffDuration = Info.StunInfo.DebuffDuration.GetValueAtLevel(DamageEffectParams.AbilityLevel);
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Stun_Duration, ScaledDebuffDuration);
 		}
 		
-		const float ScaledDebuffChance = Info.DebuffChance.GetValueAtLevel(DamageEffectParams.AbilityLevel);
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Stats_Chance, ScaledDebuffChance);
-
-		const float ScaledDebuffFrequency = Info.DebuffFrequency.GetValueAtLevel(DamageEffectParams.AbilityLevel);
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Stats_Frequency, ScaledDebuffFrequency);
-
-		const float ScaledDebuffDuration = Info.DebuffDuration.GetValueAtLevel(DamageEffectParams.AbilityLevel);
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Stats_Duration, ScaledDebuffDuration);
 	}
 
 	

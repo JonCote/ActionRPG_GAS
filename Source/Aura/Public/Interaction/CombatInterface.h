@@ -13,6 +13,7 @@ class UNiagaraSystem;
 class UAnimMontage;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered, UAbilitySystemComponent*);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeathSignature, AActor*, DeadActor);
 
 USTRUCT(BlueprintType)
 struct FTaggedMontage
@@ -55,6 +56,8 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent)
 	void Die();
+
+	virtual FOnDeathSignature& GetOnDeathDelegate() = 0;
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface")
 	FVector GetCombatSocketLocation(const FGameplayTag& SocketTag);

@@ -86,6 +86,11 @@ void ARpgPlayerController::CursorTrace()
 
 void ARpgPlayerController::RotateToMouse()
 {
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRpgGameplayTags::Get().Player_Block_Rotation))
+	{
+		return;
+	}
+	
 	if (APawn* ControlledPawn = GetPawn<APawn>())
 	{
 		const FVector PawnLocation = GetFocalLocation();

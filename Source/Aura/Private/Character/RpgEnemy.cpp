@@ -12,8 +12,8 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "UI/Widget/RpgUserWidget.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 ARpgEnemy::ARpgEnemy()
@@ -34,6 +34,8 @@ ARpgEnemy::ARpgEnemy()
 	
 	HealthBar = CreateDefaultSubobject<UWidgetComponent>("HealthBar");
 	HealthBar->SetupAttachment(GetRootComponent());
+
+	BaseWalkSpeed = 250.f;
 }
 
 void ARpgEnemy::PossessedBy(AController* NewController)
@@ -143,7 +145,8 @@ void ARpgEnemy::InitAbilityActorInfo()
 {
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<URpgAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
-
+	AbilitySystemComponent->RegisterGameplayTagEvent(FRpgGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ARpgEnemy::StunTagChanged);
+	
 	if (HasAuthority())
 	{
 		InitDefaultAttributes();	
@@ -154,4 +157,15 @@ void ARpgEnemy::InitAbilityActorInfo()
 void ARpgEnemy::InitDefaultAttributes() const
 {
 	URpgAbilitySystemLibrary::InitDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
+}
+
+void ARpgEnemy::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	Super::StunTagChanged(CallbackTag, NewCount);
+	
+	GetCharacterMovement()->MaxWalkSpeed = bIsStunned ? 0.f : BaseWalkSpeed;
+	if (RpgAIController && RpgAIController->GetBlackboardComponent())
+	{
+		RpgAIController->GetBlackboardComponent()->SetValueAsBool(FName("Stunned"), bIsStunned);
+	}
 }

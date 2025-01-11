@@ -3,6 +3,7 @@
 
 #include "Character/RpgCharacter.h"
 
+#include "RpgGameplayTags.h"
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/RpgPlayerState.h"
@@ -60,6 +61,54 @@ void ARpgCharacter::OnRep_PlayerState()
 	InitPlayerHUD();
 	InitDefaultAttributes();
 }
+
+void ARpgCharacter::OnRep_Stunned()
+{
+	if (URpgAbilitySystemComponent* RpgASC = Cast<URpgAbilitySystemComponent>(AbilitySystemComponent))
+	{
+		const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
+		FGameplayTagContainer BlockedTags;
+		BlockedTags.AddTag(GameplayTags.Player_Block_Movement);
+		BlockedTags.AddTag(GameplayTags.Player_Block_Rotation);
+		BlockedTags.AddTag(GameplayTags.Debuff_Stun);
+		if (bIsStunned)
+		{
+			RpgASC->AddLooseGameplayTags(BlockedTags);
+		}
+		else
+		{
+			RpgASC->RemoveLooseGameplayTags(BlockedTags);
+		}
+		
+	}
+}
+
+void ARpgCharacter::InitAbilityActorInfo()
+{
+	RpgPlayerState = GetPlayerState<ARpgPlayerState>();
+	check(RpgPlayerState);
+	RpgPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(RpgPlayerState, this);
+	Cast<URpgAbilitySystemComponent>(RpgPlayerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
+	AbilitySystemComponent = RpgPlayerState->GetAbilitySystemComponent();
+	AttributeSet = RpgPlayerState->GetAttributeSet();
+	OnASCRegistered.Broadcast(AbilitySystemComponent);
+
+	AbilitySystemComponent->RegisterGameplayTagEvent(FRpgGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ARpgCharacter::StunTagChanged);
+	
+}
+
+void ARpgCharacter::InitPlayerHUD()
+{
+	RpgPlayerController = Cast<ARpgPlayerController>(GetController());
+	if (RpgPlayerController)
+	{
+		if (ARpgHUD* RpgHUD = Cast<ARpgHUD>(RpgPlayerController->GetHUD()))
+		{
+			RpgHUD->InitOverlay(RpgPlayerController, RpgPlayerState, AbilitySystemComponent, AttributeSet);
+		}
+	}
+}
+
 
 void ARpgCharacter::AddToXP_Implementation(const int32 InXP)
 {
@@ -149,29 +198,7 @@ int32 ARpgCharacter::GetCharacterLevel_Implementation()
 	return RpgPlayerState->GetPlayerLevel();
 }
 
-void ARpgCharacter::InitAbilityActorInfo()
-{
-	RpgPlayerState = GetPlayerState<ARpgPlayerState>();
-	check(RpgPlayerState);
-	RpgPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(RpgPlayerState, this);
-	Cast<URpgAbilitySystemComponent>(RpgPlayerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
-	AbilitySystemComponent = RpgPlayerState->GetAbilitySystemComponent();
-	AttributeSet = RpgPlayerState->GetAttributeSet();
 
-	OnASCRegistered.Broadcast(AbilitySystemComponent);
-}
-
-void ARpgCharacter::InitPlayerHUD()
-{
-	RpgPlayerController = Cast<ARpgPlayerController>(GetController());
-	if (RpgPlayerController)
-	{
-		if (ARpgHUD* RpgHUD = Cast<ARpgHUD>(RpgPlayerController->GetHUD()))
-		{
-			RpgHUD->InitOverlay(RpgPlayerController, RpgPlayerState, AbilitySystemComponent, AttributeSet);
-		}
-	}
-}
 
 
 

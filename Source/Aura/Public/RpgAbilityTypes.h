@@ -23,6 +23,7 @@ struct FDamageInfo
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TMap<FGameplayTag, FScalableFloat> DamageMultipliers = TMap<FGameplayTag, FScalableFloat>();
+	
 };
 
 
@@ -32,7 +33,7 @@ struct FBurnInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (EditCondition = "false"))
-	FGameplayTag DebuffTag = FRpgGameplayTags::Get().Debuff_Type_Burn;
+	FGameplayTag DebuffTag = FRpgGameplayTags::Get().Debuff_Burn;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FScalableFloat DebuffChance = FScalableFloat();
@@ -42,6 +43,25 @@ struct FBurnInfo
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FScalableFloat DebuffDuration = FScalableFloat();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FDamageInfo DebuffDamageInfo = FDamageInfo();
+	
+};
+USTRUCT(BlueprintType)
+struct FStunInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (EditCondition = "false"))
+	FGameplayTag DebuffTag = FRpgGameplayTags::Get().Debuff_Stun;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FScalableFloat DebuffChance = FScalableFloat();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FScalableFloat DebuffDuration = FScalableFloat();
+	
 };
 
 UENUM(BlueprintType)
@@ -49,7 +69,7 @@ enum class EDebuffType
 {
 	None UMETA(DisplayName = "None"),
 	Burn UMETA(DisplayName = "Burn"),
-	Knockback UMETA(DisplayName = "Knockback"),
+	Stun UMETA(DisplayName = "Stun"),
 };
 
 
@@ -58,7 +78,7 @@ struct FDebuffInfo
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	/*UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FGameplayTag DebuffTag = FGameplayTag();
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
@@ -71,14 +91,17 @@ struct FDebuffInfo
 	FScalableFloat DebuffDuration = FScalableFloat();
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FDamageInfo DebuffDamageInfo = FDamageInfo();
+	FDamageInfo DebuffDamageInfo = FDamageInfo();*/
 
 	// TODO: Revamp the Debuff Structure using Enum and independent structs for each debuff type (seen below)
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	//EDebuffType DebuffType;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	EDebuffType DebuffType;
 	
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "DebuffType == EDebuffType::Burn"))
-	//FBurnInfo BurnInfo = FBurnInfo();
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "DebuffType == EDebuffType::Burn"))
+	FBurnInfo BurnInfo = FBurnInfo();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "DebuffType == EDebuffType::Stun"))
+	FStunInfo StunInfo = FStunInfo();
 	
 };
 
@@ -111,6 +134,25 @@ struct FDamageEffectParams
 	TArray<FDebuffInfo> DebuffInfo = TArray<FDebuffInfo>();
 };
 
+USTRUCT(BlueprintType)
+struct FDebuffEffect
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	bool bIsSuccessfulDebuff = false;
+
+	UPROPERTY()
+	float DebuffDamage = 0.0f;
+
+	UPROPERTY()
+	float DebuffDuration = 0.0f;
+
+	UPROPERTY()
+	float DebuffFrequency = 0.0f;
+	
+};
+
 
 USTRUCT(BlueprintType)
 struct FRpgGameplayEffectContext : public FGameplayEffectContext
@@ -136,7 +178,7 @@ public:
 	void SetDebuffDuration(const float InDebuffDuration) { DebuffDuration = InDebuffDuration; }
 	void SetDebuffFrequency(const float InDebuffFrequency) { DebuffFrequency = InDebuffFrequency; }
 	void SetDebuffTag(const TSharedPtr<FGameplayTag>& InDebuffTag) { DebuffTag = InDebuffTag; }
-	
+	//TODO: Add Debuff Count
 	
 	
 	/** Returns the actual struct used for serialization, subclasses must override this! */
@@ -181,6 +223,10 @@ protected:
 
 	UPROPERTY()
 	float DebuffFrequency = 0.0f;
+
+	UPROPERTY()
+	int32 DebuffCount = 0.0f;
+	
 	
 	TSharedPtr<FGameplayTag> DebuffTag;
 	

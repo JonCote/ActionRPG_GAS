@@ -5,11 +5,11 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "RpgGameplayTags.h"
+#include "AbilitySystem/RpgAbilitySystemLibrary.h"
 
 void URpgDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 {
-	FGameplayEffectSpecHandle DamageSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass, 1.f);
+	/*FGameplayEffectSpecHandle DamageSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass, 1.f);
 
 	for (TTuple<FGameplayTag, FScalableFloat> Pair : DamageInfo.DamageMultipliers)
 	{
@@ -20,7 +20,19 @@ void URpgDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DamageSpecHandle, DamageInfo.DamageTypeTag, ScaledDamage);
 	
 	GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(*DamageSpecHandle.Data.Get(), UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor));
+	*/
+
+	FDamageEffectParams DamageEffectParams = MakeDamageEffectParamsFromClassDefaults();
 	
+	const AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
+	if (SourceAvatarActor == TargetActor) { return; }
+	if (!URpgAbilitySystemLibrary::IsNotFriendly(SourceAvatarActor, TargetActor)) { return; }
+		
+	if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor))
+	{
+		DamageEffectParams.TargetAbilitySystemComponent = TargetASC;
+		URpgAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
+	}
 }
 
 FDamageEffectParams URpgDamageGameplayAbility::MakeDamageEffectParamsFromClassDefaults(AActor* TargetActor) const
@@ -35,6 +47,7 @@ FDamageEffectParams URpgDamageGameplayAbility::MakeDamageEffectParamsFromClassDe
 	Params.DebuffInfo = DebuffInfo;
 	return Params;
 }
+
 
 FTaggedMontage URpgDamageGameplayAbility::GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& TaggedMontages) const
 {

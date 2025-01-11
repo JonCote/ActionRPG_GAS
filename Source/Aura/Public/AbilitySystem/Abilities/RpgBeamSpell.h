@@ -28,6 +28,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StoreAdditionalTargets(TArray<AActor*>& OutAdditionalTargets);
 
+	UFUNCTION(BlueprintCallable)
+	void ApplyDamageEffectToTarget(AActor* Target) const;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PrimaryTargetDied(AActor* DeadActor);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void AdditionalTargetDied(AActor* DeadActor);
 	
 protected:
 
@@ -44,10 +52,7 @@ protected:
 	TObjectPtr<ACharacter> OwnerCharacter;
 
 	UPROPERTY(EditDefaultsOnly, Category="Beam")
-	int32 MaxNumTargetsPerArc = 2;
-
-	UPROPERTY(EditDefaultsOnly, Category="Beam")
-	int32 MaxNumArcs = 3;
+	int32 MaxNumTargetsPerArc = 5;
 
 	UPROPERTY(EditDefaultsOnly, Category="Beam")
 	float ArcRadius = 400.f;

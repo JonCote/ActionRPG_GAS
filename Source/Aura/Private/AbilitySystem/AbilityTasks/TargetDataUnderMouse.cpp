@@ -42,7 +42,9 @@ bool UTargetDataUnderMouse::SendMouseCursorData() const
 	
 	APlayerController* PC = Ability->GetCurrentActorInfo()->PlayerController.Get();
 	FHitResult CursorHit;
+	FHitResult CursorVisibilityHit;
 	bool bValidHitResult = PC->GetHitResultUnderCursor(TraceCollisionChannel, false, CursorHit);
+	PC->GetHitResultUnderCursor(ECC_Visibility, false, CursorVisibilityHit);
 	
 	FGameplayAbilityTargetData_SingleTargetHit* Data = new FGameplayAbilityTargetData_SingleTargetHit();
 	Data->HitResult = CursorHit;
@@ -60,6 +62,12 @@ bool UTargetDataUnderMouse::SendMouseCursorData() const
 
 	if (ShouldBroadcastAbilityTaskDelegates())
 	{
+		if (CursorHit.GetActor() != CursorVisibilityHit.GetActor())
+		{
+			InvalidData.Broadcast(DataHandle);
+			return false;
+		}
+		
 		if (!bValidHitResult)
 		{
 			InvalidData.Broadcast(DataHandle);

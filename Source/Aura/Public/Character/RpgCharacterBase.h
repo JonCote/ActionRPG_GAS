@@ -24,12 +24,14 @@ class AURA_API ARpgCharacterBase : public ACharacter, public IAbilitySystemInter
 
 public:
 	ARpgCharacterBase();
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
 	//~ Begin Combat Interface
 	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
 	virtual void Die_Implementation() override;
+	virtual FOnDeathSignature& GetOnDeathDelegate() override;
 	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) override;
 	virtual bool IsDead_Implementation() const override;
 	virtual AActor* GetAvatar_Implementation() override;
@@ -44,12 +46,20 @@ public:
 	//~ End Combat Interface
 
 	FOnASCRegistered OnASCRegistered;
+	FOnDeathSignature OnDeathDelegate;
 	
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastHandleDeath();
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	TArray<FTaggedMontage> AttackMontages;
+
+	UPROPERTY(ReplicatedUsing=OnRep_Stunned, BlueprintReadOnly)
+	bool bIsStunned = false;
+
+	UFUNCTION()
+	virtual void OnRep_Stunned();
+
 	
 protected:
 	virtual void BeginPlay() override;
@@ -83,7 +93,12 @@ protected:
 	TObjectPtr<UAttributeSet> AttributeSet;
 
 	virtual void InitAbilityActorInfo();
+	
+	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Combat")
+	float BaseWalkSpeed = 600.f;
+	
 	bool bDead = false;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")

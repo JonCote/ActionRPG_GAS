@@ -23,6 +23,9 @@ public:
 	void CauseDamage(AActor* TargetActor);
 
 	FDamageEffectParams MakeDamageEffectParamsFromClassDefaults(AActor* TargetActor = nullptr) const;
+
+	UFUNCTION(BlueprintPure)
+	float GetBaseDamage(const int32 InLevel) const;
 	
 protected:
 	
@@ -38,8 +41,7 @@ protected:
 	
 	UFUNCTION(BlueprintPure)
 	FTaggedMontage GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& TaggedMontages) const;
-
-	float GetBaseDamage(const int32 InLevel) const;
+	
 	float GetDamageMultiplierByTag(const FGameplayTag& MultiplierTag, const int32 InLevel) const;
 	
 	

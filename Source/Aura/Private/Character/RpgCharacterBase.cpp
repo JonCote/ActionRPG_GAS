@@ -7,6 +7,8 @@
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 
 
 ARpgCharacterBase::ARpgCharacterBase()
@@ -15,7 +17,7 @@ ARpgCharacterBase::ARpgCharacterBase()
 
 	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("BurnDebuffComponent");
 	BurnDebuffComponent->SetupAttachment(GetRootComponent());
-	BurnDebuffComponent->DebuffTag = FRpgGameplayTags::Get().Debuff_Type_Burn;
+	BurnDebuffComponent->DebuffTag = FRpgGameplayTags::Get().Debuff_Burn;
 	
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
@@ -23,6 +25,13 @@ ARpgCharacterBase::ARpgCharacterBase()
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
 	Weapon->SetupAttachment(GetMesh(), FName("WeaponHandSocket"));
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void ARpgCharacterBase::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARpgCharacterBase, bIsStunned);
 }
 
 UAbilitySystemComponent* ARpgCharacterBase::GetAbilitySystemComponent() const
@@ -39,6 +48,11 @@ void ARpgCharacterBase::Die_Implementation()
 {
 	Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
 	MulticastHandleDeath();
+}
+
+FOnDeathSignature& ARpgCharacterBase::GetOnDeathDelegate()
+{
+	return OnDeathDelegate;
 }
 
 void ARpgCharacterBase::MulticastHandleDeath_Implementation()
@@ -58,6 +72,18 @@ void ARpgCharacterBase::MulticastHandleDeath_Implementation()
 	Dissolve();
 	bDead = true;
 	BurnDebuffComponent->Deactivate();
+	OnDeathDelegate.Broadcast(this);
+}
+
+void ARpgCharacterBase::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	bIsStunned = NewCount > 0;
+	//GetCharacterMovement()->MaxWalkSpeed = bIsStunned ? 0.f : BaseWalkSpeed;
+}
+
+void ARpgCharacterBase::OnRep_Stunned()
+{
+	
 }
 
 void ARpgCharacterBase::BeginPlay()

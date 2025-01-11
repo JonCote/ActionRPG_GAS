@@ -106,47 +106,66 @@ void UExecCalc_Damage::DetermineDebuff(const FGameplayEffectCustomExecutionParam
 		// Check if a positive value was set for this DebuffType
 		if (DebuffValid > 0.f)
 		{
+			float SourceDebuffChance = 0.f;
+			float DebuffFrequency = 0.f;
+			float DebuffDuration = 0.f;
+			bool bHasDamage = false;
+		
+			
+			if (DebuffTypeTag.MatchesTagExact(GameplayTags.Debuff_Burn))
+			{
+				SourceDebuffChance = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Burn_Chance, false, -1.f);
+				DebuffFrequency = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Burn_Frequency, false);
+				DebuffDuration = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Burn_Duration, false);
+				bHasDamage = true;
+			}
+			if (DebuffTypeTag.MatchesTagExact(GameplayTags.Debuff_Stun))
+			{
+				SourceDebuffChance = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Stun_Chance, false, -1.f);
+				DebuffDuration = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Stun_Duration, false);
+				bHasDamage = false;
+			}
+			
 			// Determine if Debuff is successful
-			float SourceDebuffChance = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Stats_Chance, false, -1.f);
 			SourceDebuffChance = FMath::Clamp(SourceDebuffChance, 0.f, 100.f);
 			const bool bDebuffSuccess = FMath::RandRange(1, 100) <= SourceDebuffChance;
 			if (bDebuffSuccess)
 			{
-				
-				//float DebuffDamage = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Stats_Damage, false);
 				float DebuffDamage = 0.f;
-				float TargetResistance = 0.f;
-				for (const auto& Pair : FRpgGameplayTags::Get().DebuffDamageTypesToResistances)
+				if (bHasDamage)
 				{
-					const FGameplayTag& DamageTypeTag = Pair.Key;
-					const FGameplayTag& ResistanceTag = Pair.Value;
+					//float DebuffDamage = 0.f;
+					float TargetResistance = 0.f;
+					for (const auto& Pair : FRpgGameplayTags::Get().DebuffDamageTypesToResistances)
+					{
+						const FGameplayTag& DamageTypeTag = Pair.Key;
+						const FGameplayTag& ResistanceTag = Pair.Value;
 		
-					checkf(TargetTagsToCaptureDefs.Contains(ResistanceTag), TEXT("TagsToCaptureDefs doesn't contain Tag: [%s] in ExecCalc_Damage"), *ResistanceTag.ToString());
-					const FGameplayEffectAttributeCaptureDefinition CaptureDefinition = TargetTagsToCaptureDefs[ResistanceTag];
+						checkf(TargetTagsToCaptureDefs.Contains(ResistanceTag), TEXT("TagsToCaptureDefs doesn't contain Tag: [%s] in ExecCalc_Damage"), *ResistanceTag.ToString());
+						const FGameplayEffectAttributeCaptureDefinition CaptureDefinition = TargetTagsToCaptureDefs[ResistanceTag];
 
-					// Add the base damage for Debuff to Damage Total
-					DebuffDamage += Spec.GetSetByCallerMagnitude(DamageTypeTag, false);
+						// Add the base damage for Debuff to Damage Total
+						DebuffDamage += Spec.GetSetByCallerMagnitude(DamageTypeTag, false);
 		
-					float Resistance = 0.f;
-					ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDefinition, EvalParams, Resistance);
-					TargetResistance = FMath::Clamp(Resistance, 0.f, 100.f);
+						float Resistance = 0.f;
+						ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDefinition, EvalParams, Resistance);
+						TargetResistance = FMath::Clamp(Resistance, 0.f, 100.f);
+					}
+					// Add Source Attribute Damage Multiplier Calculations results to Damage
+					DebuffDamage += CalculateMultiplierDamage(ExecutionParams, Spec, EvalParams, SourceTagsToCaptureDefs, FRpgGameplayTags::Get().DebuffDamageMultipliersToSourceAttributes);
+
+					// Add Target Attribute Damage Multipliers Calculations results to Damage
+					DebuffDamage += CalculateMultiplierDamage(ExecutionParams, Spec, EvalParams, TargetTagsToCaptureDefs, FRpgGameplayTags::Get().DebuffDamageMultipliersToTargetAttributes);
+				
+					// Apply TargetResistance
+					DebuffDamage *= (100.f - TargetResistance) / 100.f;
+
+					// Round to nearest int value
+					DebuffDamage += 0.5f;
+					DebuffDamage = FMath::FloorToFloat(DebuffDamage);
 				}
-				// Add Source Attribute Damage Multiplier Calculations results to Damage
-				DebuffDamage += CalculateMultiplierDamage(ExecutionParams, Spec, EvalParams, SourceTagsToCaptureDefs, FRpgGameplayTags::Get().DebuffDamageMultipliersToSourceAttributes);
 
-				// Add Target Attribute Damage Multipliers Calculations results to Damage
-				DebuffDamage += CalculateMultiplierDamage(ExecutionParams, Spec, EvalParams, TargetTagsToCaptureDefs, FRpgGameplayTags::Get().DebuffDamageMultipliersToTargetAttributes);
 				
-				// Apply TargetResistance
-				DebuffDamage *= (100.f - TargetResistance) / 100.f;
-
-				// Round to nearest int value
-				DebuffDamage += 0.5f;
-				DebuffDamage = FMath::FloorToFloat(DebuffDamage);
-
-				float DebuffFrequency = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Stats_Frequency, false);
-				
-				float DebuffDuration = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Stats_Duration, false);
 
 				//TODO: Add Tenacity (Crowd Control Reduction) Attribute to game and capture it here that will reduce duration of certain types of Debuffs
 				if (GameplayTags.DebuffsEffectedByTenacity.Contains(DebuffTypeTag))
@@ -155,7 +174,8 @@ void UExecCalc_Damage::DetermineDebuff(const FGameplayEffectCustomExecutionParam
 					TargetTenacity = FMath::Clamp(TargetTenacity, 0.f, 50.f);  // 50% Tenacity is max value
 					DebuffDuration = DebuffDuration * (100.f - TargetTenacity) / 100.f;
 				}
-				
+
+				// TODO: need to have a array/map of these to apply multiple debuffs
 				FGameplayEffectContextHandle ContextHandle = Spec.GetContext();
 				URpgAbilitySystemLibrary::SetIsSuccessfulDebuff(ContextHandle, bDebuffSuccess);
 				URpgAbilitySystemLibrary::SetDebuffTag(ContextHandle, DebuffTypeTag);
