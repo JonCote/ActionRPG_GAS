@@ -194,6 +194,7 @@ void URpgAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbac
 	{
 		HandleIncomingXP(Props);
 	}
+	
 }
 
 void URpgAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)

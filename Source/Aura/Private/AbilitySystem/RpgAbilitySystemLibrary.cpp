@@ -360,6 +360,7 @@ FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const F
 		const float ScaledMultiplier = Pair.Value.GetValueAtLevel(DamageEffectParams.AbilityLevel);
 		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledMultiplier);
 	}
+	
 
 	/* Assign Caller Magnitudes for DebuffInfo */
 	for (const FDebuffInfo Info : DamageEffectParams.DebuffInfo)
@@ -367,6 +368,7 @@ FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const F
 
 		if (Info.DebuffType == EDebuffType::Burn)
 		{
+			
 			// Debuff Tag (pass value 1.f for a DebuffTag if assigned for ability)
 			const float DebuffValid = 1.f;
 			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Info.BurnInfo.DebuffTag, DebuffValid);
@@ -389,9 +391,11 @@ FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const F
 
 			const float ScaledDebuffDuration = Info.BurnInfo.DebuffDuration.GetValueAtLevel(DamageEffectParams.AbilityLevel);
 			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Burn_Duration, ScaledDebuffDuration);
+			
 		}
 		else if (Info.DebuffType == EDebuffType::Stun)
 		{
+
 			// Debuff Tag (pass value 1.f for a DebuffTag if assigned for ability)
 			const float DebuffValid = 1.f;
 			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Info.StunInfo.DebuffTag, DebuffValid);
@@ -402,6 +406,7 @@ FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const F
 
 			const float ScaledDebuffDuration = Info.StunInfo.DebuffDuration.GetValueAtLevel(DamageEffectParams.AbilityLevel);
 			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Stun_Duration, ScaledDebuffDuration);
+
 		}
 		
 	}
