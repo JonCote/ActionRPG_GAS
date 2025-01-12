@@ -78,29 +78,13 @@ struct FDebuffInfo
 {
 	GENERATED_BODY()
 	
-	/*UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FGameplayTag DebuffTag = FGameplayTag();
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FScalableFloat DebuffChance = FScalableFloat();
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FScalableFloat DebuffFrequency = FScalableFloat();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FScalableFloat DebuffDuration = FScalableFloat();
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FDamageInfo DebuffDamageInfo = FDamageInfo();*/
-
-	// TODO: Revamp the Debuff Structure using Enum and independent structs for each debuff type (seen below)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	EDebuffType DebuffType;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "DebuffType == EDebuffType::Burn"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "DebuffType == EDebuffType::Burn", EditConditionHides))
 	FBurnInfo BurnInfo = FBurnInfo();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "DebuffType == EDebuffType::Stun"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "DebuffType == EDebuffType::Stun", EditConditionHides))
 	FStunInfo StunInfo = FStunInfo();
 	
 };

@@ -194,6 +194,11 @@ void URpgAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbac
 	{
 		HandleIncomingXP(Props);
 	}
+
+	if (Data.EvaluatedData.Attribute == GetIncomingDebuffAttribute())
+	{
+		HandleIncomingDebuff(Props);
+	}
 	
 }
 
@@ -228,10 +233,10 @@ void URpgAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 	const bool bBlock = URpgAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
 	ShowFloatingText(Props, LocalIncomingDamage, bBlock, bCrit);
 
-	if (URpgAbilitySystemLibrary::IsSuccessfulDebuff(Props.EffectContextHandle))
-	{
-		HandleDebuff(Props);
-	}
+	//if (URpgAbilitySystemLibrary::IsSuccessfulDebuff(Props.EffectContextHandle))
+	//{
+	//	HandleDebuff(Props);
+	//}
 
 	/* DEBUG CODE: adds actor and all their tags to LogRpg */
 	/*
@@ -245,6 +250,18 @@ void URpgAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 	*/
 }
 
+void URpgAttributeSet::HandleIncomingDebuff(const FEffectProperties& Props)
+{
+	const float LocalIncomingDebuff = GetIncomingDebuff();
+	SetIncomingDebuff(0.f);
+
+	if (LocalIncomingDebuff < 0.f) return;
+
+	if (URpgAbilitySystemLibrary::IsSuccessfulDebuff(Props.EffectContextHandle))
+	{
+		HandleDebuff(Props);
+	}
+}
 
 // TODO: Update this to SCALE better with different Debuff Types.
 void URpgAttributeSet::HandleDebuff(const FEffectProperties& Props)
@@ -270,6 +287,7 @@ void URpgAttributeSet::HandleDebuff(const FEffectProperties& Props)
 	UTargetTagsGameplayEffectComponent& GrantTagComponent = Effect->FindOrAddComponent<UTargetTagsGameplayEffectComponent>();
 	TagContainer.Added.AddTag(DebuffTag);
 	TagContainer.CombinedTags.AddTag(DebuffTag);
+
 	if (DebuffTag.MatchesTagExact(FRpgGameplayTags::Get().Debuff_Stun))
 	{
 		TagContainer.Added.AddTag(FRpgGameplayTags::Get().Player_Block_Movement);

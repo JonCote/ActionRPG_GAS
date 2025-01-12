@@ -347,7 +347,7 @@ FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const F
 	FGameplayEffectContextHandle EffectContextHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeEffectContext();
 	EffectContextHandle.AddSourceObject(SourceAvatarActor);
 	
-	const FGameplayEffectSpecHandle SpecHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeOutgoingSpec(DamageEffectParams.DamageGameplayEffectClass, DamageEffectParams.AbilityLevel, EffectContextHandle);
+	FGameplayEffectSpecHandle SpecHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeOutgoingSpec(DamageEffectParams.DamageGameplayEffectClass, DamageEffectParams.AbilityLevel, EffectContextHandle);
 
 	/* Assign Caller Magnitudes for DamageInfo */
 	// Base Damage
@@ -360,7 +360,10 @@ FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const F
 		const float ScaledMultiplier = Pair.Value.GetValueAtLevel(DamageEffectParams.AbilityLevel);
 		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, Pair.Key, ScaledMultiplier);
 	}
+
 	
+	DamageEffectParams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
+
 
 	/* Assign Caller Magnitudes for DebuffInfo */
 	for (const FDebuffInfo Info : DamageEffectParams.DebuffInfo)
@@ -368,6 +371,7 @@ FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const F
 
 		if (Info.DebuffType == EDebuffType::Burn)
 		{
+			SpecHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeOutgoingSpec(DamageEffectParams.DamageGameplayEffectClass, DamageEffectParams.AbilityLevel, EffectContextHandle);
 			
 			// Debuff Tag (pass value 1.f for a DebuffTag if assigned for ability)
 			const float DebuffValid = 1.f;
@@ -391,10 +395,12 @@ FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const F
 
 			const float ScaledDebuffDuration = Info.BurnInfo.DebuffDuration.GetValueAtLevel(DamageEffectParams.AbilityLevel);
 			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Burn_Duration, ScaledDebuffDuration);
-			
+
+			DamageEffectParams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
 		}
 		else if (Info.DebuffType == EDebuffType::Stun)
 		{
+			SpecHandle = DamageEffectParams.SourceAbilitySystemComponent->MakeOutgoingSpec(DamageEffectParams.DamageGameplayEffectClass, DamageEffectParams.AbilityLevel, EffectContextHandle);
 
 			// Debuff Tag (pass value 1.f for a DebuffTag if assigned for ability)
 			const float DebuffValid = 1.f;
@@ -407,12 +413,15 @@ FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const F
 			const float ScaledDebuffDuration = Info.StunInfo.DebuffDuration.GetValueAtLevel(DamageEffectParams.AbilityLevel);
 			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, GameplayTags.Debuff_Stun_Duration, ScaledDebuffDuration);
 
+			DamageEffectParams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
 		}
+
+		
 		
 	}
 
 	
-	DamageEffectParams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
+	//DamageEffectParams.TargetAbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
 	return EffectContextHandle;
 }
 

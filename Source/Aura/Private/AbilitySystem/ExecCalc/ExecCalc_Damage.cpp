@@ -119,7 +119,7 @@ void UExecCalc_Damage::DetermineDebuff(const FGameplayEffectCustomExecutionParam
 				DebuffDuration = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Burn_Duration, false);
 				bHasDamage = true;
 			}
-			if (DebuffTypeTag.MatchesTagExact(GameplayTags.Debuff_Stun))
+			else if (DebuffTypeTag.MatchesTagExact(GameplayTags.Debuff_Stun))
 			{
 				SourceDebuffChance = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Stun_Chance, false, -1.f);
 				DebuffDuration = Spec.GetSetByCallerMagnitude(GameplayTags.Debuff_Stun_Duration, false);
@@ -306,6 +306,9 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	
 	const FGameplayModifierEvaluatedData EvalData(URpgAttributeSet::GetIncomingDamageAttribute(), EGameplayModOp::Additive, Damage);
 	OutExecutionOutput.AddOutputModifier(EvalData);
+
+	const FGameplayModifierEvaluatedData EvalData2(URpgAttributeSet::GetIncomingDebuffAttribute(), EGameplayModOp::Additive, 1.f);
+	OutExecutionOutput.AddOutputModifier(EvalData2);
 }
 
 float UExecCalc_Damage::CalculateMultiplierDamage(const FGameplayEffectCustomExecutionParameters& ExecutionParams,

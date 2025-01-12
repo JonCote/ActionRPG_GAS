@@ -178,6 +178,10 @@ public:
 	FGameplayAttributeData IncomingXP;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, IncomingXP);
 
+	UPROPERTY(BlueprintReadOnly, Category="Meta Attribute")
+	FGameplayAttributeData IncomingDebuff;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, IncomingDebuff);
+
 	//~ End Meta Attributes
 	
 	
@@ -262,6 +266,7 @@ public:
 private:
 	
 	void HandleIncomingDamage(const FEffectProperties& Props);
+	void HandleIncomingDebuff(const FEffectProperties& Props);
 	void HandleDebuff(const FEffectProperties& Props);
 	void HandleIncomingXP(const FEffectProperties& Props);
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
@@ -272,5 +277,6 @@ private:
 	bool bTopOffMana = false;
 	
 };
+
 
 
