@@ -37,6 +37,7 @@ void ARpgProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	SetLifeSpan(LifeSpan);
+	SetReplicateMovement(true);
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &ARpgProjectile::OnSphereOverlap);
 }
 

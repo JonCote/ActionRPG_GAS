@@ -114,7 +114,7 @@ void USpellMenuWidgetController::EquippableAbilitySelected()
 {
 	if (SelectedAbility.AbilityTag.MatchesTagExact(FRpgGameplayTags::Get().Abilities_Status_Equipped))
 	{
-		SelectedAbility.InputTag = GetRpgAbilitySystemComponent()->GetInputTagFromAbilityTag(SelectedAbility.AbilityTag);
+		SelectedAbility.InputTag = GetRpgAbilitySystemComponent()->GetSlotTagFromAbilityTag(SelectedAbility.AbilityTag);
 	}
 }
 

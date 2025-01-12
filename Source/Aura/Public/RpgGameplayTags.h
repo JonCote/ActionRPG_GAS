@@ -126,11 +126,14 @@ public:
 	// Gameplay Abilities
 	FGameplayTag Abilities_Fire_FireBolt;
 	FGameplayTag Abilities_Lightning_Electrocute;
-
 	
 	// Cooldowns
 	FGameplayTag Cooldown_Fire_FireBolt;
-	
+
+	// Passive Spell Abilities
+	FGameplayTag Abilities_Passive_HaloOfProtection;
+	FGameplayTag Abilities_Passive_LifeSiphon;
+	FGameplayTag Abilities_Passive_ManaSiphon;
 	
 
 	// CombatSockets

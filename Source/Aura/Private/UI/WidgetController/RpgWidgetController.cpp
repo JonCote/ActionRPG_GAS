@@ -69,7 +69,7 @@ void URpgWidgetController::BroadcastAbilityInfo()
 	BroadcastDelegate.BindLambda([this](const FGameplayAbilitySpec& AbilitySpec)
 	{
 		FRpgAbilityInfo Info = AbilityInfo->FindAbilityInfoForTag(GetRpgAbilitySystemComponent()->GetAbilityTagFromSpec(AbilitySpec));
-		Info.InputTag =  GetRpgAbilitySystemComponent()->GetInputTagFromSpec(AbilitySpec);
+		Info.InputTag =  GetRpgAbilitySystemComponent()->GetSlotTagFromSpec(AbilitySpec);
 		Info.StatusTag = GetRpgAbilitySystemComponent()->GetStatusTagFromSpec(AbilitySpec);
 		AbilityInfoDelegate.Broadcast(Info);
 	});

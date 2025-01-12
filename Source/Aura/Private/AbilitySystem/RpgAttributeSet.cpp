@@ -221,22 +221,12 @@ void URpgAttributeSet::HandleIncomingDamage(const FEffectProperties& Props)
 		}
 		SendXPEvent(Props);
 	}
-	//else
-	//{
-	//	FGameplayTagContainer TagContainer;
-	//	TagContainer.AddTag(FRpgGameplayTags::Get().Effects_HitReact);
-	//	Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
-	
-	//}
+
 		
 	const bool bCrit = URpgAbilitySystemLibrary::IsCriticalHit(Props.EffectContextHandle);
 	const bool bBlock = URpgAbilitySystemLibrary::IsBlockedHit(Props.EffectContextHandle);
 	ShowFloatingText(Props, LocalIncomingDamage, bBlock, bCrit);
-
-	//if (URpgAbilitySystemLibrary::IsSuccessfulDebuff(Props.EffectContextHandle))
-	//{
-	//	HandleDebuff(Props);
-	//}
+	
 
 	/* DEBUG CODE: adds actor and all their tags to LogRpg */
 	/*

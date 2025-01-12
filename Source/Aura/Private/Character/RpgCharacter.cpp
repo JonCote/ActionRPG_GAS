@@ -9,6 +9,7 @@
 #include "Player/RpgPlayerState.h"
 #include "AbilitySystem/RpgAttributeSet.h"
 #include "AbilitySystem/Data/LevelUpInfo.h"
+#include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Player/RpgPlayerController.h"
 #include "UI/HUD/RpgHUD.h"
 
@@ -64,6 +65,7 @@ void ARpgCharacter::OnRep_PlayerState()
 
 void ARpgCharacter::OnRep_Stunned()
 {
+	// Apply Gameplay Tags locally for Debuff
 	if (URpgAbilitySystemComponent* RpgASC = Cast<URpgAbilitySystemComponent>(AbilitySystemComponent))
 	{
 		const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
@@ -74,12 +76,35 @@ void ARpgCharacter::OnRep_Stunned()
 		if (bIsStunned)
 		{
 			RpgASC->AddLooseGameplayTags(BlockedTags);
+			StunDebuffComponent->Activate();
 		}
 		else
 		{
 			RpgASC->RemoveLooseGameplayTags(BlockedTags);
+			StunDebuffComponent->Deactivate();
 		}
 		
+	}
+}
+
+void ARpgCharacter::OnRep_Burned()
+{
+	// Apply Gameplay Tags locally for Debuff
+	if (URpgAbilitySystemComponent* RpgASC = Cast<URpgAbilitySystemComponent>(AbilitySystemComponent))
+	{
+		const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
+		FGameplayTagContainer BlockedTags;
+		BlockedTags.AddTag(GameplayTags.Debuff_Burn);
+		if (bIsBurned)
+		{
+			RpgASC->AddLooseGameplayTags(BlockedTags);
+			BurnDebuffComponent->Activate();
+		}
+		else
+		{
+			RpgASC->RemoveLooseGameplayTags(BlockedTags);
+			BurnDebuffComponent->Deactivate();
+		}
 	}
 }
 
@@ -94,6 +119,7 @@ void ARpgCharacter::InitAbilityActorInfo()
 	OnASCRegistered.Broadcast(AbilitySystemComponent);
 
 	AbilitySystemComponent->RegisterGameplayTagEvent(FRpgGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ARpgCharacter::StunTagChanged);
+	AbilitySystemComponent->RegisterGameplayTagEvent(FRpgGameplayTags::Get().Debuff_Burn, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ARpgCharacter::BurnTagChanged);
 	
 }
 
