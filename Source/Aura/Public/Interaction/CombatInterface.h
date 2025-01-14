@@ -14,6 +14,7 @@ class UAnimMontage;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered, UAbilitySystemComponent*);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeathSignature, AActor*, DeadActor);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamagedSignature, float /*DamageAmount*/);
 
 USTRUCT(BlueprintType)
 struct FTaggedMontage
@@ -58,6 +59,7 @@ public:
 	void Die();
 
 	virtual FOnDeathSignature& GetOnDeathDelegate() = 0;
+	virtual FOnDamagedSignature& GetOnDamagedDelegate() = 0;
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "CombatInterface")
 	FVector GetCombatSocketLocation(const FGameplayTag& SocketTag);
@@ -96,6 +98,8 @@ public:
 	USkeletalMeshComponent* GetWeaponMesh();
 	
 	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() = 0;
+
+	
 	
 };
 

@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "RpgPlayerController.generated.h"
 
+class AMagicCircle;
 class UDamageTextComponent;
 class URpgInputConfig;
 class UInputMappingContext;
@@ -29,6 +30,16 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void ShowDamageNumber(float DamageAmount, ACharacter* TargetCharacter, bool bBlockedHit, bool bCritHit);
+
+	UFUNCTION(BlueprintCallable)
+	void ShowMagicCircle(UMaterialInterface* DecalMaterial = nullptr);
+
+	UFUNCTION(BlueprintCallable)
+	void HideMagicCircle();
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateMagicCircleLocation(FHitResult HitResult);
+
 	
 protected:
 	virtual void BeginPlay() override;
@@ -85,6 +96,15 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AMagicCircle> MagicCircleClass;
+
+	UPROPERTY()
+	TObjectPtr<AMagicCircle> MagicCircle;
+
+	void UpdateMagicCircleLocation();
+	
 };
 
 

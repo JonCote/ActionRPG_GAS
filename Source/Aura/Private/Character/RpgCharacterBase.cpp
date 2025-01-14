@@ -60,6 +60,13 @@ UAbilitySystemComponent* ARpgCharacterBase::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
+float ARpgCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	const float DamageTaken = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnDamagedDelegate.Broadcast(DamageTaken);
+	return DamageTaken;
+}
+
 UAnimMontage* ARpgCharacterBase::GetHitReactMontage_Implementation()
 {
 	return HitReactMontage;
@@ -74,6 +81,11 @@ void ARpgCharacterBase::Die_Implementation()
 FOnDeathSignature& ARpgCharacterBase::GetOnDeathDelegate()
 {
 	return OnDeathDelegate;
+}
+
+FOnDamagedSignature& ARpgCharacterBase::GetOnDamagedDelegate()
+{
+	return OnDamagedDelegate;
 }
 
 void ARpgCharacterBase::MulticastHandleDeath_Implementation()

@@ -9,6 +9,7 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "RpgCharacterBase.generated.h"
 
+
 class UPassiveSpellNiagaraComponent;
 class UDebuffNiagaraComponent;
 class UNiagaraSystem;
@@ -17,6 +18,7 @@ class UGameplayEffect;
 class UAbilitySystemComponent;
 class UAttributeSet;
 class UAnimMontage;
+
 
 UCLASS(Abstract)
 class AURA_API ARpgCharacterBase : public ACharacter, public IAbilitySystemInterface, public ICombatInterface
@@ -28,12 +30,14 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
 	//~ Begin Combat Interface
 	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
 	virtual void Die_Implementation() override;
 	virtual FOnDeathSignature& GetOnDeathDelegate() override;
+	virtual FOnDamagedSignature& GetOnDamagedDelegate() override;
 	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) override;
 	virtual bool IsDead_Implementation() const override;
 	virtual AActor* GetAvatar_Implementation() override;
@@ -49,6 +53,7 @@ public:
 
 	FOnASCRegistered OnASCRegistered;
 	FOnDeathSignature OnDeathDelegate;
+	FOnDamagedSignature OnDamagedDelegate;
 	
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastHandleDeath();

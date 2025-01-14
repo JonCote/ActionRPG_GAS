@@ -200,6 +200,23 @@ void FRpgGameplayTags::InitNativeGameplayTags()
 													FName("Debuff.Stun.Duration"),
 													FString("Debuff Duration Statistic Tag")
 													);
+
+	GameplayTags.Debuff_Slow = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Slow"),
+													FString("Slow Debuff Tag")
+													);
+	GameplayTags.Debuff_Slow_Chance = UGameplayTagsManager::Get().AddNativeGameplayTag(
+														FName("Debuff.Slow.Chance"),
+														FString("Debuff Chance Statistic Tag")
+														);
+	GameplayTags.Debuff_Slow_Duration = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Slow.Duration"),
+													FString("Debuff Duration Statistic Tag")
+													);
+	GameplayTags.Debuff_Slow_Magnitude = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Debuff.Slow.Magnitude"),
+													FString("Debuff Magnitude Statistic Tag")
+													);
 	
 	
 	// Debuff Statistics
@@ -212,8 +229,10 @@ void FRpgGameplayTags::InitNativeGameplayTags()
 
 	GameplayTags.DebuffTypes.Add(GameplayTags.Debuff_Burn);
 	GameplayTags.DebuffTypes.Add(GameplayTags.Debuff_Stun);
+	GameplayTags.DebuffTypes.Add(GameplayTags.Debuff_Slow);
 	
 	GameplayTags.DebuffsEffectedByTenacity.Add(GameplayTags.Debuff_Stun);
+	GameplayTags.DebuffsEffectedByTenacity.Add(GameplayTags.Debuff_Slow);
 	
 	
 	// Debuff Damage Multipliers
@@ -328,12 +347,24 @@ void FRpgGameplayTags::InitNativeGameplayTags()
 													FName("Abilities.Lightning.Electrocute"),
 													FString("Electrocute Ability Tag")
 													);
+	GameplayTags.Abilities_Ice_IceShards = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Abilities.Ice.IceShards"),
+													FString("IceShards Ability Tag")
+													);
 
 	
 	// Cooldowns
 	GameplayTags.Cooldown_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
 													FName("Cooldown.Fire.FireBolt"),
 													FString("FireBolt Cooldown Tag")
+													);
+	GameplayTags.Cooldown_Lightning_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Cooldown.Lightning.Electrocute"),
+													FString("Electrocute Cooldown Tag")
+													);
+	GameplayTags.Cooldown_Ice_IceShards = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Cooldown.Ice.IceShards"),
+													FString("IceShards Cooldown Tag")
 													);
 
 

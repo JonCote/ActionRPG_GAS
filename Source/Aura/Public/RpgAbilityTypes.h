@@ -11,6 +11,23 @@ struct FRpgGameplayTags;
 class UGameplayEffect;
 
 USTRUCT(BlueprintType)
+struct FRadialDamageInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float RadialDamageInnerRadius = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float RadialDamageOuterRadius = 0.f;
+
+	UPROPERTY(EditDefaultsOnly)
+	FVector RadialDamageOrigin = FVector::ZeroVector;
+	
+};
+
+
+USTRUCT(BlueprintType)
 struct FDamageInfo
 {
 	GENERATED_BODY()
@@ -23,6 +40,12 @@ struct FDamageInfo
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TMap<FGameplayTag, FScalableFloat> DamageMultipliers = TMap<FGameplayTag, FScalableFloat>();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool bIsRadialDamage = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "bIsRadialDamage == true", EditConditionHides))
+	FRadialDamageInfo RadialDamageInfo = FRadialDamageInfo();
 	
 };
 
@@ -156,13 +179,22 @@ public:
 	float GetDebuffDuration() const { return DebuffDuration; }
 	float GetDebuffFrequency() const { return DebuffFrequency; }
 	TSharedPtr<FGameplayTag> GetDebuffTag() const { return DebuffTag; }
+	bool IsRadialDamage() const { return bIsRadialDamage; }
+	float GetRadialDamageInnerRadius() const { return RadialDamageInnerRadius; }
+	float GetRadialDamageOuterRadius() const { return RadialDamageOuterRadius; }
+	FVector GetRadialDamageOrigin() const { return RadialDamageOrigin; }
+	
 
 	void SetIsSuccessfulDebuff(const bool bInIsSuccessfulDebuff) { bIsSuccessfulDebuff = bInIsSuccessfulDebuff; }
 	void SetDebuffDamage(const float InDebuffDamage) {	DebuffDamage = InDebuffDamage; }
 	void SetDebuffDuration(const float InDebuffDuration) { DebuffDuration = InDebuffDuration; }
 	void SetDebuffFrequency(const float InDebuffFrequency) { DebuffFrequency = InDebuffFrequency; }
 	void SetDebuffTag(const TSharedPtr<FGameplayTag>& InDebuffTag) { DebuffTag = InDebuffTag; }
-	//TODO: Add Debuff Count
+	void SetIsRadialDamage(const bool bInIsRadialDamage) { bIsRadialDamage = bInIsRadialDamage; }
+	void SetRadialDamageInnerRadius(const float InRadialDamageInnerRadius) { RadialDamageInnerRadius = InRadialDamageInnerRadius; }
+	void SetRadialDamageOuterRadius(const float InRadialDamageOuterRadius) { RadialDamageOuterRadius = InRadialDamageOuterRadius; }
+	void SetRadialDamageOrigin(const FVector& InRadialDamageOrigin) { RadialDamageOrigin = InRadialDamageOrigin; }
+
 	
 	
 	/** Returns the actual struct used for serialization, subclasses must override this! */
@@ -210,10 +242,20 @@ protected:
 
 	UPROPERTY()
 	int32 DebuffCount = 0.0f;
-	
+
+	UPROPERTY()
+	bool bIsRadialDamage = false;
+
+	UPROPERTY()
+	float RadialDamageInnerRadius = 0.f;
+
+	UPROPERTY()
+	float RadialDamageOuterRadius = 0.f;
+
+	UPROPERTY()
+	FVector RadialDamageOrigin = FVector::ZeroVector;
 	
 	TSharedPtr<FGameplayTag> DebuffTag;
-	
 	
 };
 

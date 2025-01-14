@@ -75,6 +75,11 @@ public:
 	FGameplayTag Debuff_Stun_Chance;
 	FGameplayTag Debuff_Stun_Frequency;
 	FGameplayTag Debuff_Stun_Duration;
+
+	FGameplayTag Debuff_Slow;
+	FGameplayTag Debuff_Slow_Chance;
+	FGameplayTag Debuff_Slow_Duration;
+	FGameplayTag Debuff_Slow_Magnitude;
 	
 
 	// Debuff Statistics
@@ -126,9 +131,12 @@ public:
 	// Gameplay Abilities
 	FGameplayTag Abilities_Fire_FireBolt;
 	FGameplayTag Abilities_Lightning_Electrocute;
+	FGameplayTag Abilities_Ice_IceShards;
 	
 	// Cooldowns
 	FGameplayTag Cooldown_Fire_FireBolt;
+	FGameplayTag Cooldown_Lightning_Electrocute;
+	FGameplayTag Cooldown_Ice_IceShards;
 
 	// Passive Spell Abilities
 	FGameplayTag Abilities_Passive_HaloOfProtection;

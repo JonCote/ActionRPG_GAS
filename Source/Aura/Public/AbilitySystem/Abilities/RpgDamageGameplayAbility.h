@@ -22,6 +22,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CauseDamage(AActor* TargetActor);
 
+	UFUNCTION(BlueprintCallable)
+	void CauseRadialDamage(const FVector& RadialDamageOrigin, const TArray<AActor*>& ActorsToIgnore);
+
+	UFUNCTION(BlueprintPure)
 	FDamageEffectParams MakeDamageEffectParamsFromClassDefaults(AActor* TargetActor = nullptr) const;
 
 	UFUNCTION(BlueprintPure)
@@ -32,12 +36,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability Info")
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
 	
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Ability Info")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability Info")
 	FDamageInfo DamageInfo;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Ability Info")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Ability Info")
 	TArray<FDebuffInfo> DebuffInfo;
+	
 	
 	UFUNCTION(BlueprintPure)
 	FTaggedMontage GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& TaggedMontages) const;

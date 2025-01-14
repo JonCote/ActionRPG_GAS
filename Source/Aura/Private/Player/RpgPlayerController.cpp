@@ -10,7 +10,9 @@
 #include "NavigationSystem.h"
 #include "RpgGameplayTags.h"
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
+#include "Actor/MagicCircle.h"
 #include "Aura/Aura.h"
+#include "Components/DecalComponent.h"
 #include "Components/SplineComponent.h"
 #include "Input/RpgInputComponent.h"
 #include "Interaction/EnemyInterface.h"
@@ -31,7 +33,30 @@ void ARpgPlayerController::PlayerTick(float DeltaTime)
 	CursorTrace();
 	RotateToMouse();
 	AutoRun();
+	UpdateMagicCircleLocation();
 	
+}
+
+void ARpgPlayerController::ShowMagicCircle(UMaterialInterface* DecalMaterial)
+{
+	if (!IsValid(MagicCircle))
+	{
+		MagicCircle = GetWorld()->SpawnActor<AMagicCircle>(MagicCircleClass);
+		if (DecalMaterial)
+		{
+			MagicCircle->MagicCircleDecal->SetMaterial(0, DecalMaterial);
+		}
+	}
+	
+	
+}
+
+void ARpgPlayerController::HideMagicCircle()
+{
+	if (IsValid(MagicCircle))
+	{
+		MagicCircle->Destroy();
+	}
 }
 
 void ARpgPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* TargetCharacter, bool bBlockedHit, bool bCritHit)
@@ -62,6 +87,22 @@ void ARpgPlayerController::AutoRun()
 		{
 			bAutoRunning = false;
 		}
+	}
+}
+
+void ARpgPlayerController::UpdateMagicCircleLocation()
+{
+	if (IsValid(MagicCircle))
+	{
+		MagicCircle->SetActorLocation(CursorGroundHit.ImpactPoint);
+	}
+}
+
+void ARpgPlayerController::UpdateMagicCircleLocation(FHitResult HitResult)
+{
+	if (IsValid(MagicCircle))
+	{
+		MagicCircle->SetActorLocation(HitResult.ImpactPoint);
 	}
 }
 

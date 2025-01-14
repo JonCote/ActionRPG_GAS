@@ -4,7 +4,7 @@
 #include "AbilitySystem/AbilityTasks/TargetDataUnderMouse.h"
 
 #include "AbilitySystemComponent.h"
-#include "Aura/Aura.h"
+
 
 
 UTargetDataUnderMouse* UTargetDataUnderMouse::CreateTargetDataUnderMouse(UGameplayAbility* OwningAbility, const ECollisionChannel CollisionChannel)
@@ -18,6 +18,7 @@ void UTargetDataUnderMouse::Activate()
 {
 	if (Ability->GetCurrentActorInfo()->IsLocallyControlled())
 	{
+		
 		bool bValidHitResult = SendMouseCursorData();
 		if (!bValidHitResult) EndTask();
 	}
@@ -78,7 +79,9 @@ bool UTargetDataUnderMouse::SendMouseCursorData() const
 		}
 	}
 	return bValidHitResult;
+	
 }
+
 
 void UTargetDataUnderMouse::OnTargetDataReplicatedCallback(const FGameplayAbilityTargetDataHandle& DataHandle, FGameplayTag ActivationTag) const
 {

@@ -218,6 +218,27 @@ int32 ARpgCharacter::FindLevelForXP_Implementation(const int32 InXP) const
 	return RpgPlayerState->LevelUpInfo->FindLevelForGivenXP(InXP);
 }
 
+void ARpgCharacter::ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial)
+{
+	check(RpgPlayerController);
+	RpgPlayerController->ShowMagicCircle(DecalMaterial);
+	RpgPlayerController->bShowMouseCursor = false;
+}
+
+void ARpgCharacter::HideMagicCircle_Implementation()
+{
+	check(RpgPlayerController);
+	RpgPlayerController->HideMagicCircle();
+	RpgPlayerController->bShowMouseCursor = true;
+}
+
+void ARpgCharacter::UpdateMagicCircleLocation_Implementation(FHitResult HitResult)
+{
+	check(RpgPlayerController);
+	RpgPlayerController->UpdateMagicCircleLocation(HitResult);
+}
+
+
 int32 ARpgCharacter::GetCharacterLevel_Implementation()
 {
 	check(RpgPlayerState);

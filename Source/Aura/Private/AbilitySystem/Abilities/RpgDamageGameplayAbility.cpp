@@ -5,23 +5,11 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "GameplayCueNotifyTypes.h"
 #include "AbilitySystem/RpgAbilitySystemLibrary.h"
 
 void URpgDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 {
-	/*FGameplayEffectSpecHandle DamageSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass, 1.f);
-
-	for (TTuple<FGameplayTag, FScalableFloat> Pair : DamageInfo.DamageMultipliers)
-	{
-		float ScaledMultiplier = Pair.Value.GetValueAtLevel(GetAbilityLevel());
-		UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DamageSpecHandle, Pair.Key, ScaledMultiplier);
-	}
-	float ScaledDamage = DamageInfo.BaseDamage.GetValueAtLevel(GetAbilityLevel());
-	UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(DamageSpecHandle, DamageInfo.DamageTypeTag, ScaledDamage);
-	
-	GetAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(*DamageSpecHandle.Data.Get(), UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor));
-	*/
-
 	FDamageEffectParams DamageEffectParams = MakeDamageEffectParamsFromClassDefaults();
 	
 	const AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
@@ -34,6 +22,28 @@ void URpgDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 		URpgAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
 	}
 }
+
+void URpgDamageGameplayAbility::CauseRadialDamage(const FVector& RadialDamageOrigin, const TArray<AActor*>& ActorsToIgnore)
+{
+	TArray<AActor*> OverlappingActors;
+	URpgAbilitySystemLibrary::GetLivePlayersWithinRadius(GetAvatarActorFromActorInfo(), OverlappingActors, ActorsToIgnore, DamageInfo.RadialDamageInfo.RadialDamageOuterRadius, RadialDamageOrigin);
+
+	for (AActor* TargetActor : OverlappingActors)
+	{
+		FDamageEffectParams DamageEffectParams = MakeDamageEffectParamsFromClassDefaults();
+		DamageEffectParams.DamageInfo.RadialDamageInfo.RadialDamageOrigin = RadialDamageOrigin;
+		const AActor* SourceAvatarActor = DamageEffectParams.SourceAbilitySystemComponent->GetAvatarActor();
+		if (SourceAvatarActor != TargetActor && URpgAbilitySystemLibrary::IsNotFriendly(SourceAvatarActor, TargetActor))
+		{
+			if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor))
+			{
+				DamageEffectParams.TargetAbilitySystemComponent = TargetASC;
+				URpgAbilitySystemLibrary::ApplyDamageEffect(DamageEffectParams);
+			}
+		}
+	}
+}
+
 
 FDamageEffectParams URpgDamageGameplayAbility::MakeDamageEffectParamsFromClassDefaults(AActor* TargetActor) const
 {

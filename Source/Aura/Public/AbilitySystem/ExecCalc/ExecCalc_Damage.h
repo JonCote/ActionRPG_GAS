@@ -33,9 +33,9 @@ private:
 						 const FGameplayEffectSpec& Spec, const FAggregatorEvaluateParameters& EvalParams,
 						 const TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition>& SourceTagsToCaptureDefs,
 						 const TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition>& TargetTagsToCaptureDefs) const;
-
-	float CalculateMultiplierDamage(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+	
+	static float CalculateMultiplierDamage(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
 									const FGameplayEffectSpec& Spec, const FAggregatorEvaluateParameters& EvalParams,
 									const TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition>& TagsToCaptureDefs,
-									const TMap<FGameplayTag, FGameplayTag>& DamageMultiplierToAttribute) const;
+									const TMap<FGameplayTag, FGameplayTag>& DamageMultiplierToAttribute);
 };

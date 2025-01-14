@@ -50,6 +50,10 @@ public:
 	
 	virtual void LevelUp_Implementation() override;
 	virtual int32 FindLevelForXP_Implementation(const int32 InXP) const override;
+
+	virtual void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial = nullptr) override;
+	virtual void HideMagicCircle_Implementation() override;
+	virtual void UpdateMagicCircleLocation_Implementation(FHitResult HitResult) override;
 	//~ End Player Interface
 	
 	//~ Begin Combat Interface

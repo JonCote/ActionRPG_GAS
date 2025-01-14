@@ -8,6 +8,8 @@
 #include "RpgGameplayTags.h"
 #include "AbilitySystem/RpgAbilitySystemLibrary.h"
 #include "AbilitySystem/RpgAttributeSet.h"
+#include "Interaction/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 struct RpgTargetStatics
 {
@@ -196,6 +198,13 @@ float UExecCalc_Damage::CalculateDamage(const FGameplayEffectCustomExecutionPara
 	const TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition>& SourceTagsToCaptureDefs,
 	const TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition>& TargetTagsToCaptureDefs) const
 {
+	const UAbilitySystemComponent* SourceASC = ExecutionParams.GetSourceAbilitySystemComponent();
+	const UAbilitySystemComponent* TargetASC = ExecutionParams.GetTargetAbilitySystemComponent();
+
+	AActor* SourceAvatar = SourceASC ? SourceASC->GetAvatarActor() : nullptr;
+	AActor* TargetAvatar = TargetASC ? TargetASC->GetAvatarActor() : nullptr;
+
+	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 	float Damage = 0.f;
 
 	// Add Source Attribute Damage Multiplier Calculations results to Damage
@@ -228,7 +237,6 @@ float UExecCalc_Damage::CalculateDamage(const FGameplayEffectCustomExecutionPara
 	CritRate = FMath::Clamp(CritRate, 0.f, 100.f);
 
 	const bool bCritSuccess = FMath::RandRange(1, 100) <= CritRate;
-	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 	URpgAbilitySystemLibrary::SetIsCriticalHit(EffectContextHandle, bCritSuccess);
 	
 	float CritDamage = 0.f;
@@ -239,8 +247,41 @@ float UExecCalc_Damage::CalculateDamage(const FGameplayEffectCustomExecutionPara
 	ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(TargetDamageStatics().DefenseDef, EvalParams, Defense);
 	Defense = FMath::Max<float>(0.f, Defense);
 	const float DamageReduction = Defense * 0.1f;
-
+	
 	/* Calculate Final Damage Applied to Target */
+	// Apply Radial Damage (If IsRadialDamage)
+	if (URpgAbilitySystemLibrary::IsRadialDamage(EffectContextHandle))
+	{
+		// 1. override TakeDamage in RpgCharacterBase.
+		// 2. create delegate OnDamageDelegate, broadcast damage received in TakeDamage
+		// 3. Bind lambda to OnDamageDelegate on the Victim here
+		// 4. Call UGameplayStatics::ApplyRadialDamageWithFalloff to cause damage (this will result in TakeDamage being called
+		//			on the Victim, which will then broadcast OnDamageDelegate)
+		// 5. In lambda, Set Damage to the damage received from the broadcast
+		
+		if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(TargetAvatar))
+		{
+			CombatInterface->GetOnDamagedDelegate().AddLambda([&](float DamageAmount)
+			{
+				Damage = DamageAmount;
+			});
+		}
+		// This will cause the OnDamagedDelegate to broadcast the new Damage value accounting for RadialDamage
+		UGameplayStatics::ApplyRadialDamageWithFalloff(
+			TargetAvatar,
+			Damage,
+			0.f,
+			URpgAbilitySystemLibrary::GetRadialDamageOrigin(EffectContextHandle),
+			URpgAbilitySystemLibrary::GetRadialDamageInnerRadius(EffectContextHandle),
+			URpgAbilitySystemLibrary::GetRadialDamageOuterRadius(EffectContextHandle),
+			1.f,
+			UDamageType::StaticClass(),
+			TArray<AActor*>(),
+			SourceAvatar,
+			nullptr);
+	}
+	
+	
 	// Apply DamageReduction
 	Damage -= FMath::Max<float>(0.f, DamageReduction);
 
@@ -252,11 +293,39 @@ float UExecCalc_Damage::CalculateDamage(const FGameplayEffectCustomExecutionPara
 
 	// Apply TargetResistance
 	Damage *= (100.f - TargetResistance) / 100.f;
-
+	
+	
+	
 	// Round to nearest int value
 	Damage += 0.5f;
 	return FMath::FloorToFloat(Damage);
 }
+
+float UExecCalc_Damage::CalculateMultiplierDamage(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
+	const FGameplayEffectSpec& Spec, const FAggregatorEvaluateParameters& EvalParams,
+	const TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition>& TagsToCaptureDefs,
+	const TMap<FGameplayTag, FGameplayTag>& DamageMultiplierToAttribute)
+{
+	float Damage = 0.0f;
+	for (const auto& Pair : DamageMultiplierToAttribute)
+	{
+		const FGameplayTag& MultiplierTag = Pair.Key;
+		const FGameplayTag& AttributeTag = Pair.Value;
+
+		checkf(TagsToCaptureDefs.Contains(AttributeTag), TEXT("TagsToCaptureDefs doesn't contain Tag: [%s] in ExecCalc_Damage"), *AttributeTag.ToString());
+		const FGameplayEffectAttributeCaptureDefinition CaptureDefinition = TagsToCaptureDefs[AttributeTag];
+		
+		const float MultiplierValue = Spec.GetSetByCallerMagnitude(MultiplierTag, false);
+
+		float AttributeValue = 0.f;
+		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDefinition, EvalParams, AttributeValue);
+		AttributeValue = FMath::Max(0.f, AttributeValue);
+
+		Damage += MultiplierValue * AttributeValue;
+	}
+	return Damage;
+}
+
 
 void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
                                               FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
@@ -309,29 +378,4 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	const FGameplayModifierEvaluatedData EvalData2(URpgAttributeSet::GetIncomingDebuffAttribute(), EGameplayModOp::Additive, 1.f);
 	OutExecutionOutput.AddOutputModifier(EvalData2);
-}
-
-float UExecCalc_Damage::CalculateMultiplierDamage(const FGameplayEffectCustomExecutionParameters& ExecutionParams,
-	const FGameplayEffectSpec& Spec, const FAggregatorEvaluateParameters& EvalParams,
-	const TMap<FGameplayTag, FGameplayEffectAttributeCaptureDefinition>& TagsToCaptureDefs,
-	const TMap<FGameplayTag, FGameplayTag>& DamageMultiplierToAttribute) const
-{
-	float Damage = 0.0f;
-	for (const auto& Pair : DamageMultiplierToAttribute)
-	{
-		const FGameplayTag& MultiplierTag = Pair.Key;
-		const FGameplayTag& AttributeTag = Pair.Value;
-
-		checkf(TagsToCaptureDefs.Contains(AttributeTag), TEXT("TagsToCaptureDefs doesn't contain Tag: [%s] in ExecCalc_Damage"), *AttributeTag.ToString());
-		const FGameplayEffectAttributeCaptureDefinition CaptureDefinition = TagsToCaptureDefs[AttributeTag];
-		
-		const float MultiplierValue = Spec.GetSetByCallerMagnitude(MultiplierTag, false);
-
-		float AttributeValue = 0.f;
-		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDefinition, EvalParams, AttributeValue);
-		AttributeValue = FMath::Max(0.f, AttributeValue);
-
-		Damage += MultiplierValue * AttributeValue;
-	}
-	return Damage;
 }

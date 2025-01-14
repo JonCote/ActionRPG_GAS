@@ -22,7 +22,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Ability|Tasks", meta=(DisplayName="TargetDataUnderMouse", HidePin="OwningAbility", DefaultToSelf="OwningAbility", BlueprintInternalUseOnly = "true"))
 	static UTargetDataUnderMouse* CreateTargetDataUnderMouse(UGameplayAbility* OwningAbility, const ECollisionChannel CollisionChannel);
-
+	
 	UPROPERTY(BlueprintAssignable)
 	FMouseTargetDataSignature ValidData;
 	UPROPERTY(BlueprintAssignable)
@@ -32,8 +32,11 @@ private:
 
 	virtual void Activate() override;
 	bool SendMouseCursorData() const;
-
+	
 	void OnTargetDataReplicatedCallback(const FGameplayAbilityTargetDataHandle& DataHandle, FGameplayTag ActivationTag) const;
 
 	ECollisionChannel TraceCollisionChannel;
+
+
+	
 };

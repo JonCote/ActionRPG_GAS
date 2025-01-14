@@ -25,6 +25,11 @@ class AURA_API URpgAbilitySystemLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+
+	
+	/* ====================================================================================================================
+	 *	Widget Controller
+	 */
 	
 	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|WidgetController", meta = (DefaultToSelf = "WorldContextObject"))
 	static bool ConstructWidgetControllerParams(const UObject* WorldContextObject, FWidgetControllerParams& OutWCParams, ARpgHUD*& OutRpgHUD);
@@ -38,18 +43,27 @@ public:
 	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|WidgetController", meta = (DefaultToSelf = "WorldContextObject"))
 	static USpellMenuWidgetController* GetSpellMenuWidgetController(const UObject* WorldContextObject);
 
+
+	/* ====================================================================================================================
+	 *	Ability System Defaults
+	 */
+	
 	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|CharacterClassDefaults")
 	static void InitDefaultAttributes(const UObject* WorldContextObject, const ECharacterClass CharacterClass, const float Level, UAbilitySystemComponent* ASC);
 
 	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|CharacterClassDefaults")
 	static void GiveStartupAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* ASC, ECharacterClass CharacterClass);
-
 	
 	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|AbilityInfo")
 	static UAbilityInfo* GetAbilityInfo(const UObject* WorldContextObject);
 	
 	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|CharacterClassDefaults")
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
+
+	
+	/* ====================================================================================================================
+	 *	Effect Context Getter
+	 */
 	
 	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|GameplayEffects")
 	static bool IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle);
@@ -72,6 +86,22 @@ public:
 	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|GameplayEffects")
 	static FGameplayTag GetDebuffTag(const FGameplayEffectContextHandle& EffectContextHandle);
 
+	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|GameplayEffects")
+	static bool IsRadialDamage(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|GameplayEffects")
+	static float GetRadialDamageInnerRadius(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|GameplayEffects")
+	static float GetRadialDamageOuterRadius(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|GameplayEffects")
+	static FVector GetRadialDamageOrigin(const FGameplayEffectContextHandle& EffectContextHandle);
+
+	
+	/* ====================================================================================================================
+	 *	Effect Context Setter
+	 */
 	
 	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|GameplayEffects")
 	static void SetIsBlockedHit(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const bool bIsBlockedHit);
@@ -94,6 +124,22 @@ public:
 	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|GameplayEffects")
 	static void SetDebuffTag(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FGameplayTag& DebuffTag);
 
+	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|GameplayEffects")
+	static void SetIsRadialDamage(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const bool bIsRadialDamage);
+
+	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|GameplayEffects")
+	static void SetRadialDamageInnerRadius(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const float InnerRadius);
+
+	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|GameplayEffects")
+	static void SetRadialDamageOuterRadius(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const float OuterRadius);
+
+	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|GameplayEffects")
+	static void SetRadialDamageOrigin(UPARAM(ref) FGameplayEffectContextHandle& EffectContextHandle, const FVector Origin);
+	
+	
+	/* ====================================================================================================================
+	 *	Gameplay Mechanics
+	 */
 	
 	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|GameplayMechanics")
 	static void GetLivePlayersWithinRadius(const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& ActorsToIgnore, const float Radius, const FVector& SphereOrigin);
@@ -103,18 +149,24 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|GameplayMechanics")
 	static bool IsNotFriendly(const AActor* FirstActor, const AActor* SecondActor);
-
-	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|DamageEffects")
-	static FGameplayEffectContextHandle ApplyDamageEffect(const FDamageEffectParams& DamageEffectParams);
-
+	
 	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|GameplayMechanics")
 	static TArray<FRotator> EvenlySpacedRotators(const FVector& Forward, const FVector& Axis, const float Spread, const int32 NumRotators);
 
 	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|GameplayMechanics")
 	static TArray<FVector> EvenlyRotatedVectors(const FVector& Forward, const FVector& Axis, const float Spread, const int32 NumVectors);
 	
-	
 	static int32 GetXPRewardForClassAndLevel(const UObject* WorldContextObject, ECharacterClass CharacterClass, const int32 CharacterLevel);
+
+	
+	/* ====================================================================================================================
+	 *	Apply Damage Effect
+	 */
+	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|DamageEffects")
+	static FGameplayEffectContextHandle ApplyDebuffEffects(const FDamageEffectParams& DamageEffectParams, FGameplayEffectContextHandle& EffectContextHandle);
+	
+	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|DamageEffects")
+	static FGameplayEffectContextHandle ApplyDamageEffect(const FDamageEffectParams& DamageEffectParams);
 
 };
 
