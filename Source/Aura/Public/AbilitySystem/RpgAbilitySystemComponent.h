@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "RpgAbilitySystemComponent.generated.h"
 
+class ULoadScreenSaveGame;
 class URpgAbilitySystemComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FEffectAssetTags, const FGameplayTagContainer&);
@@ -25,6 +26,7 @@ class AURA_API URpgAbilitySystemComponent : public UAbilitySystemComponent
 public:
 
 	void AbilityActorInfoSet();
+	void AddCharacterAbilitiesFromSaveData(ULoadScreenSaveGame* SaveData);
 	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities);
 	void AddCharacterPassiveAbilities(const TArray<TSubclassOf<UGameplayAbility>>& PassiveAbilities);
 	bool bStartupAbilitiesGiven = false;

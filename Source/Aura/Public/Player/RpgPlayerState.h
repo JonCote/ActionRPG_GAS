@@ -12,6 +12,7 @@ class UAbilitySystemComponent;
 class UAttributeSet;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStatChanged, int32);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnLoadPlayerLevel, int32 /*LevelValue*/);
 
 UCLASS()
 class AURA_API ARpgPlayerState : public APlayerState, public IAbilitySystemInterface
@@ -28,9 +29,10 @@ public:
 	TObjectPtr<ULevelUpInfo> LevelUpInfo;
 	
 	FOnPlayerStatChanged OnXPChangedDelegate;
-	FOnPlayerStatChanged OnLevelChangedDelegate;
 	FOnPlayerStatChanged OnAttributePointsChangedDelegate;
 	FOnPlayerStatChanged OnSpellPointsChangedDelegate;
+	FOnPlayerStatChanged OnLevelChangedDelegate;
+	FOnLoadPlayerLevel OnLoadPlayerLevelDelegate; 
 
 	FORCEINLINE int32 GetPlayerLevel() const { return Level; }
 	FORCEINLINE int32 GetPlayerXP() const {	return XP; }
@@ -44,6 +46,8 @@ public:
 	
 	void SetLevel(const int32 InLevel);
 	void SetXP(const int32 InXP);
+	void SetAttributePoints(const int32 InAttributePoints);
+	void SetSpellPoints(const int32 InSpellPoints);
 
 
 protected:

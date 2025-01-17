@@ -9,12 +9,36 @@
 #include "AbilitySystem/Abilities/RpgGameplayAbility.h"
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "Aura/RpgLogChannels.h"
+#include "Game/LoadScreenSaveGame.h"
 #include "Interaction/PlayerInterface.h"
 
 
 void URpgAbilitySystemComponent::AbilityActorInfoSet()
 {
 	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this, &URpgAbilitySystemComponent::ClientEffectApplied);
+}
+
+void URpgAbilitySystemComponent::AddCharacterAbilitiesFromSaveData(ULoadScreenSaveGame* SaveData)
+{
+
+	for (const FSavedAbility& AbilityData : SaveData->SavedAbilities)
+	{
+		const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
+		const TSubclassOf<UGameplayAbility> LoadedAbilityClass = AbilityData.GameplayAbilityClass;
+
+		FGameplayAbilitySpec LoadedAbilitySpec = FGameplayAbilitySpec(LoadedAbilityClass, AbilityData.AbilityLevel);
+		LoadedAbilitySpec.DynamicAbilityTags.AddTag(AbilityData.AbilitySlot);
+		LoadedAbilitySpec.DynamicAbilityTags.AddTag(AbilityData.AbilityStatus);
+
+		GiveAbility(LoadedAbilitySpec);
+		
+		if (AbilityData.AbilityType.MatchesTagExact(GameplayTags.Abilities_Type_Passive) && AbilityData.AbilityStatus.MatchesTagExact(GameplayTags.Abilities_Status_Equipped))
+		{
+			TryActivateAbility(LoadedAbilitySpec.Handle);
+		}
+	}
+	bStartupAbilitiesGiven = true;
+	AbilitiesGivenDelegate.Broadcast();
 }
 
 void URpgAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities)
@@ -39,7 +63,9 @@ void URpgAbilitySystemComponent::AddCharacterPassiveAbilities(
 	for (const TSubclassOf<UGameplayAbility> AbilityClass : PassiveAbilities)
 	{
 		FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(AbilityClass, 1);
-		GiveAbilityAndActivateOnce(AbilitySpec);
+		AbilitySpec.DynamicAbilityTags.AddTag(FRpgGameplayTags::Get().Abilities_Status_Equipped);
+		GiveAbility(AbilitySpec);
+		TryActivateAbility(AbilitySpec.Handle);
 	}
 }
 
@@ -207,15 +233,6 @@ bool URpgAbilitySystemComponent::SlotIsEmpty(const FGameplayTag& SlotTag)
 
 bool URpgAbilitySystemComponent::IsSlotOnCooldown(const FGameplayTag& SlotTag, const FGameplayAbilityActorInfo* ActorInfo)
 {
-	/*FScopedAbilityListLock ActiveScopeLock(*this);
-	for (FGameplayAbilitySpec& Spec : GetActivatableAbilities())
-	{
-		if (AbilityHasSlot(&Spec, SlotTag))
-		{
-			if (!Spec.Ability->CheckCooldown(Spec.Handle, ActorInfo)) { return true; }
-		}
-	}
-	return false;*/
 	if (const FGameplayAbilitySpec* Spec = GetSpecFromSlotTag(SlotTag))
 	{
 		if (!Spec->Ability->CheckCooldown(Spec->Handle, ActorInfo)) { return true; }
@@ -355,11 +372,9 @@ void URpgAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamepl
 	if (FGameplayAbilitySpec* AbilitySpec = GetSpecFromAbilityTag(AbilityTag))
 	{
 		/* Check If the ability and Slot are valid for rebinding (ability and ability in slot are not on a cooldown) */
-		//const FGameplayAbilitySpecHandle AbilitySpecHandle = AbilitySpec->Handle;
 		const FGameplayAbilityActorInfo* ActorInfo = AbilityActorInfo.Get();
 
 		// Check if Selected Ability is on Cooldown
-		//bool bNotOnCooldown = GetSpecFromAbilityTag(AbilityTag)->Ability->CheckCooldown(AbilitySpecHandle, ActorInfo);
 		if (AbilityOnCooldown(*AbilitySpec, ActorInfo, AbilityTag)) { return; }
 		
 
@@ -396,33 +411,16 @@ void URpgAbilitySystemComponent::ServerEquipAbility_Implementation(const FGamepl
 			
 			if (!AbilityHasAnySlot(*AbilitySpec))	// Ability doesn't yet have a slot (it's not active)
 			{
+				AbilitySpec->DynamicAbilityTags.RemoveTag(GetStatusTagFromSpec(*AbilitySpec));
+				AbilitySpec->DynamicAbilityTags.AddTag(GameplayTags.Abilities_Status_Equipped);
 				if (IsPassiveAbility(*AbilitySpec))
 				{
 					TryActivateAbility(AbilitySpec->Handle);
 					MulticastActivatePassiveEffect(AbilityTag, true);
 				}
 			}
-			
 			AssignSlotToAbility(*AbilitySpec, SlotTag);
-
 			
-			
-
-			/*
-			// Remove This InputTag (slot) from any Ability that has it
-			ClearAbilitiesOfSlot(SlotTag);
-
-			// Clear this Ability's slot, just in case, it's a different slot
-			ClearAbilitySlot(AbilitySpec);
-
-			// Now, assign Slot to this Ability
-			AbilitySpec->DynamicAbilityTags.AddTag(SlotTag);
-			if (StatusTag.MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
-			{
-				AbilitySpec->DynamicAbilityTags.RemoveTag(GameplayTags.Abilities_Status_Unlocked);
-				AbilitySpec->DynamicAbilityTags.AddTag(GameplayTags.Abilities_Status_Equipped);
-			}
-			*/
 			MarkAbilitySpecDirty(*AbilitySpec);
 			ClientEquipAbility(AbilityTag, GameplayTags.Abilities_Status_Equipped, SlotTag, PrevSlotTag);
 		}
@@ -489,7 +487,7 @@ void URpgAbilitySystemComponent::ClearAbilitySlot(FGameplayAbilitySpec* AbilityS
 	AbilitySpec->DynamicAbilityTags.RemoveTag(Slot);
 
 	const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
-	if (GetStatusTagFromSpec(*AbilitySpec).MatchesTagExact(GameplayTags.Abilities_Status_Unlocked))
+	if (GetStatusTagFromSpec(*AbilitySpec).MatchesTagExact(GameplayTags.Abilities_Status_Equipped))
 	{
 		AbilitySpec->DynamicAbilityTags.RemoveTag(GameplayTags.Abilities_Status_Equipped);
 		AbilitySpec->DynamicAbilityTags.AddTag(GameplayTags.Abilities_Status_Unlocked);
@@ -497,6 +495,7 @@ void URpgAbilitySystemComponent::ClearAbilitySlot(FGameplayAbilitySpec* AbilityS
 	
 }
 
+// TODO: Remove this function since not used
 void URpgAbilitySystemComponent::ClearAbilitiesOfSlot(const FGameplayTag& SlotTag)
 {
 	FScopedAbilityListLock ActiveScopeLock(*this);

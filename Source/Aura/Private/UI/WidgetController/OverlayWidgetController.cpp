@@ -23,12 +23,14 @@ void UOverlayWidgetController::BroadCastInitialValues()
 void UOverlayWidgetController::BindCallbacksToDependencies()
 {
 	GetRpgPlayerState()->OnXPChangedDelegate.AddUObject(this, &UOverlayWidgetController::OnXPChanged);
-	GetRpgPlayerState()->OnLevelChangedDelegate.AddLambda(
-		[this](int32 NewLevel)
-		{
-			OnPlayerLevelChangedDelegate.Broadcast(NewLevel);
-		}
-	);
+	GetRpgPlayerState()->OnLevelChangedDelegate.AddLambda([this](int32 NewLevel)
+	{
+		OnPlayerLevelChangedDelegate.Broadcast(NewLevel, true);
+	});
+	GetRpgPlayerState()->OnLoadPlayerLevelDelegate.AddLambda([this](int32 NewLevel)
+	{
+		OnPlayerLevelChangedDelegate.Broadcast(NewLevel, false);
+	});
 	
 
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(

@@ -156,7 +156,7 @@ void ARpgEnemy::InitAbilityActorInfo()
 
 void ARpgEnemy::InitDefaultAttributes() const
 {
-	URpgAbilitySystemLibrary::InitDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
+	URpgAbilitySystemLibrary::InitializeEnemyDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
 }
 
 void ARpgEnemy::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)

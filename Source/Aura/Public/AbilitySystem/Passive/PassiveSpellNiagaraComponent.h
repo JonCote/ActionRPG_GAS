@@ -8,7 +8,7 @@
 #include "PassiveSpellNiagaraComponent.generated.h"
 
 
-
+class URpgAbilitySystemComponent;
 /**
  * 
  */
@@ -27,5 +27,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	void OnPassiveActivate(const FGameplayTag& AbilityTag, bool bActivate);
+	
+	void ActivateIfEquipped(URpgAbilitySystemComponent* RpgASC);
 	
 };

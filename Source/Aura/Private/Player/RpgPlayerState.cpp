@@ -57,10 +57,11 @@ void ARpgPlayerState::AddToSpellPoints(const int32 InSpellPoints)
 	OnSpellPointsChangedDelegate.Broadcast(SpellPoints);
 }
 
+/* SetLevel is not for use during a LevelUp event */
 void ARpgPlayerState::SetLevel(const int32 InLevel)
 {
 	Level = InLevel;
-	OnLevelChangedDelegate.Broadcast(Level);
+	OnLoadPlayerLevelDelegate.Broadcast(Level);
 }
 
 void ARpgPlayerState::SetXP(const int32 InXP)
@@ -69,6 +70,17 @@ void ARpgPlayerState::SetXP(const int32 InXP)
 	OnXPChangedDelegate.Broadcast(XP);
 }
 
+void ARpgPlayerState::SetAttributePoints(const int32 InAttributePoints)
+{
+	AttributePoints = InAttributePoints;
+	OnAttributePointsChangedDelegate.Broadcast(AttributePoints);
+}
+
+void ARpgPlayerState::SetSpellPoints(const int32 InSpellPoints)
+{
+	SpellPoints = InSpellPoints;
+	OnSpellPointsChangedDelegate.Broadcast(SpellPoints);
+}
 
 void ARpgPlayerState::OnRep_Level(int32 OldLevel)
 {

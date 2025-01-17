@@ -9,6 +9,7 @@
 #include "RpgAbilitySystemLibrary.generated.h"
 
 
+class ULoadScreenSaveGame;
 struct FDamageEffectParams;
 class UAbilityInfo;
 struct FWidgetControllerParams;
@@ -45,12 +46,15 @@ public:
 
 
 	/* ====================================================================================================================
-	 *	Ability System Defaults
+	 *	Ability System
 	 */
 	
 	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|CharacterClassDefaults")
-	static void InitDefaultAttributes(const UObject* WorldContextObject, const ECharacterClass CharacterClass, const float Level, UAbilitySystemComponent* ASC);
+	static void InitializeEnemyDefaultAttributes(const UObject* WorldContextObject, const ECharacterClass CharacterClass, const float Level, UAbilitySystemComponent* ASC);
 
+	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|CharacterClassDefaults")
+	static void InitializeDefaultAttributesFromSaveData(const UObject* WorldContextObject, UAbilitySystemComponent* ASC, ULoadScreenSaveGame* SaveGame);
+	
 	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|CharacterClassDefaults")
 	static void GiveStartupAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* ASC, ECharacterClass CharacterClass);
 	
@@ -59,7 +63,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|CharacterClassDefaults")
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
-
+	
 	
 	/* ====================================================================================================================
 	 *	Effect Context Getter

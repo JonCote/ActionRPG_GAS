@@ -4,6 +4,7 @@
 #include "AbilitySystem/Passive/PassiveSpellNiagaraComponent.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "RpgGameplayTags.h"
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
 #include "Interaction/CombatInterface.h"
 
@@ -20,6 +21,7 @@ void UPassiveSpellNiagaraComponent::BeginPlay()
 	if (URpgAbilitySystemComponent* RpgASC = Cast<URpgAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner())))
 	{
 		RpgASC->ActivePassiveEffectDelegate.AddUObject(this, &UPassiveSpellNiagaraComponent::OnPassiveActivate);
+		ActivateIfEquipped(RpgASC);
 	}
 	else if (ICombatInterface* CombatInterface = Cast<ICombatInterface>(GetOwner()))
 	{
@@ -28,6 +30,7 @@ void UPassiveSpellNiagaraComponent::BeginPlay()
 			if (URpgAbilitySystemComponent* RpgASC = Cast<URpgAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner())))
 			{
 				RpgASC->ActivePassiveEffectDelegate.AddUObject(this, &UPassiveSpellNiagaraComponent::OnPassiveActivate);
+				ActivateIfEquipped(RpgASC);
 			}
 		});
 	}
@@ -44,6 +47,17 @@ void UPassiveSpellNiagaraComponent::OnPassiveActivate(const FGameplayTag& Abilit
 		else
 		{
 			Deactivate();
+		}
+	}
+}
+
+void UPassiveSpellNiagaraComponent::ActivateIfEquipped(URpgAbilitySystemComponent* RpgASC)
+{
+	if (RpgASC->bStartupAbilitiesGiven)
+	{
+		if (RpgASC->GetStatusFromAbilityTag(PassiveSpellTag).MatchesTagExact(FRpgGameplayTags::Get().Abilities_Status_Equipped))
+		{
+			Activate();
 		}
 	}
 }

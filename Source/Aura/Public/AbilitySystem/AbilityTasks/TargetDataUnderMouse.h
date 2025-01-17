@@ -37,6 +37,5 @@ private:
 
 	ECollisionChannel TraceCollisionChannel;
 
-
 	
 };

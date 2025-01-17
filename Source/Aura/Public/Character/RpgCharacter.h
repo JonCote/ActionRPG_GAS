@@ -54,6 +54,8 @@ public:
 	virtual void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial = nullptr) override;
 	virtual void HideMagicCircle_Implementation() override;
 	virtual void UpdateMagicCircleLocation_Implementation(FHitResult HitResult) override;
+
+	virtual void SaveProgress_Implementation(const FName& CheckpointTag) override;
 	//~ End Player Interface
 	
 	//~ Begin Combat Interface
@@ -67,6 +69,8 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<ARpgPlayerController> RpgPlayerController;
+
+	void LoadProgress();
 
 private:
 	virtual void InitAbilityActorInfo() override;

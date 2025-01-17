@@ -115,6 +115,7 @@ void ARpgPlayerController::CursorTrace()
 	
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	GetHitResultUnderCursor(ECC_GROUND, false, CursorGroundHit);
+	
 	if (!CursorHit.bBlockingHit) return;
 
 	LastActor = ThisActor;
