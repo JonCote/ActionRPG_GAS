@@ -58,6 +58,9 @@ public:
 	ULoadScreenSaveGame* GetSaveSlotData(const FString& SlotName, int32 SlotIndex) const;
 	ULoadScreenSaveGame* RetrieveInGameSaveData() const;
 	void SaveInGameProgressData(ULoadScreenSaveGame* SaveObject) const;
+	void SaveWorldState(UWorld* World) const;
+	void LoadWorldState(UWorld* World) const;
+	
 	
 	
 protected:

@@ -13,7 +13,6 @@
 #include "AbilitySystem/Data/LevelUpInfo.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
 #include "Game/LoadScreenSaveGame.h"
-#include "Game/RpgGameInstance.h"
 #include "Game/RpgGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/RpgPlayerController.h"
@@ -72,6 +71,9 @@ void ARpgCharacter::LoadProgress()
 			return;
 		}
 
+		// Load World State
+		RpgGameMode->LoadWorldState(GetWorld());
+		
 		// Load PlayerState Data
 		if (RpgPlayerState)
 		{
@@ -98,9 +100,13 @@ void ARpgCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 	if (!HasAuthority()) { return; }
 	if (const ARpgGameModeBase* RpgGameMode = Cast<ARpgGameModeBase>(UGameplayStatics::GetGameMode(this)))
 	{
+		// Save World State
+		RpgGameMode->SaveWorldState(GetWorld());
+		
 		ULoadScreenSaveGame* SaveData = RpgGameMode->RetrieveInGameSaveData();
 		if (SaveData == nullptr) { return; }
 
+		// Save Player State
 		SaveData->PlayerStartTag = CheckpointTag;
 		
 		SaveData->PlayerLevel = RpgPlayerState->GetPlayerLevel();

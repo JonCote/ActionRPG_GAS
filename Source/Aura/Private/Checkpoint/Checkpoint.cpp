@@ -4,7 +4,9 @@
 #include "Checkpoint/Checkpoint.h"
 
 #include "Components/SphereComponent.h"
+#include "Game/RpgGameModeBase.h"
 #include "Interaction/PlayerInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 ACheckpoint::ACheckpoint(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -26,6 +28,14 @@ ACheckpoint::ACheckpoint(const FObjectInitializer& ObjectInitializer) : Super(Ob
 	
 }
 
+void ACheckpoint::LoadActor_Implementation()
+{
+	if (bReached)
+	{
+		HandleGlowEffects();
+	}
+}
+
 void ACheckpoint::BeginPlay()
 {
 	Super::BeginPlay();
@@ -40,6 +50,13 @@ void ACheckpoint::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 {
 	if (OtherActor->Implements<UPlayerInterface>())
 	{
+		bReached = true;
+
+	//	if (const ARpgGameModeBase* RpgGM = Cast<ARpgGameModeBase>(UGameplayStatics::GetGameMode(this)))
+	//	{
+	//		RpgGM->SaveWorldState(GetWorld());
+	//	}
+		
 		IPlayerInterface::Execute_SaveProgress(OtherActor, PlayerStartTag);
 		HandleGlowEffects();
 	}

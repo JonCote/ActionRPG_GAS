@@ -19,6 +19,46 @@ enum ESaveSlotStatus
 };
 
 USTRUCT(BlueprintType)
+struct FSavedActor
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FName ActorName = FName();
+
+	UPROPERTY()
+	FTransform Transform = FTransform();
+
+	// Serialized variables from the Actor - only those marked with SaveGame specifier
+	UPROPERTY()
+	TArray<uint8> Bytes = TArray<uint8>();
+	
+};
+inline bool operator==(const FSavedActor& Left, const FSavedActor& Right)
+{
+	return Left.ActorName == Right.ActorName;
+}
+
+
+USTRUCT(BlueprintType)
+struct FSavedMap
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FString MapAssetName = FString();
+
+	UPROPERTY()
+	TArray<FSavedActor> SavedActors = TArray<FSavedActor>();
+	
+};
+inline bool operator==(const FSavedMap& Left, const FSavedMap& Right)
+{
+	return Left.MapAssetName == Right.MapAssetName;
+}
+
+
+USTRUCT(BlueprintType)
 struct FSavedAbility
 {
 	GENERATED_BODY()
@@ -42,7 +82,6 @@ struct FSavedAbility
 	int32 AbilityLevel;
 	
 };
-
 inline bool operator==(const FSavedAbility& Left, const FSavedAbility& Right)
 {
 	return Left.AbilityTag.MatchesTagExact(Right.AbilityTag);
@@ -115,8 +154,14 @@ public:
 	 */
 	UPROPERTY()
 	TArray<FSavedAbility> SavedAbilities;
-	
-	
-	
+
+	/*
+	 *	Maps Actors Data
+	 */
+	UPROPERTY()
+	TArray<FSavedMap> SavedMaps;
+
+	FSavedMap GetSavedMapWithMapName(const FString& InMapAssetName);
+	bool HasMap(const FString& InMapAssetName);
 	
 };
