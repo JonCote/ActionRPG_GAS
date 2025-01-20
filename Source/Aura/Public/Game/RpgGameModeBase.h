@@ -46,6 +46,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TMap<FString, TSoftObjectPtr<UWorld>> GameMaps;
 
+	FString GetMapNameFromMapAssetName(const FString& MapAssetName) const;
+	FString GetMapAssetNameFromMapName(const FString& MapName) const;
 	
 	void TravelToMap(const UMVVM_LoadSlot* Slot);
 	

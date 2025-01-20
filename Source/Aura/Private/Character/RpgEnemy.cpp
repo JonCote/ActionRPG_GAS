@@ -51,7 +51,7 @@ void ARpgEnemy::PossessedBy(AController* NewController)
 	
 }
 
-void ARpgEnemy::HighlightActor()
+void ARpgEnemy::HighlightActor_Implementation()
 {
 	GetMesh()->SetRenderCustomDepth(true);
 	GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
@@ -59,7 +59,7 @@ void ARpgEnemy::HighlightActor()
 	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_RED);
 }
 
-void ARpgEnemy::UnHighlightActor()
+void ARpgEnemy::UnHighlightActor_Implementation()
 {
 	GetMesh()->SetRenderCustomDepth(false);
 	Weapon->SetRenderCustomDepth(false);

@@ -5,26 +5,23 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputSubsystems.h"
-#include "MovieSceneTracksComponentTypes.h"
-#include "NavigationPath.h"
-#include "NavigationSystem.h"
 #include "RpgGameplayTags.h"
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
 #include "Actor/MagicCircle.h"
 #include "Aura/Aura.h"
 #include "Components/DecalComponent.h"
-#include "Components/SplineComponent.h"
 #include "Input/RpgInputComponent.h"
-#include "Interaction/EnemyInterface.h"
 #include "GameFramework/Character.h"
+#include "Interaction/CombatInterface.h"
+#include "Interaction/EnemyInterface.h"
+#include "Interaction/HighlightInterface.h"
+#include "Interaction/PlayerInterface.h"
 #include "UI/Widget/DamageTextComponent.h"
 
 
 ARpgPlayerController::ARpgPlayerController()
 {
 	bReplicates = true;
-
-	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
 void ARpgPlayerController::PlayerTick(float DeltaTime)
@@ -32,7 +29,6 @@ void ARpgPlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 	CursorTrace();
 	RotateToMouse();
-	AutoRun();
 	UpdateMagicCircleLocation();
 	
 }
@@ -47,7 +43,6 @@ void ARpgPlayerController::ShowMagicCircle(UMaterialInterface* DecalMaterial)
 			MagicCircle->MagicCircleDecal->SetMaterial(0, DecalMaterial);
 		}
 	}
-	
 	
 }
 
@@ -72,23 +67,6 @@ void ARpgPlayerController::ShowDamageNumber_Implementation(float DamageAmount, A
 	}
 }
 
-void ARpgPlayerController::AutoRun()
-{
-	if (!bClickToMove || !bAutoRunning) return;
-	
-	if (APawn* ControlledPawn = GetPawn())
-	{
-		const FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
-		const FVector Direction = Spline->FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
-		ControlledPawn->AddMovementInput(Direction);
-
-		const float DistanceToDestination = (LocationOnSpline - CachedDestination).Length();
-		if (DistanceToDestination <= AutoRunAcceptanceRadius)
-		{
-			bAutoRunning = false;
-		}
-	}
-}
 
 void ARpgPlayerController::UpdateMagicCircleLocation()
 {
@@ -119,11 +97,24 @@ void ARpgPlayerController::CursorTrace()
 	if (!CursorHit.bBlockingHit) return;
 
 	LastActor = ThisActor;
-	ThisActor = CursorHit.GetActor();
-
+	
+	if (IsValid(CursorHit.GetActor()) && CursorHit.GetActor()->Implements<UHighlightInterface>())
+	{
+		ThisActor = CursorHit.GetActor();
+		if (ThisActor->Implements<UEnemyInterface>()) { TargetingStatus = TargetingEnemy; }
+		else if (ThisActor->Implements<UPlayerInterface>()) { TargetingStatus = TargetingPlayer; }
+		else { TargetingStatus = TargetingInteractable; }
+	}
+	else
+	{
+		ThisActor = nullptr;
+		TargetingStatus = NotTargeting;
+	}
+	
+	
 	if (LastActor == ThisActor) return;
-	if (LastActor) LastActor->UnHighlightActor();
-	if (ThisActor) ThisActor->HighlightActor();
+	if (LastActor) IHighlightInterface::Execute_UnHighlightActor(LastActor);
+	if (ThisActor) IHighlightInterface::Execute_HighlightActor(ThisActor);
 }
 
 void ARpgPlayerController::RotateToMouse()
@@ -150,16 +141,12 @@ void ARpgPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 		return;
 	}
 	
-	if (InputTag.MatchesTagExact(FRpgGameplayTags::Get().InputTag_LMB))
+	if (InputTag.MatchesTagExact(FRpgGameplayTags::Get().InputTag_LMB) && TargetingStatus == TargetingInteractable)
 	{
-		//bTargeting = ThisActor ? true : false;
-		bTargeting = true;
+		// TODO: Targeting a interactable object and clicked LMB on it, Do Some kind of interaction
 		
-		if (bClickToMove)
-		{
-			bAutoRunning = false;
-		}
 	}
+	
 	if (GetASC()) GetASC()->AbilityInputTagPressed(InputTag);
 	
 }
@@ -171,38 +158,8 @@ void ARpgPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 		return;
 	}
 	
-	if (!InputTag.MatchesTagExact(FRpgGameplayTags::Get().InputTag_LMB) || bTargeting)
-	{
-		if (GetASC())
-		{
-			GetASC()->AbilityInputTagReleased(InputTag);
-		}
-	}
-	else if (bClickToMove)
-	{
-		const APawn* ControlledPawn = GetPawn();
-		if (FollowTime <= ShortPressThreshold && ControlledPawn)
-		{
-			
-			if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CachedDestination))
-			{
-				Spline->ClearSplinePoints();
-				for (const FVector& PointLoc : NavPath->PathPoints)
-				{
-					Spline->AddSplinePoint(PointLoc, ESplineCoordinateSpace::World);
-				}
-				CachedDestination = NavPath->PathPoints.Last();
-				bAutoRunning = true;
-			}
-		}
-		FollowTime = 0.f;
-	}
-
-	if (GetASC())
-	{
-		GetASC()->AbilityInputTagReleased(InputTag);
-	}
-	bTargeting = false;
+	if (GetASC()) GetASC()->AbilityInputTagReleased(InputTag);
+	
 }
 
 void ARpgPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
@@ -212,28 +169,8 @@ void ARpgPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 		return;
 	}
 	
-	if (!InputTag.MatchesTagExact(FRpgGameplayTags::Get().InputTag_LMB) || bTargeting)
-	{
-		if (GetASC())
-		{
-			GetASC()->AbilityInputTagHeld(InputTag);
-		}
-	}
-	else if (bClickToMove)
-	{
-		FollowTime += GetWorld()->GetDeltaSeconds();
-		
-		if (CursorHit.bBlockingHit)
-		{
-			CachedDestination = CursorHit.ImpactPoint;
-		}
 
-		if (APawn* ControlledPawn = GetPawn())
-		{
-			const FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
-			ControlledPawn->AddMovementInput(WorldDirection);
-		}
-	}
+	if (GetASC()) GetASC()->AbilityInputTagHeld(InputTag);
 	
 }
 
@@ -271,12 +208,8 @@ void ARpgPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	URpgInputComponent* RpgInputComponent = CastChecked<URpgInputComponent>(InputComponent);
-
-	if (!bClickToMove)
-	{
-		RpgInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARpgPlayerController::Move);
-	}
 	
+	RpgInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARpgPlayerController::Move);
 	RpgInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 }
 

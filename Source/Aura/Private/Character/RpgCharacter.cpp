@@ -12,6 +12,7 @@
 #include "AbilitySystem/Data/AbilityInfo.h"
 #include "AbilitySystem/Data/LevelUpInfo.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
+#include "Aura/Aura.h"
 #include "Game/LoadScreenSaveGame.h"
 #include "Game/RpgGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -95,13 +96,13 @@ void ARpgCharacter::LoadProgress()
 	}
 }
 
-void ARpgCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
+void ARpgCharacter::SaveProgress_Implementation(const FName& CheckpointTag, UWorld* World)
 {
 	if (!HasAuthority()) { return; }
 	if (const ARpgGameModeBase* RpgGameMode = Cast<ARpgGameModeBase>(UGameplayStatics::GetGameMode(this)))
 	{
 		// Save World State
-		RpgGameMode->SaveWorldState(GetWorld());
+		RpgGameMode->SaveWorldState(World);
 		
 		ULoadScreenSaveGame* SaveData = RpgGameMode->RetrieveInGameSaveData();
 		if (SaveData == nullptr) { return; }
@@ -145,6 +146,20 @@ void ARpgCharacter::SaveProgress_Implementation(const FName& CheckpointTag)
 		RpgGameMode->SaveInGameProgressData(SaveData);
 	}
 	
+}
+
+void ARpgCharacter::HighlightActor_Implementation()
+{
+	GetMesh()->SetRenderCustomDepth(true);
+	GetMesh()->SetCustomDepthStencilValue(CUSTOM_DEPTH_GREEN);
+	Weapon->SetRenderCustomDepth(true);
+	Weapon->SetCustomDepthStencilValue(CUSTOM_DEPTH_GREEN);
+}
+
+void ARpgCharacter::UnHighlightActor_Implementation()
+{
+	GetMesh()->SetRenderCustomDepth(false);
+	Weapon->SetRenderCustomDepth(false);
 }
 
 void ARpgCharacter::OnRep_PlayerState()

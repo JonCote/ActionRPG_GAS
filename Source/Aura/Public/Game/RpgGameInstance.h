@@ -24,5 +24,9 @@ public:
 
 	UPROPERTY()
 	int32 LoadSlotIndex = 0;
+
+	void UpdatePlayerStartTag(const FName& InPlayerStartTag);
+
+	
 	
 };

@@ -7,6 +7,7 @@
 #include "AbilitySystemInterface.h"
 #include "Interaction/CombatInterface.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
+#include "Interaction/HighlightInterface.h"
 #include "RpgCharacterBase.generated.h"
 
 
@@ -73,6 +74,8 @@ public:
 	UFUNCTION()
 	virtual void OnRep_Burned();
 
+	void SetCharacterClass(const ECharacterClass InCharacterClass) { CharacterClass = InCharacterClass; }
+	
 	
 protected:
 	virtual void BeginPlay() override;

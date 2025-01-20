@@ -15,7 +15,7 @@ class ARpgPlayerController;
 class ARpgPlayerState;
 
 UCLASS()
-class AURA_API ARpgCharacter : public ARpgCharacterBase, public IPlayerInterface
+class AURA_API ARpgCharacter : public ARpgCharacterBase, public IPlayerInterface, public IHighlightInterface
 {
 	GENERATED_BODY()
 
@@ -55,8 +55,13 @@ public:
 	virtual void HideMagicCircle_Implementation() override;
 	virtual void UpdateMagicCircleLocation_Implementation(FHitResult HitResult) override;
 
-	virtual void SaveProgress_Implementation(const FName& CheckpointTag) override;
+	virtual void SaveProgress_Implementation(const FName& CheckpointTag, UWorld* World) override;
 	//~ End Player Interface
+
+	//~ Begin Highlight Interface
+	virtual void HighlightActor_Implementation() override;
+	virtual void UnHighlightActor_Implementation() override;
+	//~ End Highlight Interface
 	
 	//~ Begin Combat Interface
 	virtual int32 GetCharacterLevel_Implementation() override;

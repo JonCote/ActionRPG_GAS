@@ -7,16 +7,24 @@
 #include "GameplayTagContainer.h"
 #include "RpgPlayerController.generated.h"
 
+class IHighlightInterface;
 class AMagicCircle;
 class UDamageTextComponent;
 class URpgInputConfig;
 class UInputMappingContext;
 class UInputAction;
-class IEnemyInterface;
 class URpgAbilitySystemComponent;
-class USplineComponent;
 
 struct FInputActionValue;
+
+enum ETargetingStatus
+{
+	TargetingEnemy,
+	TargetingPlayer,
+	TargetingInteractable,
+	NotTargeting
+	
+};
 
 
 UCLASS()
@@ -56,10 +64,14 @@ private:
 	
 	void CursorTrace();
 	void RotateToMouse();
-	TScriptInterface<IEnemyInterface> LastActor;
-	TScriptInterface<IEnemyInterface> ThisActor;
+	UPROPERTY()
+	TObjectPtr<AActor> LastActor;
+	UPROPERTY()
+	TObjectPtr<AActor> ThisActor;
+	ETargetingStatus TargetingStatus = NotTargeting;
 	FHitResult CursorHit;
 	FHitResult CursorGroundHit;
+	
 
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);
@@ -72,27 +84,6 @@ private:
 	TObjectPtr<URpgAbilitySystemComponent> RpgAbilitySystemComponent;
 
 	URpgAbilitySystemComponent* GetASC();
-
-	bool bTargeting = false;
-	
-	//~ Click To Move Stuff
-	UPROPERTY(EditAnywhere, Category = "Input|ClickToMove")
-	bool bClickToMove = false;
-	
-	FVector CachedDestination = FVector::ZeroVector;
-	float FollowTime = 0.f;
-	float ShortPressThreshold = 0.5f;
-	bool bAutoRunning = false;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Input|ClickToMove")
-	float AutoRunAcceptanceRadius = 50.f;
-
-	UPROPERTY(VisibleAnywhere, Category = "Input|ClickToMove")
-	TObjectPtr<USplineComponent> Spline;
-
-	void AutoRun();
-	
-	//~ end of click to move stuff
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;

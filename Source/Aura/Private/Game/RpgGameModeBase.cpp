@@ -39,6 +39,30 @@ AActor* ARpgGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
 	return nullptr;
 }
 
+FString ARpgGameModeBase::GetMapNameFromMapAssetName(const FString& MapAssetName) const
+{
+	for (auto& Map: GameMaps)
+	{
+		if (Map.Value.ToSoftObjectPath().GetAssetName() == MapAssetName)
+		{
+			return Map.Key;
+		}
+	}
+	return FString();
+}
+
+FString ARpgGameModeBase::GetMapAssetNameFromMapName(const FString& MapName) const
+{
+	for (auto& Map: GameMaps)
+	{
+		if (Map.Key == MapName)
+		{
+			return Map.Value.ToSoftObjectPath().GetAssetName();
+		}
+	}
+	return FString();
+}
+
 void ARpgGameModeBase::TravelToMap(const UMVVM_LoadSlot* Slot)
 {
 	const FString SlotName = Slot->GetLoadSlotName();
@@ -116,6 +140,9 @@ void ARpgGameModeBase::SaveWorldState(UWorld* World) const
 
 	if (ULoadScreenSaveGame* SaveGame = GetSaveSlotData(RpgGameInstance->LoadSlotName, RpgGameInstance->LoadSlotIndex))
 	{
+		SaveGame->MapAssetName = WorldName;
+		SaveGame->MapName = GetMapNameFromMapAssetName(WorldName);
+		
 		if (!SaveGame->HasMap(WorldName))
 		{
 			FSavedMap NewSaveMap;

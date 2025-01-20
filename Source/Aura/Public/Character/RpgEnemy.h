@@ -16,18 +16,13 @@ class ARpgAIController;
  * 
  */
 UCLASS()
-class AURA_API ARpgEnemy : public ARpgCharacterBase, public IEnemyInterface
+class AURA_API ARpgEnemy : public ARpgCharacterBase, public IEnemyInterface, public IHighlightInterface
 {
 	GENERATED_BODY()
 
 public:
 	ARpgEnemy();
 	virtual void PossessedBy(AController* NewController) override;
-
-	//~ Begin Enemy Interface
-	virtual void HighlightActor() override;
-	virtual void UnHighlightActor() override;
-	//~ End Enemy Interface
 
 	//~ Begin Combat Interface
 	virtual int32 GetCharacterLevel_Implementation() override;
@@ -36,6 +31,11 @@ public:
 	virtual AActor* GetCombatTarget_Implementation() const override;
 	
 	//~ End Combat Interface
+
+	//~ Begin Highlight Interface
+	virtual void HighlightActor_Implementation() override;
+	virtual void UnHighlightActor_Implementation() override;
+	//~ End Highlight Interface
 
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeChangedSignature OnHealthChanged;
@@ -53,6 +53,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category="Combat")
 	TObjectPtr<AActor> CombatTarget;
+
+	void SetLevel(const int32 InLevel) { Level = InLevel; }
 	
 protected:
 	virtual void BeginPlay() override;

@@ -66,6 +66,6 @@ public:
 	void UpdateMagicCircleLocation(FHitResult HitResult);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void SaveProgress(const FName& CheckpointTag);
+	void SaveProgress(const FName& CheckpointTag, UWorld* World);
 	
 };
