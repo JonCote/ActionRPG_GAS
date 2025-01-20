@@ -44,7 +44,7 @@ void URpgFireBolt::SpawnProjectiles(const FVector& ProjectileTargetLocation, con
 	if (!GetAvatarActorFromActorInfo()->HasAuthority()) { return; }
 	
 	FRotator Rotation = (ProjectileTargetLocation - SpawnLocation).Rotation();
-	Rotation.Pitch = PitchOverride;
+	//Rotation.Pitch = PitchOverride;
 	
 	
 	const int32 NumProjectiles = FMath::Min(MaxNumberOfProjectiles, GetAbilityLevel());

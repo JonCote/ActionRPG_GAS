@@ -9,6 +9,7 @@
 #include "AbilitySystem/RpgAbilitySystemComponent.h"
 #include "Actor/MagicCircle.h"
 #include "Aura/Aura.h"
+#include "Character/RpgCharacter.h"
 #include "Components/DecalComponent.h"
 #include "Input/RpgInputComponent.h"
 #include "GameFramework/Character.h"
@@ -16,6 +17,7 @@
 #include "Interaction/EnemyInterface.h"
 #include "Interaction/HighlightInterface.h"
 #include "Interaction/PlayerInterface.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "UI/Widget/DamageTextComponent.h"
 
 
@@ -27,8 +29,7 @@ ARpgPlayerController::ARpgPlayerController()
 void ARpgPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
-	CursorTrace();
-	RotateToMouse();
+	LineTrace();
 	UpdateMagicCircleLocation();
 	
 }
@@ -54,6 +55,14 @@ void ARpgPlayerController::HideMagicCircle()
 	}
 }
 
+void ARpgPlayerController::UpdateMagicCircleLocation()
+{
+	if (IsValid(MagicCircle))
+	{
+		MagicCircle->SetActorLocation(LineTraceHit.ImpactPoint);
+	}
+}
+
 void ARpgPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* TargetCharacter, bool bBlockedHit, bool bCritHit)
 {
 	if (IsValid(TargetCharacter) && DamageTextComponentClass && IsLocalController())
@@ -67,40 +76,33 @@ void ARpgPlayerController::ShowDamageNumber_Implementation(float DamageAmount, A
 	}
 }
 
-
-void ARpgPlayerController::UpdateMagicCircleLocation()
+void ARpgPlayerController::LineTrace()
 {
-	if (IsValid(MagicCircle))
-	{
-		MagicCircle->SetActorLocation(CursorGroundHit.ImpactPoint);
-	}
-}
 
-void ARpgPlayerController::UpdateMagicCircleLocation(FHitResult HitResult)
-{
-	if (IsValid(MagicCircle))
-	{
-		MagicCircle->SetActorLocation(HitResult.ImpactPoint);
-	}
-}
-
-void ARpgPlayerController::CursorTrace()
-{
-	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRpgGameplayTags::Get().Player_Block_CursorTrace))
-	{
-		return;
-	}
+	const ARpgCharacter* PlayerCharacter = Cast<ARpgCharacter>(GetCharacter());
 	
-	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
-	GetHitResultUnderCursor(ECC_GROUND, false, CursorGroundHit);
-	
-	if (!CursorHit.bBlockingHit) return;
+	const FVector CameraLocation = PlayerCharacter->PlayerCamera->GetComponentLocation();
+	const FVector ForwardVector = PlayerCharacter->PlayerCamera->GetForwardVector();
+
+	UKismetSystemLibrary::LineTraceSingle(
+		GetCharacter(),
+		CameraLocation,
+		CameraLocation + ForwardVector * 6000.f,
+		TraceTypeQuery1,
+		false,
+		TArray<AActor*>(),
+		EDrawDebugTrace::None,
+		LineTraceHit,
+		true
+	);
+
+	if (!LineTraceHit.bBlockingHit) return;
 
 	LastActor = ThisActor;
 	
-	if (IsValid(CursorHit.GetActor()) && CursorHit.GetActor()->Implements<UHighlightInterface>())
+	if (IsValid(LineTraceHit.GetActor()) && LineTraceHit.GetActor()->Implements<UHighlightInterface>())
 	{
-		ThisActor = CursorHit.GetActor();
+		ThisActor = LineTraceHit.GetActor();
 		if (ThisActor->Implements<UEnemyInterface>()) { TargetingStatus = TargetingEnemy; }
 		else if (ThisActor->Implements<UPlayerInterface>()) { TargetingStatus = TargetingPlayer; }
 		else { TargetingStatus = TargetingInteractable; }
@@ -111,27 +113,10 @@ void ARpgPlayerController::CursorTrace()
 		TargetingStatus = NotTargeting;
 	}
 	
-	
 	if (LastActor == ThisActor) return;
 	if (LastActor) IHighlightInterface::Execute_UnHighlightActor(LastActor);
 	if (ThisActor) IHighlightInterface::Execute_HighlightActor(ThisActor);
-}
-
-void ARpgPlayerController::RotateToMouse()
-{
-	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRpgGameplayTags::Get().Player_Block_Rotation))
-	{
-		return;
-	}
 	
-	if (APawn* ControlledPawn = GetPawn<APawn>())
-	{
-		const FVector PawnLocation = GetFocalLocation();
-		const FRotator ControllerRotator = GetControlRotation();
-		const FRotator Rotation = (CursorGroundHit.Location - PawnLocation).Rotation();
-		const FRotator YawRotation(ControllerRotator.Pitch, Rotation.Yaw, ControllerRotator.Roll);
-		SetControlRotation(YawRotation);
-	}
 }
 
 void ARpgPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
@@ -140,6 +125,8 @@ void ARpgPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 	{
 		return;
 	}
+
+	
 	
 	if (InputTag.MatchesTagExact(FRpgGameplayTags::Get().InputTag_LMB) && TargetingStatus == TargetingInteractable)
 	{
@@ -194,12 +181,10 @@ void ARpgPlayerController::BeginPlay()
 		Subsystem->AddMappingContext(PlayerInputContext, 0);	
 	}
 
-	bShowMouseCursor = true;
+	bShowMouseCursor = false;
 	DefaultMouseCursor = EMouseCursor::Default;
 
-	FInputModeGameAndUI InputModeData;
-	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	InputModeData.SetHideCursorDuringCapture(false);
+	const FInputModeGameOnly InputModeData;
 	SetInputMode(InputModeData);
 }
 
@@ -210,7 +195,11 @@ void ARpgPlayerController::SetupInputComponent()
 	URpgInputComponent* RpgInputComponent = CastChecked<URpgInputComponent>(InputComponent);
 	
 	RpgInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARpgPlayerController::Move);
+	RpgInputComponent->BindAction(LookAround, ETriggerEvent::Triggered, this, &ARpgPlayerController::Look);
+	RpgInputComponent->BindAction(DisplayCursor, ETriggerEvent::Triggered, this, &ARpgPlayerController::CursorMode);
+
 	RpgInputComponent->BindAbilityActions(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
+	
 }
 
 void ARpgPlayerController::Move(const FInputActionValue& InputActionValue)
@@ -219,15 +208,56 @@ void ARpgPlayerController::Move(const FInputActionValue& InputActionValue)
 	{
 		return;
 	}
-	
-	const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
-	const FVector UpDirection(1.f, 0.f, 0.f);
-	const FVector SideDirection(0.f, 1.f, 0.f);
-	
+
+	FVector2D MovementVector = InputActionValue.Get<FVector2D>();
 	if (APawn* ControlledPawn = GetPawn<APawn>())
 	{
-		ControlledPawn->AddMovementInput(UpDirection, InputAxisVector.Y);
-		ControlledPawn->AddMovementInput(SideDirection, InputAxisVector.X);
+		const FRotator Rotation = ControlledPawn->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+		ControlledPawn->AddMovementInput(ForwardDirection, MovementVector.Y);
+		ControlledPawn->AddMovementInput(RightDirection, MovementVector.X);
 	}
 }
+
+void ARpgPlayerController::Look(const FInputActionValue& InputActionValue)
+{
+	FVector2D LookAxisVector = InputActionValue.Get<FVector2D>();
+
+	if (APawn* ControlledPawn = GetPawn<APawn>())
+	{
+		ControlledPawn->AddControllerYawInput(-LookAxisVector.X);
+		ControlledPawn->AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void ARpgPlayerController::CursorMode(const FInputActionValue& InputActionValue)
+{
+	if (InputActionValue.Get<bool>())
+	{
+		bShouldShowCursor = !bShouldShowCursor;
+	}
+	if (bShouldShowCursor)
+	{
+		bShowMouseCursor = true;
+
+		FInputModeGameAndUI InputModeData;
+		InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		InputModeData.SetHideCursorDuringCapture(false);
+		SetInputMode(InputModeData);
+	}
+	else
+	{
+		bShowMouseCursor = false;
+
+		const FInputModeGameOnly InputModeData;
+		SetInputMode(InputModeData);
+	}
+}
+
+
 

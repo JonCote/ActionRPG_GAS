@@ -46,8 +46,10 @@ public:
 	void HideMagicCircle();
 
 	UFUNCTION(BlueprintCallable)
-	void UpdateMagicCircleLocation(FHitResult HitResult);
-
+	void UpdateMagicCircleLocation();
+	
+	UPROPERTY(BlueprintReadOnly)
+	FHitResult LineTraceHit;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -59,18 +61,27 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> MoveAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> LookAround;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> DisplayCursor;
 	
 	void Move(const FInputActionValue& InputActionValue);
+	void Look(const FInputActionValue& InputActionValue);
+	void CursorMode(const FInputActionValue& InputActionValue);
 	
-	void CursorTrace();
-	void RotateToMouse();
+
+	void LineTrace();
+
 	UPROPERTY()
 	TObjectPtr<AActor> LastActor;
 	UPROPERTY()
 	TObjectPtr<AActor> ThisActor;
 	ETargetingStatus TargetingStatus = NotTargeting;
-	FHitResult CursorHit;
-	FHitResult CursorGroundHit;
+
+	bool bShouldShowCursor = false;
 	
 
 	void AbilityInputTagPressed(FGameplayTag InputTag);
@@ -93,8 +104,6 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<AMagicCircle> MagicCircle;
-
-	void UpdateMagicCircleLocation();
 	
 };
 

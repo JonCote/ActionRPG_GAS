@@ -26,20 +26,21 @@ ARpgCharacter::ARpgCharacter()
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>("PlayerCamera");
 	CameraBoom->SetupAttachment(GetRootComponent(), FName("CameraBoom"));
 	PlayerCamera->SetupAttachment(CameraBoom, FName("PlayerCamera"));
-
-	CameraBoom->bInheritPitch = false;
-	CameraBoom->bInheritRoll = false;
-	CameraBoom->bInheritYaw = false;
+	
 	CameraBoom->bUsePawnControlRotation = true;
-	CameraBoom->bDoCollisionTest = false;  // Might want this true later to prevent camera going into scene objects
-
 	PlayerCamera->bUsePawnControlRotation = false;
-
+	CameraBoom->bDoCollisionTest = false;  // Might want this true later to prevent camera going into scene objects
+	CameraBoom->bEnableCameraLag = true;
+	CameraBoom->bEnableCameraRotationLag = true;
+	CameraBoom->CameraLagSpeed = 40.f;
+	CameraBoom->CameraRotationLagSpeed = 30.f;
+	
 	LevelUpNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>("LevelUpNiagaraComponent");
 	LevelUpNiagaraComponent->SetupAttachment(GetRootComponent());
 	LevelUpNiagaraComponent->bAutoActivate = false;
-	
-	GetCharacterMovement()->RotationRate = FRotator(0, 400.f, 0);
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0, 500.f, 0);
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -331,20 +332,18 @@ void ARpgCharacter::ShowMagicCircle_Implementation(UMaterialInterface* DecalMate
 {
 	check(RpgPlayerController);
 	RpgPlayerController->ShowMagicCircle(DecalMaterial);
-	RpgPlayerController->bShowMouseCursor = false;
 }
 
 void ARpgCharacter::HideMagicCircle_Implementation()
 {
 	check(RpgPlayerController);
 	RpgPlayerController->HideMagicCircle();
-	RpgPlayerController->bShowMouseCursor = true;
 }
 
-void ARpgCharacter::UpdateMagicCircleLocation_Implementation(FHitResult HitResult)
+void ARpgCharacter::UpdateMagicCircleLocation_Implementation()
 {
 	check(RpgPlayerController);
-	RpgPlayerController->UpdateMagicCircleLocation(HitResult);
+	RpgPlayerController->UpdateMagicCircleLocation();
 }
 
 

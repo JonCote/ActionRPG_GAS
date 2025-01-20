@@ -53,7 +53,7 @@ public:
 
 	virtual void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial = nullptr) override;
 	virtual void HideMagicCircle_Implementation() override;
-	virtual void UpdateMagicCircleLocation_Implementation(FHitResult HitResult) override;
+	virtual void UpdateMagicCircleLocation_Implementation() override;
 
 	virtual void SaveProgress_Implementation(const FName& CheckpointTag, UWorld* World) override;
 	//~ End Player Interface

@@ -60,11 +60,7 @@ void UWaitOnPressTargetting::SendMouseCursorData() const
 	
 	FGameplayAbilityTargetDataHandle DataHandle;
 	DataHandle.Add(Data);
-
-	if (ARpgCharacter* RpgCharacter = Cast<ARpgCharacter>(Ability->GetAvatarActorFromActorInfo()))
-	{
-		RpgCharacter->UpdateMagicCircleLocation_Implementation(CursorHit);
-	}
+	
 	
 }
 
