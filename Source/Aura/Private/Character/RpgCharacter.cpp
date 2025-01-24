@@ -29,7 +29,7 @@ ARpgCharacter::ARpgCharacter()
 	
 	CameraBoom->bUsePawnControlRotation = true;
 	PlayerCamera->bUsePawnControlRotation = false;
-	CameraBoom->bDoCollisionTest = false;  // Might want this true later to prevent camera going into scene objects
+	CameraBoom->bDoCollisionTest = true;  // Might want this true later to prevent camera going into scene objects
 	CameraBoom->bEnableCameraLag = true;
 	CameraBoom->bEnableCameraRotationLag = true;
 	CameraBoom->CameraLagSpeed = 40.f;
@@ -42,9 +42,9 @@ ARpgCharacter::ARpgCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0, 500.f, 0);
 
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
+	bUseControllerRotationPitch = true;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = true;
 
 	CharacterClass = ECharacterClass::Mage;
 }
@@ -65,7 +65,12 @@ void ARpgCharacter::LoadProgress()
 	if (const ARpgGameModeBase* RpgGameMode = Cast<ARpgGameModeBase>(UGameplayStatics::GetGameMode(this)))
 	{
 		ULoadScreenSaveGame* SaveData = RpgGameMode->RetrieveInGameSaveData();
-		if (SaveData == nullptr) { return; }
+		if (SaveData == nullptr)
+		{
+			InitDefaultAttributes();
+			AddCharacterAbilities();
+			return;
+		}
 		if (SaveData->bFirstTimeLoadIn)
 		{
 			InitDefaultAttributes();

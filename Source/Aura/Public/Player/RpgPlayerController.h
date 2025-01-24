@@ -50,6 +50,7 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly)
 	FHitResult LineTraceHit;
+
 	
 protected:
 	virtual void BeginPlay() override;

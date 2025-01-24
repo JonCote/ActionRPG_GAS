@@ -41,7 +41,7 @@ protected:
 	
 private:
 	UPROPERTY(EditDefaultsOnly)
-	float LifeSpan = 4.f;	
+	float LifeSpan = 3.f;	
 	
 	bool bHit = false;
 	TObjectPtr<UAudioComponent> TravelSoundComponent;

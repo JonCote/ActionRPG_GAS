@@ -83,11 +83,12 @@ void ARpgPlayerController::LineTrace()
 	
 	const FVector CameraLocation = PlayerCharacter->PlayerCamera->GetComponentLocation();
 	const FVector ForwardVector = PlayerCharacter->PlayerCamera->GetForwardVector();
-
+	
+	
 	UKismetSystemLibrary::LineTraceSingle(
 		GetCharacter(),
-		CameraLocation,
-		CameraLocation + ForwardVector * 6000.f,
+		CameraLocation + ForwardVector * PlayerCharacter->CameraBoom->TargetArmLength,
+		CameraLocation + ForwardVector * 16000.f,
 		TraceTypeQuery1,
 		false,
 		TArray<AActor*>(),
@@ -227,6 +228,11 @@ void ARpgPlayerController::Move(const FInputActionValue& InputActionValue)
 void ARpgPlayerController::Look(const FInputActionValue& InputActionValue)
 {
 	FVector2D LookAxisVector = InputActionValue.Get<FVector2D>();
+
+	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRpgGameplayTags::Get().Player_Block_Rotation))
+	{
+		return;
+	}
 
 	if (APawn* ControlledPawn = GetPawn<APawn>())
 	{

@@ -54,6 +54,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category="Combat")
 	TObjectPtr<AActor> CombatTarget;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Combat")
+	float AttackSpeed = 1.f;
+
 	void SetLevel(const int32 InLevel) { Level = InLevel; }
 	
 protected:
