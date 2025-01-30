@@ -7,8 +7,10 @@
 #include "InventoryItemInfo.generated.h"
 
 
-USTRUCT()
-struct FInventoryItemInfo
+class ALootableItem;
+
+USTRUCT(BlueprintType)
+struct FRpgItemInfo
 {
 	GENERATED_BODY()
 
@@ -17,8 +19,15 @@ struct FInventoryItemInfo
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<const UTexture2D> Icon = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<ALootableItem> ItemClass;
 	
 };
+inline bool operator==(const FRpgItemInfo& Left, const FRpgItemInfo& Right)
+{
+	return Left.ItemName == Right.ItemName;
+}
 
 
 /**
@@ -29,9 +38,11 @@ class AURA_API UInventoryItemInfo : public UDataAsset
 {
 	GENERATED_BODY()
 
-	FInventoryItemInfo FindItemInfoByName(const FString& ItemName, bool bLogNotFound = false) const;
+public:
+	
+	FRpgItemInfo FindItemInfoByName(const FString& ItemName, bool bLogNotFound = false) const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Item Information")
-	TArray<FInventoryItemInfo> ItemInformation;
+	TArray<FRpgItemInfo> ItemInformation;
 	
 };

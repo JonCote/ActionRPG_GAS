@@ -15,6 +15,7 @@
 #include "Aura/Aura.h"
 #include "Game/LoadScreenSaveGame.h"
 #include "Game/RpgGameModeBase.h"
+#include "Inventory/Inventory.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/RpgPlayerController.h"
 #include "UI/HUD/RpgHUD.h"
@@ -46,6 +47,8 @@ ARpgCharacter::ARpgCharacter()
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = true;
 
+	Inventory = CreateDefaultSubobject<UInventory>("Inventory");
+	
 	CharacterClass = ECharacterClass::Mage;
 }
 
@@ -151,7 +154,12 @@ void ARpgCharacter::SaveProgress_Implementation(const FName& CheckpointTag, UWor
 		
 		RpgGameMode->SaveInGameProgressData(SaveData);
 	}
-	
+}
+
+bool ARpgCharacter::LootItem_Implementation(const FString& ItemName)
+{
+	return Inventory->AddItemToInventory(ItemName);
+
 }
 
 void ARpgCharacter::HighlightActor_Implementation()

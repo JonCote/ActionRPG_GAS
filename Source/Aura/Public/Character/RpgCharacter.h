@@ -11,6 +11,7 @@
 #include "RpgCharacter.generated.h"
 
 
+class UInventory;
 class ARpgPlayerController;
 class ARpgPlayerState;
 
@@ -35,6 +36,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UNiagaraComponent> LevelUpNiagaraComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
+	TObjectPtr<UInventory> Inventory;
+	
 	
 	//~ Begin Player Interface
 	virtual void AddToXP_Implementation(const int32 InXP) override;
@@ -56,8 +61,10 @@ public:
 	virtual void UpdateMagicCircleLocation_Implementation() override;
 
 	virtual void SaveProgress_Implementation(const FName& CheckpointTag, UWorld* World) override;
-	//~ End Player Interface
 
+	virtual bool LootItem_Implementation(const FString& ItemName) override;
+	//~ End Player Interface
+	
 	//~ Begin Highlight Interface
 	virtual void HighlightActor_Implementation() override;
 	virtual void UnHighlightActor_Implementation() override;

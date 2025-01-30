@@ -67,5 +67,9 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SaveProgress(const FName& CheckpointTag, UWorld* World);
-	
+
+
+	/* Inventory System */
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Inventory")
+	bool LootItem(const FString& ItemName);
 };

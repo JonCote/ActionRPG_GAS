@@ -5,6 +5,7 @@
 
 #include "UI/Widget/RpgUserWidget.h"
 #include "UI/WidgetController/AttributeMenuWidgetController.h"
+#include "UI/WidgetController/InventoryWidgetController.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "UI/WidgetController/SpellMenuWidgetController.h"
 
@@ -40,6 +41,17 @@ USpellMenuWidgetController* ARpgHUD::GetSpellMenuWidgetController(const FWidgetC
 		SpellMenuWidgetController->BindCallbacksToDependencies();
 	}
 	return SpellMenuWidgetController;
+}
+
+UInventoryWidgetController* ARpgHUD::GetInventoryWidgetController(const FWidgetControllerParams& WCParams)
+{
+	if (InventoryWidgetController == nullptr)
+	{
+		InventoryWidgetController = NewObject<UInventoryWidgetController>(this, InventoryWidgetControllerClass);
+		InventoryWidgetController->SetWidgetControllerParams(WCParams);
+		InventoryWidgetController->BindCallbacksToDependencies();
+	}
+	return InventoryWidgetController;
 }
 
 void ARpgHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS)

@@ -5,9 +5,9 @@
 
 #include "Aura/RpgLogChannels.h"
 
-FInventoryItemInfo UInventoryItemInfo::FindItemInfoByName(const FString& ItemName, bool bLogNotFound) const
+FRpgItemInfo UInventoryItemInfo::FindItemInfoByName(const FString& ItemName, bool bLogNotFound) const
 {
-	for (const FInventoryItemInfo& Item : ItemInformation)
+	for (const FRpgItemInfo& Item : ItemInformation)
 	{
 		if (Item.ItemName == ItemName)
 		{
@@ -21,5 +21,5 @@ FInventoryItemInfo UInventoryItemInfo::FindItemInfoByName(const FString& ItemNam
 			*ItemName, *GetNameSafe(this));
 	}
 	
-	return FInventoryItemInfo();
+	return FRpgItemInfo();
 }

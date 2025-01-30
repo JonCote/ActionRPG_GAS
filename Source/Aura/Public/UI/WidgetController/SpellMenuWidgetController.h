@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "RpgGameplayTags.h"
-#include "Player/RpgPlayerState.h"
 #include "UI/WidgetController/RpgWidgetController.h"
 #include "SpellMenuWidgetController.generated.h"
 

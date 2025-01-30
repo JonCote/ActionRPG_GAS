@@ -77,6 +77,16 @@ USpellMenuWidgetController* URpgAbilitySystemLibrary::GetSpellMenuWidgetControll
 	return nullptr;
 }
 
+UInventoryWidgetController* URpgAbilitySystemLibrary::GetInventoryWidgetController(const UObject* WorldContextObject)
+{
+	FWidgetControllerParams WidgetControllerParams;
+	ARpgHUD* RpgHUD = nullptr;
+	if (ConstructWidgetControllerParams(WorldContextObject, WidgetControllerParams, RpgHUD))
+	{
+		return RpgHUD->GetInventoryWidgetController(WidgetControllerParams);
+	}
+	return nullptr;
+}
 
 
 /* ====================================================================================================================

@@ -9,6 +9,7 @@
 #include "RpgAbilitySystemLibrary.generated.h"
 
 
+class UInventoryWidgetController;
 class ULoadScreenSaveGame;
 struct FDamageEffectParams;
 class UAbilityInfo;
@@ -44,6 +45,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|WidgetController", meta = (DefaultToSelf = "WorldContextObject"))
 	static USpellMenuWidgetController* GetSpellMenuWidgetController(const UObject* WorldContextObject);
 
+	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|WidgetController", meta = (DefaultToSelf = "WorldContextObject"))
+	static UInventoryWidgetController* GetInventoryWidgetController(const UObject* WorldContextObject);
+	
 
 	/* ====================================================================================================================
 	 *	Ability System
