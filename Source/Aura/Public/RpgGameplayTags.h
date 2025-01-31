@@ -48,6 +48,17 @@ public:
 	FGameplayTag InputTag_Passive_1;
 	FGameplayTag InputTag_Passive_2;
 
+	// Equipment Tags
+	FGameplayTag Equipment_Helmet;
+	FGameplayTag Equipment_Chest;
+	FGameplayTag Equipment_Gloves;
+	FGameplayTag Equipment_Legs;
+	FGameplayTag Equipment_Boots;
+	FGameplayTag Equipment_Necklace;
+	FGameplayTag Equipment_Ring;
+	FGameplayTag Equipment_Belt;
+	FGameplayTag Equipment_Weapon;
+	
 	// Damage Types TODO: Update to Damage_Type_xxx 
 	FGameplayTag Damage;
 	FGameplayTag Damage_Fire;

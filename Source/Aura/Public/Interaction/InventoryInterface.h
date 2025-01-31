@@ -9,6 +9,7 @@
 
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryChanged, const TArray<FRpgItemInfo>& /*Inventory*/);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnEquipmentChanged, const FGameplayTag /*EquipSlotType*/, const FRpgItemInfo& /*Inventory*/);
 
 
 
@@ -30,5 +31,6 @@ class AURA_API IInventoryInterface
 public:
 
 	virtual FOnInventoryChanged& GetOnInventoryChangedDelegate() = 0;
+	virtual FOnEquipmentChanged& GetOnEquipmentChangedDelegate() = 0;
 	
 };

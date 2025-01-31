@@ -3,6 +3,7 @@
 
 #include "Inventory/Inventory.h"
 
+#include "RpgGameplayTags.h"
 #include "Actor/LootableItem.h"
 #include "Aura/RpgLogChannels.h"
 
@@ -15,12 +16,26 @@ UInventory::UInventory()
 	{
 		Inventory.Add(FRpgItemInfo());
 	}
-	
+
+	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Chest, FRpgItemInfo());
+	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Helmet, FRpgItemInfo());
+	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Belt, FRpgItemInfo());
+	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Boots, FRpgItemInfo());
+	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Gloves, FRpgItemInfo());
+	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Legs, FRpgItemInfo());
+	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Necklace, FRpgItemInfo());
+	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Ring, FRpgItemInfo());
+	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Weapon, FRpgItemInfo());
 }
 
 FOnInventoryChanged& UInventory::GetOnInventoryChangedDelegate()
 {
 	return OnInventoryChangedDelegate;
+}
+
+FOnEquipmentChanged& UInventory::GetOnEquipmentChangedDelegate()
+{
+	return OnEquipmentChangedDelegate;
 }
 
 
@@ -63,6 +78,8 @@ bool UInventory::AddItemToInventory(const FString& ItemName)
 
 void UInventory::SwapItemInfoInSlots(const int32 SlotID, const int32 NewSlotID)
 {
+	if (SlotID > InventorySlots || NewSlotID > InventorySlots) return;
+	
 	const FRpgItemInfo TempItem = Inventory[SlotID];
 	Inventory[SlotID] = Inventory[NewSlotID];
 	Inventory[NewSlotID] = TempItem;
@@ -73,6 +90,16 @@ void UInventory::SwapItemInfoInSlots(const int32 SlotID, const int32 NewSlotID)
 TArray<FRpgItemInfo> UInventory::GetInventory()
 {
 	return Inventory;
+}
+
+void UInventory::EquipItem(const FString& ItemName, FGameplayTag EquipSlotTag)
+{
+	const FRpgItemInfo NewItem = ItemInfo->FindItemInfoByName(ItemName);
+
+	EquippedItems.Emplace(EquipSlotTag) = NewItem;
+
+	OnEquipmentChangedDelegate.Broadcast(EquipSlotTag, NewItem);
+	
 }
 
 void UInventory::BeginPlay()

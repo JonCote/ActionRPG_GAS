@@ -111,6 +111,44 @@ void FRpgGameplayTags::InitNativeGameplayTags()
 													FString("Input Tag for Passive Ability 2")
 													);
 
+	// Equipment Tags
+	GameplayTags.Equipment_Helmet = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Equipment.Helmet"),
+													FString("Equipment Tag for Helmet")
+													);
+	GameplayTags.Equipment_Chest = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Equipment.Chest"),
+													FString("Equipment Tag for Chest")
+													);
+	GameplayTags.Equipment_Gloves = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Equipment.Gloves"),
+													FString("Equipment Tag for Gloves")
+													);
+	GameplayTags.Equipment_Legs = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Equipment.Legs"),
+													FString("Equipment Tag for Legs")
+													);
+	GameplayTags.Equipment_Boots = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Equipment.Boots"),
+													FString("Equipment Tag for Boots")
+													);
+	GameplayTags.Equipment_Necklace = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Equipment.Necklace"),
+													FString("Equipment Tag for Necklace")
+													);
+	GameplayTags.Equipment_Ring = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Equipment.Ring"),
+													FString("Equipment Tag for Ring")
+													);
+	GameplayTags.Equipment_Belt = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Equipment.Belt"),
+													FString("Equipment Tag for Belt")
+													);
+	GameplayTags.Equipment_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(
+													FName("Equipment.Weapon"),
+													FString("Equipment Tag for Weapon")
+													);
+	
 	// Damage Types
 	GameplayTags.Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(
 													FName("Damage"),
