@@ -11,7 +11,7 @@
 UInventory::UInventory()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
+	
 	for (int32 i = 0; i < InventorySlots; i++)
 	{
 		Inventory.Add(FRpgItemInfo());
@@ -47,8 +47,17 @@ FRpgItemInfo UInventory::GetItemInfoInSlot(const int32 SlotID)
 void UInventory::RemoveItemInfoInSlot(const int32 SlotID)
 {
 	if (!IsValid(Inventory[SlotID].ItemClass.Get())) return;
+	
 	const FVector SpawnLocation = GetOwner()->GetActorLocation() + GetOwner()->GetActorForwardVector() * 150.f;
 	GetWorld()->SpawnActor(Inventory[SlotID].ItemClass, &SpawnLocation);
+	
+	if (Inventory[SlotID].bEquipped)
+	{
+		EquippedItems.Emplace(Inventory[SlotID].ItemType) = FRpgItemInfo();
+		OnEquipmentChangedDelegate.Broadcast(Inventory[SlotID].ItemType, FRpgItemInfo());
+	}
+	
+	Inventory[SlotID].bEquipped = false;
 	Inventory[SlotID] = FRpgItemInfo();
 	OnInventoryChangedDelegate.Broadcast(Inventory);
 }
@@ -62,11 +71,13 @@ bool UInventory::AddItemToInventory(const FString& ItemName)
 {
 	const FRpgItemInfo NewItem = ItemInfo->FindItemInfoByName(ItemName);
 
-	for (auto& InvSlot : Inventory)
+	for (int32 i = 0; i < Inventory.Num(); i++)
 	{
-		if (InvSlot == FRpgItemInfo())
+		if (Inventory[i] == FRpgItemInfo())
 		{
-			InvSlot = NewItem;
+			Inventory[i] = NewItem;
+			Inventory[i].InventorySlotID = i;
+			
 			OnInventoryChangedDelegate.Broadcast(Inventory);
 			return true;
 		}
@@ -82,7 +93,9 @@ void UInventory::SwapItemInfoInSlots(const int32 SlotID, const int32 NewSlotID)
 	
 	const FRpgItemInfo TempItem = Inventory[SlotID];
 	Inventory[SlotID] = Inventory[NewSlotID];
+	Inventory[SlotID].InventorySlotID = SlotID;
 	Inventory[NewSlotID] = TempItem;
+	Inventory[NewSlotID].InventorySlotID = NewSlotID;
 
 	OnInventoryChangedDelegate.Broadcast(Inventory);
 }
@@ -92,14 +105,41 @@ TArray<FRpgItemInfo> UInventory::GetInventory()
 	return Inventory;
 }
 
-void UInventory::EquipItem(const FString& ItemName, FGameplayTag EquipSlotTag)
+TArray<FRpgItemInfo> UInventory::GetEquipped()
 {
-	const FRpgItemInfo NewItem = ItemInfo->FindItemInfoByName(ItemName);
+	TArray<FRpgItemInfo> OutItems;
+	for (auto& Item : EquippedItems)
+	{
+		OutItems.Add(Item.Value);
+	}
+	return OutItems;
+}
 
-	EquippedItems.Emplace(EquipSlotTag) = NewItem;
+void UInventory::EquipItem(const int32 SlotID, FGameplayTag EquipSlotTag)
+{
+	if (!EquippedItems.Find(EquipSlotTag)) return;
 
-	OnEquipmentChangedDelegate.Broadcast(EquipSlotTag, NewItem);
+	if (EquippedItems.Find(EquipSlotTag)->bEquipped)
+	{
+		Inventory[EquippedItems.Find(EquipSlotTag)->InventorySlotID].bEquipped = false;
+	}
 	
+	Inventory[SlotID].bEquipped = true;
+	
+	EquippedItems.Emplace(EquipSlotTag) = Inventory[SlotID];
+
+	OnEquipmentChangedDelegate.Broadcast(EquipSlotTag, Inventory[SlotID]);
+	
+}
+
+void UInventory::UnequipItem(const int32 SlotID, FGameplayTag EquipSlotTag)
+{
+	if (!EquippedItems.Find(EquipSlotTag)) return;
+
+	Inventory[SlotID].bEquipped = false;
+	EquippedItems.Emplace(EquipSlotTag) = FRpgItemInfo();
+
+	OnEquipmentChangedDelegate.Broadcast(EquipSlotTag, FRpgItemInfo());
 }
 
 void UInventory::BeginPlay()

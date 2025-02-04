@@ -37,7 +37,10 @@ public:
 	void SlotChanged(const int32 OldSlot, const int32 NewSlot);
 
 	UFUNCTION(BlueprintCallable, Category="Inventory")
-	void EquipItem(const FString& ItemName, const FGameplayTag EquipSlotTag);
+	void EquipItem(const int32 SlotID, const FGameplayTag EquipSlotTag);
+
+	UFUNCTION(BlueprintCallable, Category="Inventory")
+	void UnequipItem(const int32 SlotID, const FGameplayTag EquipSlotTag);
 
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	void RemoveFromInventory(const int32 Slot);

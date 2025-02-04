@@ -52,13 +52,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	TArray<FRpgItemInfo> GetInventory();
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	TArray<FRpgItemInfo> GetEquipped();
+	
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FRpgItemInfo> Inventory;
 
 
 	/* Equipment slots */
 
-	void EquipItem(const FString& ItemName, FGameplayTag EquipSlotTag);
+	void EquipItem(const int32 SlotID, FGameplayTag EquipSlotTag);
+	void UnequipItem(const int32 SlotID, FGameplayTag EquipSlotTag);
 	
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Inventory|Equipped")
 	TMap<FGameplayTag, FRpgItemInfo> EquippedItems;

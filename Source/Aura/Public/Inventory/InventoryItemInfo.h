@@ -26,6 +26,12 @@ struct FRpgItemInfo
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<ALootableItem> ItemClass;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bEquipped = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 InventorySlotID = -1;
 	
 };
 inline bool operator==(const FRpgItemInfo& Left, const FRpgItemInfo& Right)
