@@ -7,8 +7,9 @@
 #include "UI/WidgetController/RpgWidgetController.h"
 #include "InventoryWidgetController.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryChangedSignature, const TArray<FRpgItemInfo>&, Inventory);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipmentSlotChangedSignature, const FGameplayTag, SlotTag, const FRpgItemInfo, ItemInfo);
+class UInventory;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemInfoSignature, const FRpgItemInfo&, Info);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnMaxInventorySlotsChangedSignature, int32, OldValue, int32, NewValue);
 
 /**
  * 
@@ -23,15 +24,18 @@ public:
 	virtual void BroadCastInitialValues() override;
 	virtual void BindCallbacksToDependencies() override;
 
-	UPROPERTY(BlueprintAssignable, Category="Inventory")
-	FInventoryChangedSignature InventoryChangedDelegate;
+	UPROPERTY(BlueprintAssignable, Category="Inventory|Messages")
+	FItemInfoSignature ItemInfoDelegate;
 
-	UPROPERTY(BlueprintAssignable, Category="Inventory")
-	FEquipmentSlotChangedSignature EquipmentSlotChangedDelegate;
+	UPROPERTY(BlueprintAssignable, Category="Inventory|MaxSlots")
+	FOnMaxInventorySlotsChangedSignature OnMaxSlotsChangedDelegate;
+
+	UPROPERTY(BlueprintReadWrite, Category="Inventory|MaxSlots")
+	int32 CurrentInventorySlots = 0;
+
+	void BroadcastItemInfo();
 	
-	void OnInventoryChanged(const TArray<FRpgItemInfo>& Inventory);
-
-	void OnEquipmentSlotChanged(const FGameplayTag InSlotTag, const FRpgItemInfo& InItemInfo);
+	void OnItemChanged(const FRpgItemInfo& ItemInfo) const;
 
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	void SlotChanged(const int32 OldSlot, const int32 NewSlot);
@@ -44,5 +48,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	void RemoveFromInventory(const int32 Slot);
+
+	
+
+private:
+
+	UInventory* GetInventoryComponent();
+	
 };
+
 

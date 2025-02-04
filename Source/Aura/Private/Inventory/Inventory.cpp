@@ -15,28 +15,33 @@ UInventory::UInventory()
 	for (int32 i = 0; i < InventorySlots; i++)
 	{
 		Inventory.Add(FRpgItemInfo());
+		Inventory[i].InventorySlotID = i;
 	}
-
-	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Chest, FRpgItemInfo());
-	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Helmet, FRpgItemInfo());
-	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Belt, FRpgItemInfo());
-	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Boots, FRpgItemInfo());
-	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Gloves, FRpgItemInfo());
-	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Legs, FRpgItemInfo());
-	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Necklace, FRpgItemInfo());
-	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Ring, FRpgItemInfo());
-	EquippedItems.Add(FRpgGameplayTags::Get().Equipment_Weapon, FRpgItemInfo());
 }
 
-FOnInventoryChanged& UInventory::GetOnInventoryChangedDelegate()
+FOnItemInfoChanged& UInventory::GetOnItemInfoChangedDelegate()
 {
-	return OnInventoryChangedDelegate;
+	return OnItemInfoChangedDelegate;
 }
 
-FOnEquipmentChanged& UInventory::GetOnEquipmentChangedDelegate()
+FOnInventorySlotsChanged& UInventory::GetOnInventorySlotsChangedDelegate()
 {
-	return OnEquipmentChangedDelegate;
+	return OnInventorySlotsChangedDelegate;
 }
+
+
+void UInventory::ForEachItem(const FForEachItem& Delegate)
+{
+	for (const FRpgItemInfo& Item : Inventory)
+	{
+		if (!Delegate.ExecuteIfBound(Item))
+		{
+			UE_LOG(LogRpg, Error, TEXT("Failed to execute delegate in %hs"), __FUNCTION__);
+		}
+	}
+}
+
+
 
 
 FRpgItemInfo UInventory::GetItemInfoInSlot(const int32 SlotID)
@@ -53,13 +58,16 @@ void UInventory::RemoveItemInfoInSlot(const int32 SlotID)
 	
 	if (Inventory[SlotID].bEquipped)
 	{
-		EquippedItems.Emplace(Inventory[SlotID].ItemType) = FRpgItemInfo();
-		OnEquipmentChangedDelegate.Broadcast(Inventory[SlotID].ItemType, FRpgItemInfo());
+		FRpgItemInfo EmptyItem = FRpgItemInfo();
+		EmptyItem.ItemType = Inventory[SlotID].ItemType;
+		EmptyItem.bEquipped = Inventory[SlotID].bEquipped;
+		OnItemInfoChangedDelegate.Broadcast(EmptyItem);
 	}
 	
-	Inventory[SlotID].bEquipped = false;
 	Inventory[SlotID] = FRpgItemInfo();
-	OnInventoryChangedDelegate.Broadcast(Inventory);
+	Inventory[SlotID].InventorySlotID = SlotID;
+
+	OnItemInfoChangedDelegate.Broadcast(Inventory[SlotID]);
 }
 
 void UInventory::SetItemInfoInSlot(const int32 SlotID, const FRpgItemInfo Info)
@@ -77,8 +85,8 @@ bool UInventory::AddItemToInventory(const FString& ItemName)
 		{
 			Inventory[i] = NewItem;
 			Inventory[i].InventorySlotID = i;
+			OnItemInfoChangedDelegate.Broadcast(Inventory[i]);
 			
-			OnInventoryChangedDelegate.Broadcast(Inventory);
 			return true;
 		}
 	}
@@ -97,7 +105,9 @@ void UInventory::SwapItemInfoInSlots(const int32 SlotID, const int32 NewSlotID)
 	Inventory[NewSlotID] = TempItem;
 	Inventory[NewSlotID].InventorySlotID = NewSlotID;
 
-	OnInventoryChangedDelegate.Broadcast(Inventory);
+	OnItemInfoChangedDelegate.Broadcast(Inventory[SlotID]);
+	OnItemInfoChangedDelegate.Broadcast(Inventory[NewSlotID]);
+	
 }
 
 TArray<FRpgItemInfo> UInventory::GetInventory()
@@ -108,39 +118,56 @@ TArray<FRpgItemInfo> UInventory::GetInventory()
 TArray<FRpgItemInfo> UInventory::GetEquipped()
 {
 	TArray<FRpgItemInfo> OutItems;
-	for (auto& Item : EquippedItems)
+	for (auto& Item : Inventory)
 	{
-		OutItems.Add(Item.Value);
+		if (Item.bEquipped)
+		{
+			OutItems.Add(Item);
+		}
 	}
 	return OutItems;
 }
 
+void UInventory::BroadcastInventorySlotCount()
+{
+	OnInventorySlotsChangedDelegate.Broadcast(InventorySlots);
+}
+
 void UInventory::EquipItem(const int32 SlotID, FGameplayTag EquipSlotTag)
 {
-	if (!EquippedItems.Find(EquipSlotTag)) return;
-
-	if (EquippedItems.Find(EquipSlotTag)->bEquipped)
+	
+	for (auto& Item : Inventory)
 	{
-		Inventory[EquippedItems.Find(EquipSlotTag)->InventorySlotID].bEquipped = false;
+		if (Item.ItemType == EquipSlotTag && Item.bEquipped)
+		{
+			Item.bEquipped = false;
+			OnItemInfoChangedDelegate.Broadcast(Item);
+		}
 	}
 	
 	Inventory[SlotID].bEquipped = true;
 	
-	EquippedItems.Emplace(EquipSlotTag) = Inventory[SlotID];
+	OnItemInfoChangedDelegate.Broadcast(Inventory[SlotID]);
 
-	OnEquipmentChangedDelegate.Broadcast(EquipSlotTag, Inventory[SlotID]);
+	
 	
 }
 
 void UInventory::UnequipItem(const int32 SlotID, FGameplayTag EquipSlotTag)
 {
-	if (!EquippedItems.Find(EquipSlotTag)) return;
+	if (SlotID < 0) return;
 
+	FRpgItemInfo EmptyItem = FRpgItemInfo();
+	EmptyItem.ItemType = Inventory[SlotID].ItemType;
+	EmptyItem.bEquipped = Inventory[SlotID].bEquipped;
+	OnItemInfoChangedDelegate.Broadcast(EmptyItem);
+	
 	Inventory[SlotID].bEquipped = false;
-	EquippedItems.Emplace(EquipSlotTag) = FRpgItemInfo();
 
-	OnEquipmentChangedDelegate.Broadcast(EquipSlotTag, FRpgItemInfo());
+	OnItemInfoChangedDelegate.Broadcast(Inventory[SlotID]);
 }
+
+
 
 void UInventory::BeginPlay()
 {

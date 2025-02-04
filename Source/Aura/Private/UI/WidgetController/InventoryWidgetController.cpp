@@ -9,24 +9,37 @@
 
 void UInventoryWidgetController::BroadCastInitialValues()
 {
-	
+	GetInventoryComponent()->BroadcastInventorySlotCount();
+	BroadcastItemInfo();
 }
 
 void UInventoryWidgetController::BindCallbacksToDependencies()
 {
-	Cast<ARpgCharacter>(GetRpgPlayerState()->GetPawn())->Inventory->OnInventoryChangedDelegate.AddUObject(this, &UInventoryWidgetController::OnInventoryChanged);
-	Cast<ARpgCharacter>(GetRpgPlayerState()->GetPawn())->Inventory->OnEquipmentChangedDelegate.AddUObject(this, &UInventoryWidgetController::OnEquipmentSlotChanged);
+	GetInventoryComponent()->OnItemInfoChangedDelegate.AddUObject(this, &UInventoryWidgetController::OnItemChanged);
+	GetInventoryComponent()->OnInventorySlotsChangedDelegate.AddLambda(
+		[this](int32 NewValue)
+		{
+			OnMaxSlotsChangedDelegate.Broadcast(CurrentInventorySlots, NewValue);
+			CurrentInventorySlots = NewValue;
+		});
 }
 
-void UInventoryWidgetController::OnInventoryChanged(const TArray<FRpgItemInfo>& Inventory)
+void UInventoryWidgetController::BroadcastItemInfo()
 {
-	InventoryChangedDelegate.Broadcast(Inventory);
+	FForEachItem BroadcastDelegate;
+	BroadcastDelegate.BindLambda([this](const FRpgItemInfo& ItemInfo)
+	{
+		ItemInfoDelegate.Broadcast(ItemInfo);
+	});
+
+	Cast<ARpgCharacter>(GetRpgPlayerState()->GetPawn())->Inventory->ForEachItem(BroadcastDelegate);
 }
 
-void UInventoryWidgetController::OnEquipmentSlotChanged(const FGameplayTag InSlotTag, const FRpgItemInfo& InItemInfo)
+void UInventoryWidgetController::OnItemChanged(const FRpgItemInfo& ItemInfo) const
 {
-	EquipmentSlotChangedDelegate.Broadcast(InSlotTag, InItemInfo);
+	ItemInfoDelegate.Broadcast(ItemInfo);
 }
+
 
 void UInventoryWidgetController::SlotChanged(const int32 OldSlot, const int32 NewSlot)
 {
@@ -46,6 +59,11 @@ void UInventoryWidgetController::UnequipItem(const int32 SlotID, const FGameplay
 void UInventoryWidgetController::RemoveFromInventory(const int32 Slot)
 {
 	Cast<ARpgCharacter>(GetRpgPlayerState()->GetPawn())->Inventory->RemoveItemInfoInSlot(Slot);
+}
+
+UInventory* UInventoryWidgetController::GetInventoryComponent()
+{
+	return Cast<ARpgCharacter>(GetRpgPlayerState()->GetPawn())->Inventory;
 }
 
 

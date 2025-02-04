@@ -8,8 +8,10 @@
 #include "InventoryInterface.generated.h"
 
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryChanged, const TArray<FRpgItemInfo>& /*Inventory*/);
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnEquipmentChanged, const FGameplayTag /*EquipSlotType*/, const FRpgItemInfo& /*Inventory*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemInfoChanged, const FRpgItemInfo& /*ItemInfo*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventorySlotsChanged, int32);
+DECLARE_DELEGATE_OneParam(FForEachItem, const FRpgItemInfo&);
+
 
 
 
@@ -30,7 +32,8 @@ class AURA_API IInventoryInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual FOnInventoryChanged& GetOnInventoryChangedDelegate() = 0;
-	virtual FOnEquipmentChanged& GetOnEquipmentChangedDelegate() = 0;
+	virtual FOnItemInfoChanged& GetOnItemInfoChangedDelegate() = 0;
+	virtual FOnInventorySlotsChanged& GetOnInventorySlotsChangedDelegate() = 0;
+	virtual void ForEachItem(const FForEachItem& Delegate) = 0;
 	
 };

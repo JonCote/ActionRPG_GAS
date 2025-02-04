@@ -20,13 +20,14 @@ public:
 	UInventory();
 
 	/* Inventory Interface */
-	virtual FOnInventoryChanged& GetOnInventoryChangedDelegate() override;
-	virtual FOnEquipmentChanged& GetOnEquipmentChangedDelegate() override;
+	virtual FOnItemInfoChanged& GetOnItemInfoChangedDelegate() override;
+	virtual FOnInventorySlotsChanged& GetOnInventorySlotsChangedDelegate() override;
+	virtual void ForEachItem(const FForEachItem& Delegate) override;
 	
 	/* End Inventory Interface */
 
-	FOnInventoryChanged OnInventoryChangedDelegate;
-	FOnEquipmentChanged OnEquipmentChangedDelegate;
+	FOnItemInfoChanged OnItemInfoChangedDelegate;
+	FOnInventorySlotsChanged OnInventorySlotsChangedDelegate;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory|Item Info")
 	TObjectPtr<UInventoryItemInfo> ItemInfo;
@@ -59,13 +60,11 @@ public:
 	TArray<FRpgItemInfo> Inventory;
 
 
+	void BroadcastInventorySlotCount();
+	
 	/* Equipment slots */
-
 	void EquipItem(const int32 SlotID, FGameplayTag EquipSlotTag);
 	void UnequipItem(const int32 SlotID, FGameplayTag EquipSlotTag);
-	
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Inventory|Equipped")
-	TMap<FGameplayTag, FRpgItemInfo> EquippedItems;
 
 	
 protected:
