@@ -88,11 +88,11 @@ struct FStunInfo
 };
 
 UENUM(BlueprintType)
-enum class EDebuffType
+enum class EDebuffType : uint8
 {
-	None UMETA(DisplayName = "None"),
-	Burn UMETA(DisplayName = "Burn"),
-	Stun UMETA(DisplayName = "Stun"),
+	None = 0	UMETA(DisplayName = "None"),
+	Burn = 1	UMETA(DisplayName = "Burn"),
+	Stun = 2	UMETA(DisplayName = "Stun"),
 };
 
 
@@ -102,7 +102,7 @@ struct FDebuffInfo
 	GENERATED_BODY()
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	EDebuffType DebuffType;
+	EDebuffType DebuffType = EDebuffType::None;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "DebuffType == EDebuffType::Burn", EditConditionHides))
 	FBurnInfo BurnInfo = FBurnInfo();
