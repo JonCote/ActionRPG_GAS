@@ -29,7 +29,6 @@ FOnInventorySlotsChanged& UInventory::GetOnInventorySlotsChangedDelegate()
 	return OnInventorySlotsChangedDelegate;
 }
 
-
 void UInventory::ForEachItem(const FForEachItem& Delegate)
 {
 	for (const FRpgItemInfo& Item : Inventory)
@@ -40,9 +39,6 @@ void UInventory::ForEachItem(const FForEachItem& Delegate)
 		}
 	}
 }
-
-
-
 
 FRpgItemInfo UInventory::GetItemInfoInSlot(const int32 SlotID)
 {
@@ -128,9 +124,14 @@ TArray<FRpgItemInfo> UInventory::GetEquipped()
 	return OutItems;
 }
 
-void UInventory::BroadcastInventorySlotCount()
+int32 UInventory::GetInventorySlotCount() const
 {
-	OnInventorySlotsChangedDelegate.Broadcast(InventorySlots);
+	return InventorySlots;
+}
+
+void UInventory::SetInventorySlotCount(const int32 SlotCount)
+{
+	InventorySlots = SlotCount;
 }
 
 void UInventory::EquipItem(const int32 SlotID, FGameplayTag EquipSlotTag)

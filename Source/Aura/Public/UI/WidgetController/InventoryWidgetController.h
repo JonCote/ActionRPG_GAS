@@ -9,7 +9,7 @@
 
 class UInventory;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemInfoSignature, const FRpgItemInfo&, Info);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnMaxInventorySlotsChangedSignature, int32, OldValue, int32, NewValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaxInventorySlotsChangedSignature, int32, NewValue);
 
 /**
  * 
@@ -28,7 +28,7 @@ public:
 	FItemInfoSignature ItemInfoDelegate;
 
 	UPROPERTY(BlueprintAssignable, Category="Inventory|MaxSlots")
-	FOnMaxInventorySlotsChangedSignature OnMaxSlotsChangedDelegate;
+	FOnMaxInventorySlotsChangedSignature OnMaxInventorySlotsChangedDelegate;
 
 	UPROPERTY(BlueprintReadWrite, Category="Inventory|MaxSlots")
 	int32 CurrentInventorySlots = 0;
@@ -45,7 +45,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	void UnequipItem(const int32 SlotID, const FGameplayTag EquipSlotTag);
-
+	
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	void RemoveFromInventory(const int32 Slot);
 

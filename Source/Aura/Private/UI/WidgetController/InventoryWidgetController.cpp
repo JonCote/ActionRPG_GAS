@@ -9,7 +9,7 @@
 
 void UInventoryWidgetController::BroadCastInitialValues()
 {
-	GetInventoryComponent()->BroadcastInventorySlotCount();
+	OnMaxInventorySlotsChangedDelegate.Broadcast(GetInventoryComponent()->GetInventorySlotCount());
 	BroadcastItemInfo();
 }
 
@@ -19,7 +19,7 @@ void UInventoryWidgetController::BindCallbacksToDependencies()
 	GetInventoryComponent()->OnInventorySlotsChangedDelegate.AddLambda(
 		[this](int32 NewValue)
 		{
-			OnMaxSlotsChangedDelegate.Broadcast(CurrentInventorySlots, NewValue);
+			OnMaxInventorySlotsChangedDelegate.Broadcast(NewValue);
 			CurrentInventorySlots = NewValue;
 		});
 }
@@ -60,6 +60,8 @@ void UInventoryWidgetController::RemoveFromInventory(const int32 Slot)
 {
 	Cast<ARpgCharacter>(GetRpgPlayerState()->GetPawn())->Inventory->RemoveItemInfoInSlot(Slot);
 }
+
+
 
 UInventory* UInventoryWidgetController::GetInventoryComponent()
 {

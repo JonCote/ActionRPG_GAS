@@ -32,9 +32,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory|Item Info")
 	TObjectPtr<UInventoryItemInfo> ItemInfo;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
-	int32 InventorySlots = 12;
-
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	FRpgItemInfo GetItemInfoInSlot(const int32 SlotID);
 
@@ -55,12 +52,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	TArray<FRpgItemInfo> GetEquipped();
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	int32 GetInventorySlotCount() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void SetInventorySlotCount(const int32 SlotCount);
 	
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FRpgItemInfo> Inventory;
-
-
-	void BroadcastInventorySlotCount();
 	
 	/* Equipment slots */
 	void EquipItem(const int32 SlotID, FGameplayTag EquipSlotTag);
@@ -73,6 +73,8 @@ protected:
 	
 	
 private:
+
+	int32 InventorySlots = 48;
 
 
 
