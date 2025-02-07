@@ -6,6 +6,9 @@
 #include "GameFramework/HUD.h"
 #include "RpgHUD.generated.h"
 
+struct FGameplayTag;
+class ULayoutWidget;
+class ULayerWidget;
 class UInventoryWidgetController;
 class USpellMenuWidgetController;
 class UAttributeMenuWidgetController;
@@ -29,18 +32,16 @@ public:
 	UInventoryWidgetController* GetInventoryWidgetController(const FWidgetControllerParams& WCParams);
 
 	void InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS);
-
-protected:
-
 	
 private:
 
+	
 	UPROPERTY()
 	TObjectPtr<URpgUserWidget> OverlayWidget;
 	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<URpgUserWidget> OverlayWidgetClass;
-
+	
 	UPROPERTY()
 	TObjectPtr<UOverlayWidgetController> OverlayWidgetController;
 
@@ -64,4 +65,6 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UInventoryWidgetController> InventoryWidgetControllerClass;
+	
+	
 };

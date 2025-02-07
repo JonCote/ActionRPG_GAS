@@ -61,7 +61,7 @@ void ARpgHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySyste
 	
 	UUserWidget* Widget = CreateWidget<UUserWidget>(GetWorld(), OverlayWidgetClass);
 	OverlayWidget = Cast<URpgUserWidget>(Widget);
-
+	
 	const FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
 	UOverlayWidgetController* WidgetController = GetOverlayWidgetController(WidgetControllerParams);
 	
@@ -69,5 +69,8 @@ void ARpgHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySyste
 	WidgetController->BroadCastInitialValues();
 	
 	Widget->AddToViewport();
+	
 }
+
+
 
