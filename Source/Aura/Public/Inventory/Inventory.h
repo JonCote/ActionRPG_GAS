@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "InventoryItemInfo.h"
+#include "ItemInfo.h"
 #include "Components/ActorComponent.h"
 #include "Interaction/InventoryInterface.h"
 #include "Inventory.generated.h"
@@ -30,7 +30,7 @@ public:
 	FOnInventorySlotsChanged OnInventorySlotsChangedDelegate;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory|Item Info")
-	TObjectPtr<UInventoryItemInfo> ItemInfo;
+	TObjectPtr<UItemInfo> ItemInfo;
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	FRpgItemInfo GetItemInfoInSlot(const int32 SlotID);

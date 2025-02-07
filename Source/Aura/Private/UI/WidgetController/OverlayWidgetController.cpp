@@ -17,6 +17,18 @@ void UOverlayWidgetController::BroadCastInitialValues()
 
 	OnManaChanged.Broadcast(GetRpgAttributeSet()->GetMana());
 	OnMaxManaChanged.Broadcast(GetRpgAttributeSet()->GetMaxMana());
+
+
+
+	if (GetRpgAbilitySystemComponent()->bStartupAbilitiesGiven)
+	{
+		BroadcastAbilityInfo();
+	}
+	else
+	{
+		GetRpgAbilitySystemComponent()->AbilitiesGivenDelegate.AddUObject(this, &UOverlayWidgetController::BroadcastAbilityInfo);
+	}
+		
 	
 }
 

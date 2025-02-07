@@ -5,8 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
-#include "InventoryItemInfo.generated.h"
-
+#include "ItemInfo.generated.h"
 
 class ALootableItem;
 
@@ -44,7 +43,7 @@ inline bool operator==(const FRpgItemInfo& Left, const FRpgItemInfo& Right)
  * 
  */
 UCLASS()
-class AURA_API UInventoryItemInfo : public UDataAsset
+class AURA_API UItemInfo : public UDataAsset
 {
 	GENERATED_BODY()
 
