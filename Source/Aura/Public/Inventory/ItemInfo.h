@@ -4,10 +4,31 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "ScalableFloat.h"
 #include "Engine/DataAsset.h"
 #include "ItemInfo.generated.h"
 
 class ALootableItem;
+
+
+USTRUCT(BlueprintType)
+struct FRpgEquippableItemInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FGameplayTag EquipmentType = FGameplayTag();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FScalableFloat AttackPower = 0.f;
+};
+
+UENUM(BlueprintType)
+enum class EItemType : uint8
+{
+	None = 0	UMETA(DisplayName = "None"),
+	Equipment = 1	UMETA(DisplayName = "Equipment"),
+};
 
 USTRUCT(BlueprintType)
 struct FRpgItemInfo
@@ -25,6 +46,12 @@ struct FRpgItemInfo
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<ALootableItem> ItemClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	EItemType ItemTypeEnum = EItemType::None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "ItemTypeEnum == EItemType::Equipment", EditConditionHides))
+	FRpgEquippableItemInfo EquippableItemInfo = FRpgEquippableItemInfo();
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bEquipped = false;
