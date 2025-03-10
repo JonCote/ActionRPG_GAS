@@ -660,7 +660,7 @@ FActiveGameplayEffectHandle URpgAbilitySystemLibrary::CreateAndApplyAttributeMod
 
 			FGameplayTagRequirements reqs;
 			reqs.IgnoreTags = FGameplayTagContainer();
-			reqs. RequireTags = FGameplayTagContainer();
+			reqs.RequireTags = FGameplayTagContainer();
 
 			FGameplayModifierInfo& Info = GameplayEffect->Modifiers[Idx + tempIdxDisplacement];
 			Info.ModifierMagnitude = FScalableFloat(pair.Value);

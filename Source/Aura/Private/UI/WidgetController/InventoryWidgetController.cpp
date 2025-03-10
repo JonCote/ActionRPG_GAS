@@ -61,6 +61,18 @@ void UInventoryWidgetController::RemoveFromInventory(const int32 Slot)
 	Cast<ARpgCharacter>(GetRpgPlayerState()->GetPawn())->Inventory->RemoveItemInfoInSlot(Slot);
 }
 
+FString UInventoryWidgetController::GetItemAttributeModifiersDescription(const FRpgItemInfo& Item) const
+{
+	FString OutStr = FString();
+	for (const TPair<FGameplayAttribute, float>& pair : Item.AttributeModifiers)
+	{
+		FString AttributeName = pair.Key.GetName();
+		FString Value = FString::FromInt(pair.Value);
+		OutStr = OutStr + AttributeName + ": " + Value + "\n";
+	}
+
+	return OutStr;
+}
 
 
 UInventory* UInventoryWidgetController::GetInventoryComponent()
