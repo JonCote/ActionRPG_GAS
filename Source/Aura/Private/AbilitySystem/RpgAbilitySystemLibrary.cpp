@@ -7,6 +7,8 @@
 #include "AbilitySystemComponent.h"
 #include "RpgAbilityTypes.h"
 #include "RpgGameplayTags.h"
+#include "Aura/RpgLogChannels.h"
+#include "Character/RpgCharacter.h"
 #include "Game/LoadScreenSaveGame.h"
 #include "Game/RpgGameModeBase.h"
 #include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
@@ -634,4 +636,55 @@ FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const F
 	
 	
 	return EffectContextHandle;
+}
+
+FActiveGameplayEffectHandle URpgAbilitySystemLibrary::CreateAndApplyAttributeModifierEffects(
+	const AActor* TargetCharacter, const TMap<FGameplayAttribute, float> AttributeModifiers)
+{
+	FActiveGameplayEffectHandle EquipmentModGEHandle;
+	if (UAbilitySystemComponent* ASC = Cast<ARpgCharacter>(TargetCharacter)->GetAbilitySystemComponent())
+	{
+		// Create the GE at runtime
+		UGameplayEffect* GameplayEffect = NewObject<UGameplayEffect>(GetTransientPackage());
+
+		GameplayEffect->DurationPolicy = EGameplayEffectDurationType::Infinite;
+
+		int32 Idx = GameplayEffect->Modifiers.Num();
+		GameplayEffect->Modifiers.SetNum(Idx + AttributeModifiers.Num());
+
+		int tempIdxDisplacement = 0;
+		for (const TPair<FGameplayAttribute, float>& pair : AttributeModifiers)
+		{
+			// Add check to validate pair.key is a valid Attribute
+
+			FGameplayTagRequirements reqs;
+			reqs.IgnoreTags = FGameplayTagContainer();
+			reqs. RequireTags = FGameplayTagContainer();
+
+			FGameplayModifierInfo& Info = GameplayEffect->Modifiers[Idx + tempIdxDisplacement];
+			Info.ModifierMagnitude = FScalableFloat(pair.Value);
+			Info.ModifierOp = EGameplayModOp::Additive;
+			Info.Attribute = pair.Key;
+			Info.SourceTags = reqs;
+			Info.TargetTags = reqs;
+
+			tempIdxDisplacement += 1;
+		}
+
+		EquipmentModGEHandle = ASC->ApplyGameplayEffectToSelf(GameplayEffect, 1.0f, ASC->MakeEffectContext());
+		UE_LOG(LogRpg, Log, TEXT("New GE Handle: %s"), *EquipmentModGEHandle.ToString());
+		
+	}
+	
+	return EquipmentModGEHandle;
+}
+
+FActiveGameplayEffectHandle URpgAbilitySystemLibrary::RemoveAttributeModifierEffects(const AActor* TargetCharacter, FActiveGameplayEffectHandle ActiveEffectHandleToRemove)
+{
+	if (UAbilitySystemComponent* ASC = Cast<ARpgCharacter>(TargetCharacter)->GetAbilitySystemComponent())
+	{
+		ASC->RemoveActiveGameplayEffect(ActiveEffectHandleToRemove);
+		ActiveEffectHandleToRemove.Invalidate();
+	}
+	return ActiveEffectHandleToRemove;
 }
