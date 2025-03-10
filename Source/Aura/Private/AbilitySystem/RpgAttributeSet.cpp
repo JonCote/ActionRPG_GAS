@@ -199,6 +199,11 @@ void URpgAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbac
 	{
 		HandleIncomingDebuff(Props);
 	}
+
+	if (Data.EvaluatedData.Attribute == GetIncomingBuffAttribute())
+	{
+		HandleIncomingBuff(Props);
+	}
 	
 }
 
@@ -322,6 +327,11 @@ void URpgAttributeSet::HandleDebuff(const FEffectProperties& Props)
 	}
 }
 
+void URpgAttributeSet::HandleIncomingBuff(const FEffectProperties& Props)
+{
+	
+}
+
 void URpgAttributeSet::HandleIncomingXP(const FEffectProperties& Props)
 {
 	const int32 LocalIncomingXP = GetIncomingXP();
@@ -393,6 +403,16 @@ void URpgAttributeSet::SendXPEvent(const FEffectProperties& Props)
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter, GameplayTags.Attributes_Meta_IncomingXP, Payload);
 	}
 	
+}
+
+void URpgAttributeSet::SendBuffEvent(const FEffectProperties& Props)
+{
+	const FRpgGameplayTags& GameplayTags = FRpgGameplayTags::Get();
+	FGameplayEventData Payload;
+	Payload.EventTag = GameplayTags.Attributes_Secondary_AttackPower;
+	Payload.EventMagnitude = 10.f;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Props.SourceCharacter, GameplayTags.Attributes_Secondary_AttackPower, Payload);
 }
 
 //~ Primary Attributes OnRep

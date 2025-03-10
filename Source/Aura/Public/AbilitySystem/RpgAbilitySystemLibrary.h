@@ -9,6 +9,7 @@
 #include "RpgAbilitySystemLibrary.generated.h"
 
 
+class ARpgCharacter;
 class UInventoryWidgetController;
 class ULoadScreenSaveGame;
 struct FDamageEffectParams;
@@ -165,7 +166,7 @@ public:
 	static TArray<FVector> EvenlyRotatedVectors(const FVector& Forward, const FVector& Axis, const float Spread, const int32 NumVectors);
 	
 	static int32 GetXPRewardForClassAndLevel(const UObject* WorldContextObject, ECharacterClass CharacterClass, const int32 CharacterLevel);
-
+	
 	
 	/* ====================================================================================================================
 	 *	Apply Damage Effect
@@ -176,5 +177,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "RpgAbilitySystemLibrary|DamageEffects")
 	static FGameplayEffectContextHandle ApplyDamageEffect(const FDamageEffectParams& DamageEffectParams);
 
+
+	/* ====================================================================================================================
+	 *	Apply Equipment Effects
+	 */
+	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|EquipmentEffects")
+	static FActiveGameplayEffectHandle CreateAndApplyAttributeModifierEffects(const AActor* TargetCharacter, const TMap<FGameplayAttribute, float> AttributeModifiers);
+
+	UFUNCTION(BlueprintPure, Category = "RpgAbilitySystemLibrary|EquipmentEffects")
+	static FActiveGameplayEffectHandle RemoveAttributeModifierEffects(const AActor* TargetCharacter, FActiveGameplayEffectHandle ActiveEffectHandleToRemove);
 };
 

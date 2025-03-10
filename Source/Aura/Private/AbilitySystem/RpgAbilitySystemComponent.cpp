@@ -57,8 +57,7 @@ void URpgAbilitySystemComponent::AddCharacterAbilities(const TArray<TSubclassOf<
 	AbilitiesGivenDelegate.Broadcast();
 }
 
-void URpgAbilitySystemComponent::AddCharacterPassiveAbilities(
-	const TArray<TSubclassOf<UGameplayAbility>>& PassiveAbilities)
+void URpgAbilitySystemComponent::AddCharacterPassiveAbilities(const TArray<TSubclassOf<UGameplayAbility>>& PassiveAbilities)
 {
 	for (const TSubclassOf<UGameplayAbility> AbilityClass : PassiveAbilities)
 	{

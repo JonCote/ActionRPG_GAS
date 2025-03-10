@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AttributeSet.h"
 #include "GameplayTagContainer.h"
 #include "ScalableFloat.h"
+#include "Character/RpgCharacter.h"
 #include "Engine/DataAsset.h"
 #include "ItemInfo.generated.h"
 
@@ -19,7 +21,7 @@ struct FRpgEquippableItemInfo
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FGameplayTag EquipmentType = FGameplayTag();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FScalableFloat AttackPower = 0.f;
 };
 
@@ -52,13 +54,19 @@ struct FRpgItemInfo
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "ItemTypeEnum == EItemType::Equipment", EditConditionHides))
 	FRpgEquippableItemInfo EquippableItemInfo = FRpgEquippableItemInfo();
-
+	
 	UPROPERTY(BlueprintReadOnly)
 	bool bEquipped = false;
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 InventorySlotID = -1;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<FGameplayAttribute, float> AttributeModifiers;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ARpgCharacter* OwningCharacter = nullptr;
+
 };
 inline bool operator==(const FRpgItemInfo& Left, const FRpgItemInfo& Right)
 {

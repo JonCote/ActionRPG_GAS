@@ -182,6 +182,10 @@ public:
 	FGameplayAttributeData IncomingDebuff;
 	ATTRIBUTE_ACCESSORS(URpgAttributeSet, IncomingDebuff);
 
+	UPROPERTY(BlueprintReadOnly, Category="Meta Attribute")
+	FGameplayAttributeData IncomingBuff;
+	ATTRIBUTE_ACCESSORS(URpgAttributeSet, IncomingBuff);
+
 	//~ End Meta Attributes
 	
 	
@@ -268,10 +272,12 @@ private:
 	void HandleIncomingDamage(const FEffectProperties& Props);
 	void HandleIncomingDebuff(const FEffectProperties& Props);
 	void HandleDebuff(const FEffectProperties& Props);
+	void HandleIncomingBuff(const FEffectProperties& Props);
 	void HandleIncomingXP(const FEffectProperties& Props);
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 	static void ShowFloatingText(const FEffectProperties& Props, const float Damage, bool bBlockedHit, bool bCriticalHit);
 	static void SendXPEvent(const FEffectProperties& Props);
+	static void SendBuffEvent(const FEffectProperties& Props);
 
 	bool bTopOffHealth = false;
 	bool bTopOffMana = false;

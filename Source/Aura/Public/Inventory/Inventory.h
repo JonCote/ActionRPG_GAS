@@ -3,13 +3,82 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActiveGameplayEffectHandle.h"
 #include "ItemInfo.h"
 #include "Components/ActorComponent.h"
 #include "Interaction/InventoryInterface.h"
 #include "Inventory.generated.h"
 
-
 struct FGameplayTag;
+
+
+USTRUCT(BlueprintType)
+struct FEquippedItems
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRpgItemInfo Helmet = FRpgItemInfo();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FActiveGameplayEffectHandle HelmetEffectHandle;
+	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRpgItemInfo Chest = FRpgItemInfo();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FActiveGameplayEffectHandle ChestEffectHandle;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRpgItemInfo Legs = FRpgItemInfo();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FActiveGameplayEffectHandle LegsEffectHandle;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRpgItemInfo Gloves = FRpgItemInfo();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FActiveGameplayEffectHandle GlovesEffectHandle;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRpgItemInfo Boots = FRpgItemInfo();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FActiveGameplayEffectHandle BootsEffectHandle;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRpgItemInfo Weapon = FRpgItemInfo();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FActiveGameplayEffectHandle WeaponEffectHandle;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRpgItemInfo Necklace = FRpgItemInfo();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FActiveGameplayEffectHandle NecklaceEffectHandle;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRpgItemInfo Belt = FRpgItemInfo();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FActiveGameplayEffectHandle BeltEffectHandle;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRpgItemInfo Ring = FRpgItemInfo();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FActiveGameplayEffectHandle RingEffectHandle;
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class AURA_API UInventory : public UActorComponent, public IInventoryInterface
@@ -61,11 +130,14 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FRpgItemInfo> Inventory;
+
+	UPROPERTY(BlueprintReadOnly)
+	FEquippedItems EquippedItems;
 	
 	/* Equipment slots */
 	void EquipItem(const int32 SlotID, FGameplayTag EquipSlotTag);
 	void UnequipItem(const int32 SlotID, FGameplayTag EquipSlotTag);
-
+	void ManageEquippedItems(const FRpgItemInfo* ItemInfo);
 	
 protected:
 	virtual void BeginPlay() override;

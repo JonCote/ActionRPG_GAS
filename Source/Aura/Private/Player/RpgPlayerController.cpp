@@ -80,7 +80,7 @@ void ARpgPlayerController::LineTrace()
 {
 
 	const ARpgCharacter* PlayerCharacter = Cast<ARpgCharacter>(GetCharacter());
-	
+	if (!PlayerCharacter) return;
 	const FVector CameraLocation = PlayerCharacter->PlayerCamera->GetComponentLocation();
 	const FVector ForwardVector = PlayerCharacter->PlayerCamera->GetForwardVector();
 	
