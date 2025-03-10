@@ -3,6 +3,7 @@
 
 #include "Inventory/ItemInfo.h"
 
+#include "Animation/AnimNode_Inertialization.h"
 #include "Aura/RpgLogChannels.h"
 
 FRpgItemInfo UItemInfo::FindItemInfoByName(const FString& ItemName, bool bLogNotFound) const
@@ -23,3 +24,5 @@ FRpgItemInfo UItemInfo::FindItemInfoByName(const FString& ItemName, bool bLogNot
 	
 	return FRpgItemInfo();
 }
+
+

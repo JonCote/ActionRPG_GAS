@@ -137,7 +137,7 @@ public:
 	/* Equipment slots */
 	void EquipItem(const int32 SlotID, FGameplayTag EquipSlotTag);
 	void UnequipItem(const int32 SlotID, FGameplayTag EquipSlotTag);
-	void ManageEquippedItems(const FRpgItemInfo* ItemInfo);
+	bool ManageEquippedItems(const FRpgItemInfo* ItemInfo);
 	
 protected:
 	virtual void BeginPlay() override;

@@ -49,7 +49,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory")
 	void RemoveFromInventory(const int32 Slot);
 
-	
+	UFUNCTION(BlueprintCallable, Category="Inventory")
+	FString GetItemAttributeModifiersDescription(const FRpgItemInfo& Item) const;
 
 private:
 

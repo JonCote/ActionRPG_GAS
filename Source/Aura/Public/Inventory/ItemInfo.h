@@ -31,20 +31,17 @@ struct FRpgItemInfo
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<const UTexture2D> Icon = nullptr;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FGameplayTag ItemType = FGameplayTag();
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<ALootableItem> ItemClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	EItemType ItemTypeEnum = EItemType::None;
+	EItemType ItemType = EItemType::None;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "ItemTypeEnum == EItemType::Equipment", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "ItemType == EItemType::Equipment", EditConditionHides))
 	FGameplayTag EquipmentTypeTag = FGameplayTag();
 	
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "ItemTypeEnum == EItemType::Equipment", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "ItemType == EItemType::Equipment", EditConditionHides))
 	TMap<FGameplayAttribute, float> AttributeModifiers = TMap<FGameplayAttribute, float>();
 
 	
@@ -75,7 +72,7 @@ class AURA_API UItemInfo : public UDataAsset
 public:
 	
 	FRpgItemInfo FindItemInfoByName(const FString& ItemName, bool bLogNotFound = false) const;
-
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Item Information")
 	TArray<FRpgItemInfo> ItemInformation;
 	

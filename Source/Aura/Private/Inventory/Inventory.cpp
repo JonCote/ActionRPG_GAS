@@ -58,6 +58,7 @@ void UInventory::RemoveItemInfoInSlot(const int32 SlotID)
 	{
 		FRpgItemInfo EmptyItem = FRpgItemInfo();
 		EmptyItem.ItemType = Inventory[SlotID].ItemType;
+		EmptyItem.EquipmentTypeTag = Inventory[SlotID].EquipmentTypeTag;
 		EmptyItem.bEquipped = Inventory[SlotID].bEquipped;
 		ManageEquippedItems(&EmptyItem);
 		OnItemInfoChangedDelegate.Broadcast(EmptyItem);
@@ -140,119 +141,129 @@ void UInventory::SetInventorySlotCount(const int32 SlotCount)
 void UInventory::EquipItem(const int32 SlotID, FGameplayTag EquipSlotTag)
 {
 	if (Inventory[SlotID] == FRpgItemInfo()) return;
-	if (Inventory[SlotID].ItemTypeEnum != EItemType::Equipment) return;
+	if (Inventory[SlotID].ItemType != EItemType::Equipment) return;
 	
 	for (auto& Item : Inventory)
 	{
-		if (Item.ItemType == EquipSlotTag && Item.bEquipped)
+		if (Item.EquipmentTypeTag == EquipSlotTag && Item.bEquipped)
 		{
 			Item.bEquipped = false;
 			OnItemInfoChangedDelegate.Broadcast(Item);
 		}
 	}
+	if (ManageEquippedItems(&Inventory[SlotID]))
+	{
+		Inventory[SlotID].bEquipped = true;
+		OnItemInfoChangedDelegate.Broadcast(Inventory[SlotID]);
+	}
 	
-	Inventory[SlotID].bEquipped = true;
-	ManageEquippedItems(&Inventory[SlotID]);
-	
-	OnItemInfoChangedDelegate.Broadcast(Inventory[SlotID]);
 }
 
 void UInventory::UnequipItem(const int32 SlotID, FGameplayTag EquipSlotTag)
 {
 	if (SlotID < 0) return;
-	if (Inventory[SlotID].ItemTypeEnum != EItemType::Equipment) return;
+	if (Inventory[SlotID].ItemType != EItemType::Equipment) return;
 
 	FRpgItemInfo EmptyItem = FRpgItemInfo();
 	EmptyItem.ItemType = Inventory[SlotID].ItemType;
+	EmptyItem.EquipmentTypeTag = Inventory[SlotID].EquipmentTypeTag;
 	EmptyItem.bEquipped = Inventory[SlotID].bEquipped;
-	OnItemInfoChangedDelegate.Broadcast(EmptyItem);
+	if (ManageEquippedItems(&EmptyItem))
+	{
+		OnItemInfoChangedDelegate.Broadcast(EmptyItem);
+		Inventory[SlotID].bEquipped = false;
+		OnItemInfoChangedDelegate.Broadcast(Inventory[SlotID]);
+	}
 	
-	ManageEquippedItems(&EmptyItem);
-	
-	Inventory[SlotID].bEquipped = false;
-
-	OnItemInfoChangedDelegate.Broadcast(Inventory[SlotID]);
 }
 
-void UInventory::ManageEquippedItems(const FRpgItemInfo* EquipItemInfo)
+bool UInventory::ManageEquippedItems(const FRpgItemInfo* EquipItemInfo)
 {
+	if (EquipItemInfo->ItemType != EItemType::Equipment)
+	{
+		UE_LOG(LogRpg, Error, TEXT("Attempting to Equip Item that is not of type equipment: [%hhd]"), EquipItemInfo->ItemType);
+		return false;
+	}
+	
 	const FRpgGameplayTags GameplayTags = FRpgGameplayTags::Get();
-	if (EquipItemInfo->ItemType.MatchesTagExact(GameplayTags.Equipment_Weapon))
+	if (EquipItemInfo->EquipmentTypeTag.MatchesTagExact(GameplayTags.Equipment_Weapon))
 	{
 		EquippedItems.WeaponEffectHandle = URpgAbilitySystemLibrary::RemoveAttributeModifierEffects(GetOwner(), EquippedItems.WeaponEffectHandle);
 		EquippedItems.Weapon = *EquipItemInfo;
 		EquippedItems.WeaponEffectHandle = URpgAbilitySystemLibrary::CreateAndApplyAttributeModifierEffects(GetOwner(), EquippedItems.Weapon.AttributeModifiers);
 		
-		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->ItemType.ToString());
+		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->EquipmentTypeTag.ToString());
 	}
-	else if (EquipItemInfo->ItemType.MatchesTagExact(GameplayTags.Equipment_Helmet))
+	else if (EquipItemInfo->EquipmentTypeTag.MatchesTagExact(GameplayTags.Equipment_Helmet))
 	{
 		EquippedItems.HelmetEffectHandle = URpgAbilitySystemLibrary::RemoveAttributeModifierEffects(GetOwner(), EquippedItems.HelmetEffectHandle);
 		EquippedItems.Helmet = *EquipItemInfo;
 		EquippedItems.HelmetEffectHandle = URpgAbilitySystemLibrary::CreateAndApplyAttributeModifierEffects(GetOwner(), EquippedItems.Helmet.AttributeModifiers);
 		
-		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->ItemType.ToString());
+		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->EquipmentTypeTag.ToString());
 	}
-	else if (EquipItemInfo->ItemType.MatchesTagExact(GameplayTags.Equipment_Chest))
+	else if (EquipItemInfo->EquipmentTypeTag.MatchesTagExact(GameplayTags.Equipment_Chest))
 	{
 		EquippedItems.ChestEffectHandle = URpgAbilitySystemLibrary::RemoveAttributeModifierEffects(GetOwner(), EquippedItems.ChestEffectHandle);
 		EquippedItems.Chest = *EquipItemInfo;
 		EquippedItems.ChestEffectHandle = URpgAbilitySystemLibrary::CreateAndApplyAttributeModifierEffects(GetOwner(), EquippedItems.Chest.AttributeModifiers);
 		
-		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->ItemType.ToString());
+		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->EquipmentTypeTag.ToString());
 	}
-	else if (EquipItemInfo->ItemType.MatchesTagExact(GameplayTags.Equipment_Legs))
+	else if (EquipItemInfo->EquipmentTypeTag.MatchesTagExact(GameplayTags.Equipment_Legs))
 	{
 		EquippedItems.LegsEffectHandle = URpgAbilitySystemLibrary::RemoveAttributeModifierEffects(GetOwner(), EquippedItems.LegsEffectHandle);
 		EquippedItems.Legs = *EquipItemInfo;
 		EquippedItems.LegsEffectHandle = URpgAbilitySystemLibrary::CreateAndApplyAttributeModifierEffects(GetOwner(), EquippedItems.Legs.AttributeModifiers);
 		
-		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->ItemType.ToString());
+		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->EquipmentTypeTag.ToString());
 	}
-	else if (EquipItemInfo->ItemType.MatchesTagExact(GameplayTags.Equipment_Gloves))
+	else if (EquipItemInfo->EquipmentTypeTag.MatchesTagExact(GameplayTags.Equipment_Gloves))
 	{
 		EquippedItems.GlovesEffectHandle = URpgAbilitySystemLibrary::RemoveAttributeModifierEffects(GetOwner(), EquippedItems.GlovesEffectHandle);
 		EquippedItems.Gloves = *EquipItemInfo;
 		EquippedItems.GlovesEffectHandle = URpgAbilitySystemLibrary::CreateAndApplyAttributeModifierEffects(GetOwner(), EquippedItems.Gloves.AttributeModifiers);
 		
-		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->ItemType.ToString());
+		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->EquipmentTypeTag.ToString());
 	}
-	else if (EquipItemInfo->ItemType.MatchesTagExact(GameplayTags.Equipment_Boots))
+	else if (EquipItemInfo->EquipmentTypeTag.MatchesTagExact(GameplayTags.Equipment_Boots))
 	{
 		EquippedItems.BootsEffectHandle = URpgAbilitySystemLibrary::RemoveAttributeModifierEffects(GetOwner(), EquippedItems.BootsEffectHandle);
 		EquippedItems.Boots = *EquipItemInfo;
 		EquippedItems.BootsEffectHandle = URpgAbilitySystemLibrary::CreateAndApplyAttributeModifierEffects(GetOwner(), EquippedItems.Boots.AttributeModifiers);
 		
-		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->ItemType.ToString());
+		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->EquipmentTypeTag.ToString());
 	}
-	else if (EquipItemInfo->ItemType.MatchesTagExact(GameplayTags.Equipment_Necklace))
+	else if (EquipItemInfo->EquipmentTypeTag.MatchesTagExact(GameplayTags.Equipment_Necklace))
 	{
 		EquippedItems.NecklaceEffectHandle = URpgAbilitySystemLibrary::RemoveAttributeModifierEffects(GetOwner(), EquippedItems.NecklaceEffectHandle);
 		EquippedItems.Necklace = *EquipItemInfo;
 		EquippedItems.NecklaceEffectHandle = URpgAbilitySystemLibrary::CreateAndApplyAttributeModifierEffects(GetOwner(), EquippedItems.Necklace.AttributeModifiers);
 		
-		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->ItemType.ToString());
+		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->EquipmentTypeTag.ToString());
 	}
-	else if (EquipItemInfo->ItemType.MatchesTagExact(GameplayTags.Equipment_Belt))
+	else if (EquipItemInfo->EquipmentTypeTag.MatchesTagExact(GameplayTags.Equipment_Belt))
 	{
 		EquippedItems.BeltEffectHandle = URpgAbilitySystemLibrary::RemoveAttributeModifierEffects(GetOwner(), EquippedItems.BeltEffectHandle);
 		EquippedItems.Belt = *EquipItemInfo;
 		EquippedItems.BeltEffectHandle = URpgAbilitySystemLibrary::CreateAndApplyAttributeModifierEffects(GetOwner(), EquippedItems.Belt.AttributeModifiers);
 		
-		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->ItemType.ToString());
+		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->EquipmentTypeTag.ToString());
 	}
-	else if (EquipItemInfo->ItemType.MatchesTagExact(GameplayTags.Equipment_Ring))
+	else if (EquipItemInfo->EquipmentTypeTag.MatchesTagExact(GameplayTags.Equipment_Ring))
 	{
 		EquippedItems.RingEffectHandle = URpgAbilitySystemLibrary::RemoveAttributeModifierEffects(GetOwner(), EquippedItems.RingEffectHandle);
 		EquippedItems.Ring = *EquipItemInfo;
 		EquippedItems.RingEffectHandle = URpgAbilitySystemLibrary::CreateAndApplyAttributeModifierEffects(GetOwner(), EquippedItems.Ring.AttributeModifiers);
 		
-		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->ItemType.ToString());
+		UE_LOG(LogRpg, Log, TEXT("Equipping: [%s]"), *EquipItemInfo->EquipmentTypeTag.ToString());
 	}
 	else
 	{
-		UE_LOG(LogRpg, Log, TEXT("Failed to find Equipment slot: [%s]"), *EquipItemInfo->ItemType.ToString());
+		UE_LOG(LogRpg, Error, TEXT("Failed to find Equipment slot: [%s]"), *EquipItemInfo->EquipmentTypeTag.ToString());
+		return false;
 	}
+	return true;
 }
 
 
