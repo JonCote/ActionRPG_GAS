@@ -638,6 +638,7 @@ FGameplayEffectContextHandle URpgAbilitySystemLibrary::ApplyDamageEffect(const F
 	return EffectContextHandle;
 }
 
+// TODO: Make this work on Client side so Multiplayer is possible (Replication is not happening from server to client I believe)
 FActiveGameplayEffectHandle URpgAbilitySystemLibrary::CreateAndApplyAttributeModifierEffects(
 	const AActor* TargetCharacter, const TMap<FGameplayAttribute, float> AttributeModifiers)
 {
@@ -670,6 +671,7 @@ FActiveGameplayEffectHandle URpgAbilitySystemLibrary::CreateAndApplyAttributeMod
 
 			tempIdxDisplacement += 1;
 		}
+		
 
 		EquipmentModGEHandle = ASC->ApplyGameplayEffectToSelf(GameplayEffect, 1.0f, ASC->MakeEffectContext());
 		UE_LOG(LogRpg, Log, TEXT("New GE Handle: %s"), *EquipmentModGEHandle.ToString());

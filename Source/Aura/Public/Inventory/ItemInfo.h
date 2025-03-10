@@ -13,18 +13,6 @@
 class ALootableItem;
 
 
-USTRUCT(BlueprintType)
-struct FRpgEquippableItemInfo
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FGameplayTag EquipmentType = FGameplayTag();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FScalableFloat AttackPower = 0.f;
-};
-
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
@@ -53,19 +41,21 @@ struct FRpgItemInfo
 	EItemType ItemTypeEnum = EItemType::None;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "ItemTypeEnum == EItemType::Equipment", EditConditionHides))
-	FRpgEquippableItemInfo EquippableItemInfo = FRpgEquippableItemInfo();
+	FGameplayTag EquipmentTypeTag = FGameplayTag();
 	
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "ItemTypeEnum == EItemType::Equipment", EditConditionHides))
+	TMap<FGameplayAttribute, float> AttributeModifiers = TMap<FGameplayAttribute, float>();
+
+	
+	UPROPERTY(BlueprintReadOnly)
+	ARpgCharacter* OwningCharacter = nullptr;
+
 	UPROPERTY(BlueprintReadOnly)
 	bool bEquipped = false;
 
 	UPROPERTY(BlueprintReadOnly)
 	int32 InventorySlotID = -1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<FGameplayAttribute, float> AttributeModifiers;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ARpgCharacter* OwningCharacter = nullptr;
 
 };
 inline bool operator==(const FRpgItemInfo& Left, const FRpgItemInfo& Right)
