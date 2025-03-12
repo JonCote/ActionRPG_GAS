@@ -6,6 +6,8 @@
 #include "UObject/Interface.h"
 #include "PlayerInterface.generated.h"
 
+class UItemInfo;
+struct FRpgItemInfo;
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UPlayerInterface : public UInterface
@@ -71,5 +73,5 @@ public:
 
 	/* Inventory System */
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Inventory")
-	bool LootItem(const FString& ItemName);
+	bool LootItem(UItemInfo* NewItem);
 };

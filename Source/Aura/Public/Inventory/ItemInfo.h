@@ -6,7 +6,7 @@
 #include "AttributeSet.h"
 #include "GameplayTagContainer.h"
 #include "ScalableFloat.h"
-#include "Character/RpgCharacter.h"
+//#include "Character/RpgCharacter.h"
 #include "Engine/DataAsset.h"
 #include "ItemInfo.generated.h"
 
@@ -19,6 +19,7 @@ enum class EItemType : uint8
 	None = 0	UMETA(DisplayName = "None"),
 	Equipment = 1	UMETA(DisplayName = "Equipment"),
 };
+
 
 USTRUCT(BlueprintType)
 struct FRpgItemInfo
@@ -44,9 +45,11 @@ struct FRpgItemInfo
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "ItemType == EItemType::Equipment", EditConditionHides))
 	TMap<FGameplayAttribute, float> AttributeModifiers = TMap<FGameplayAttribute, float>();
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	int32 OverlayEnumVal = 0;
 	
-	UPROPERTY(BlueprintReadOnly)
-	ARpgCharacter* OwningCharacter = nullptr;
+	//UPROPERTY(BlueprintReadOnly)
+	//ARpgCharacter* OwningCharacter = nullptr;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bEquipped = false;
@@ -64,16 +67,16 @@ inline bool operator==(const FRpgItemInfo& Left, const FRpgItemInfo& Right)
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class AURA_API UItemInfo : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
 	
-	FRpgItemInfo FindItemInfoByName(const FString& ItemName, bool bLogNotFound = false) const;
+	//FRpgItemInfo FindItemInfoByName(const FString& ItemName, bool bLogNotFound = false) const;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory Item Information")
-	TArray<FRpgItemInfo> ItemInformation;
+	FRpgItemInfo ItemInformation;
 	
 };

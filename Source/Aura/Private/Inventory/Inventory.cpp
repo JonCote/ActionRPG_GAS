@@ -75,15 +75,16 @@ void UInventory::SetItemInfoInSlot(const int32 SlotID, const FRpgItemInfo Info)
 	Inventory[SlotID] = Info;
 }
 
-bool UInventory::AddItemToInventory(const FString& ItemName)
+bool UInventory::AddItemToInventory(UItemInfo* NewItem)
 {
-	const FRpgItemInfo NewItem = ItemInfo->FindItemInfoByName(ItemName);
-
+	//const FRpgItemInfo NewItem = ItemInfo->FindItemInfoByName(ItemName);
+	
 	for (int32 i = 0; i < Inventory.Num(); i++)
 	{
 		if (Inventory[i] == FRpgItemInfo())
 		{
-			Inventory[i] = NewItem;
+			ItemInfos.Add(i, NewItem);
+			Inventory[i] = NewItem->ItemInformation;
 			Inventory[i].InventorySlotID = i;
 			OnItemInfoChangedDelegate.Broadcast(Inventory[i]);
 			
@@ -91,7 +92,7 @@ bool UInventory::AddItemToInventory(const FString& ItemName)
 		}
 	}
 
-	UE_LOG(LogRpg, Warning, TEXT("Inventory full [%s] can not be looted"), *NewItem.ItemName);
+	UE_LOG(LogRpg, Warning, TEXT("Inventory full [%s] can not be looted"), *NewItem->ItemInformation.ItemName);
 	return false;
 }
 
@@ -153,6 +154,7 @@ void UInventory::EquipItem(const int32 SlotID, FGameplayTag EquipSlotTag)
 	}
 	if (ManageEquippedItems(&Inventory[SlotID]))
 	{
+		
 		Inventory[SlotID].bEquipped = true;
 		OnItemInfoChangedDelegate.Broadcast(Inventory[SlotID]);
 	}
@@ -189,6 +191,15 @@ bool UInventory::ManageEquippedItems(const FRpgItemInfo* EquipItemInfo)
 	if (EquipItemInfo->EquipmentTypeTag.MatchesTagExact(GameplayTags.Equipment_Weapon))
 	{
 		EquippedItems.WeaponEffectHandle = URpgAbilitySystemLibrary::RemoveAttributeModifierEffects(GetOwner(), EquippedItems.WeaponEffectHandle);
+		if (EquipItemInfo->InventorySlotID > -1)
+		{
+			EquippedItems.WeaponInfo = *ItemInfos.Find(EquipItemInfo->InventorySlotID);
+		}
+		else
+		{
+			EquippedItems.WeaponInfo = nullptr;
+		}
+		
 		EquippedItems.Weapon = *EquipItemInfo;
 		EquippedItems.WeaponEffectHandle = URpgAbilitySystemLibrary::CreateAndApplyAttributeModifierEffects(GetOwner(), EquippedItems.Weapon.AttributeModifiers);
 		

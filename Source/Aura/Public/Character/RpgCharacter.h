@@ -11,6 +11,7 @@
 #include "RpgCharacter.generated.h"
 
 
+class UItemInfo;
 class UInventory;
 class ARpgPlayerController;
 class ARpgPlayerState;
@@ -62,7 +63,7 @@ public:
 
 	virtual void SaveProgress_Implementation(const FName& CheckpointTag, UWorld* World) override;
 
-	virtual bool LootItem_Implementation(const FString& ItemName) override;
+	virtual bool LootItem_Implementation(UItemInfo* NewItem) override;
 	//~ End Player Interface
 	
 	//~ Begin Highlight Interface

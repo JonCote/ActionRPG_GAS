@@ -18,6 +18,16 @@ struct FEquippedItems
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FRpgItemInfo Weapon = FRpgItemInfo();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FActiveGameplayEffectHandle WeaponEffectHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UItemInfo* WeaponInfo = nullptr;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FRpgItemInfo Helmet = FRpgItemInfo();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -50,13 +60,6 @@ struct FEquippedItems
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FActiveGameplayEffectHandle BootsEffectHandle;
-
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRpgItemInfo Weapon = FRpgItemInfo();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FActiveGameplayEffectHandle WeaponEffectHandle;
 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -111,7 +114,7 @@ public:
 	void SetItemInfoInSlot(const int32 SlotID, const FRpgItemInfo Info);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	bool AddItemToInventory(const FString& ItemName);
+	bool AddItemToInventory(UItemInfo* NewItem);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void SwapItemInfoInSlots(const int32 SlotID, const int32 NewSlotID);
@@ -128,8 +131,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void SetInventorySlotCount(const int32 SlotCount);
 	
+	//UPROPERTY(BlueprintReadOnly)
+	//TArray<FRpgItemInfo> Inventory;
+
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FRpgItemInfo> Inventory;
+
+	//UPROPERTY(BlueprintReadOnly)
+	//TMap<int32, UItemInfo*> ItemInfos;
 
 	UPROPERTY(BlueprintReadOnly)
 	FEquippedItems EquippedItems;

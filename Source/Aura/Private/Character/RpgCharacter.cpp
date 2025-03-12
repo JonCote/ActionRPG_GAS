@@ -156,9 +156,9 @@ void ARpgCharacter::SaveProgress_Implementation(const FName& CheckpointTag, UWor
 	}
 }
 
-bool ARpgCharacter::LootItem_Implementation(const FString& ItemName)
+bool ARpgCharacter::LootItem_Implementation(UItemInfo* NewItem)
 {
-	return Inventory->AddItemToInventory(ItemName);
+	return Inventory->AddItemToInventory(NewItem);
 
 }
 

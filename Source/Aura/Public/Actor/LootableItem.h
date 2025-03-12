@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interaction/LootableInterface.h"
+#include "Inventory/ItemInfo.h"
 #include "LootableItem.generated.h"
 
 class USphereComponent;
@@ -18,7 +19,7 @@ public:
 	ALootableItem();
 
 	UPROPERTY(EditAnywhere, Category = "Interactable")
-	FString ItemName;
+	TObjectPtr<UItemInfo> ItemInfo;
 	
 
 protected:

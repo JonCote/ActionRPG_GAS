@@ -39,9 +39,9 @@ void ALootableItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AA
 {
 	if (OtherActor->Implements<UPlayerInterface>())
 	{
-		if (!IPlayerInterface::Execute_LootItem(OtherActor, ItemName))
+		if (!IPlayerInterface::Execute_LootItem(OtherActor, ItemInfo))
 		{
-			UE_LOG(LogRpg, Warning, TEXT("Looting of item [%s] failed!"), *ItemName);
+			UE_LOG(LogRpg, Warning, TEXT("Looting of item [%s] failed!"), *ItemInfo->ItemInformation.ItemName);
 		}
 		else
 		{
