@@ -131,14 +131,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void SetInventorySlotCount(const int32 SlotCount);
 	
-	//UPROPERTY(BlueprintReadOnly)
-	//TArray<FRpgItemInfo> Inventory;
-
 	UPROPERTY(BlueprintReadOnly)
 	TArray<FRpgItemInfo> Inventory;
 
-	//UPROPERTY(BlueprintReadOnly)
-	//TMap<int32, UItemInfo*> ItemInfos;
+	UPROPERTY(BlueprintReadOnly)
+	TMap<int32, UItemInfo*> ItemInfos;
 
 	UPROPERTY(BlueprintReadOnly)
 	FEquippedItems EquippedItems;
