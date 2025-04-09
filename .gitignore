@@ -4,7 +4,13 @@ Intermediate
 Saved
 Build
 
+Content/*
+!Content/Blueprints
+!Content/Assets
+!Content/Maps
 
+
+.idea
 .vscode
 .vs
 *.VC.db
