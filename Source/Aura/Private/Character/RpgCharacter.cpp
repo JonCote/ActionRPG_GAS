@@ -64,7 +64,13 @@ void ARpgCharacter::LoadProgress()
 	if (const ARpgGameModeBase* RpgGameMode = Cast<ARpgGameModeBase>(UGameplayStatics::GetGameMode(this)))
 	{
 		ULoadScreenSaveGame* SaveData = RpgGameMode->RetrieveInGameSaveData();
-		if (SaveData == nullptr) { return; }
+		if (SaveData == nullptr)
+		{
+			// Used to have access to abilities/attributes while testing
+			InitDefaultAttributes();
+			AddCharacterAbilities();
+			return;
+		}
 		if (SaveData->bFirstTimeLoadIn)
 		{
 			InitDefaultAttributes();

@@ -203,6 +203,7 @@ void ARpgPlayerController::BeginPlay()
 	SetInputMode(InputModeData);
 }
 
+
 void ARpgPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -230,4 +231,3 @@ void ARpgPlayerController::Move(const FInputActionValue& InputActionValue)
 		ControlledPawn->AddMovementInput(SideDirection, InputAxisVector.X);
 	}
 }
-
