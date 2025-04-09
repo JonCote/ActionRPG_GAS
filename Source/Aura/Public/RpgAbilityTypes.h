@@ -88,7 +88,7 @@ struct FStunInfo
 };
 
 UENUM(BlueprintType)
-enum class EDebuffType
+enum class EDebuffType : uint8
 {
 	None UMETA(DisplayName = "None"),
 	Burn UMETA(DisplayName = "Burn"),

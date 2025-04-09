@@ -15,7 +15,7 @@ ARpgPlayerState::ARpgPlayerState()
 	
 	AttributeSet = CreateDefaultSubobject<URpgAttributeSet>("AttributeSet");
 
-	NetUpdateFrequency = 100.f;
+	SetNetUpdateFrequency(100.f);
 }
 
 void ARpgPlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
